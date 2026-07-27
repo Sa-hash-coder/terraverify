@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import GlobeCanvas from "../../components/globe-canvas";
 
 // Load Leaflet dynamically with SSR disabled since it requires client window/document globals
 const MapComponent = dynamic(() => import("../../components/map-component"), {
@@ -17,11 +18,17 @@ const MapComponent = dynamic(() => import("../../components/map-component"), {
 
 export default function Explorer() {
   const [selectedProject, setSelectedProject] = useState<number | null>(1);
+  const [isTargeting, setIsTargeting] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleProjectSelect = (id: number) => {
+    setSelectedProject(id);
+    setIsTargeting(true);
+  };
 
   if (!mounted) return null;
 
@@ -61,7 +68,7 @@ export default function Explorer() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Project Card 1 */}
             <div 
-              onClick={() => setSelectedProject(1)}
+              onClick={() => handleProjectSelect(1)}
               className={`p-5 rounded-2xl border cursor-pointer transition-all ${selectedProject === 1 ? 'bg-white/[0.05] border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'bg-[#111] border-gray-800 hover:border-gray-600'}`}
             >
               <div className="flex justify-between items-start mb-3">
@@ -84,7 +91,7 @@ export default function Explorer() {
 
             {/* Project Card 2 (Suspended Example) */}
             <div 
-              onClick={() => setSelectedProject(2)}
+              onClick={() => handleProjectSelect(2)}
               className={`p-5 rounded-2xl border cursor-pointer transition-all ${selectedProject === 2 ? 'bg-white/[0.05] border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'bg-[#111] border-gray-800 hover:border-gray-600'}`}
             >
               <div className="flex justify-between items-start mb-3">
@@ -108,11 +115,19 @@ export default function Explorer() {
         </div>
 
         {/* Map Area */}
-        <div className="flex-1 relative bg-[#0a0f12] h-1/2 md:h-auto min-h-[300px] z-0">
-          <MapComponent selectedProject={selectedProject} onSelectProject={setSelectedProject} />
+        <div className="flex-1 relative bg-[#0a0f12] h-1/2 md:h-auto min-h-[300px] z-0 overflow-hidden">
+          {/* 3D Globe Targeting Layer */}
+          <div className={`absolute inset-0 transition-opacity duration-700 z-10 ${isTargeting ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <GlobeCanvas selectedProject={selectedProject} onTransitionComplete={() => setIsTargeting(false)} />
+          </div>
+
+          {/* 2D Satellite Map Layer */}
+          <div className={`absolute inset-0 transition-opacity duration-1000 z-0 ${!isTargeting ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <MapComponent selectedProject={selectedProject} onSelectProject={handleProjectSelect} />
+          </div>
 
           {/* Floating Action Button */}
-          <button className="absolute bottom-8 right-8 px-6 py-3 bg-white text-black font-bold rounded-full shadow-lg hover:bg-gray-200 transition-colors z-10">
+          <button className="absolute bottom-8 right-8 px-6 py-3 bg-white text-black font-bold rounded-full shadow-lg hover:bg-gray-200 transition-colors z-20">
             View On-Chain Oracle Report ↗
           </button>
         </div>
