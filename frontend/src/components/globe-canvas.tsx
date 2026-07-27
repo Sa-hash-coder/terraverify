@@ -13,36 +13,41 @@ interface Point3D {
   z: number;
 }
 
+// Helper to get coordinates
+const getProjectAngles = (id: number | null) => {
+  if (id === 1) {
+    return { x: -3.42 * (Math.PI / 180), y: 62.40 * (Math.PI / 180) };
+  }
+  if (id === 2) {
+    return { x: -1.25 * (Math.PI / 180), y: -114.12 * (Math.PI / 180) };
+  }
+  return { x: 0, y: 0 };
+};
+
 export default function GlobeCanvas({ selectedProject, onTransitionComplete }: GlobeCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Track angles and zoom scaling
-  const [targetAngles, setTargetAngles] = useState({ x: 0, y: 0 });
-  const currentAngles = useRef({ x: 0, y: 0 });
-  const zoomScale = useRef(1.0);
+  // Initialize target angles based on selectedProject
+  const [targetAngles, setTargetAngles] = useState(() => getProjectAngles(selectedProject));
+  
+  // Start current angles with a Y-offset (180 degrees) so it always spins into view on mount
+  const currentAngles = useRef({ 
+    x: getProjectAngles(selectedProject).x - 0.5, 
+    y: getProjectAngles(selectedProject).y + Math.PI 
+  });
+  
+  const zoomScale = useRef(0.2); // Start slightly zoomed out for a zoom-in entrance
   const isZooming = useRef(false);
   const animationFrameId = useRef<number | null>(null);
 
   // Set target angles when the project changes
   useEffect(() => {
     isZooming.current = false;
-    zoomScale.current = 1.0;
+    zoomScale.current = 0.2;
 
-    if (selectedProject === 1) {
-      // Amazon coordinates: Lat -3.42, Lon -62.40
-      // Convert to spherical angles (in radians)
-      setTargetAngles({
-        x: -3.42 * (Math.PI / 180),
-        y: 62.40 * (Math.PI / 180),
-      });
-    } else if (selectedProject === 2) {
-      // Borneo coordinates: Lat -1.25, Lon 114.12
-      setTargetAngles({
-        x: -1.25 * (Math.PI / 180),
-        y: -114.12 * (Math.PI / 180),
-      });
-    }
+    const angles = getProjectAngles(selectedProject);
+    setTargetAngles(angles);
   }, [selectedProject]);
 
   useEffect(() => {
