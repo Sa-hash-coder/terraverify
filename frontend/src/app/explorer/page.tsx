@@ -1,10 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+
+// Load Leaflet dynamically with SSR disabled since it requires client window/document globals
+const MapComponent = dynamic(() => import("../../components/map-component"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-[#0a0f12] flex items-center justify-center text-emerald-400 font-mono animate-pulse">
+      LOADING TELEMETRY MAP...
+    </div>
+  ),
+});
 
 export default function Explorer() {
   const [selectedProject, setSelectedProject] = useState<number | null>(1);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <main className="h-screen flex flex-col overflow-hidden">
@@ -25,9 +44,7 @@ export default function Explorer() {
           <Link href="/" className="hover:text-white transition-colors">Dashboard</Link>
           <span className="text-emerald-400">Explorer</span>
           <Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link>
-          <button className="px-5 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all">
-            Connect Wallet
-          </button>
+          <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
         </div>
       </nav>
 
@@ -90,52 +107,12 @@ export default function Explorer() {
           </div>
         </div>
 
-        {/* Map Area (Mockup for Portfolio) */}
-        <div className="flex-1 relative bg-[#0a0f12] flex items-center justify-center overflow-hidden h-1/2 md:h-auto min-h-[300px]">
-          {/* Fake Grid Background to simulate map tiles */}
-          <div className="absolute inset-0" style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)`,
-            backgroundSize: '40px 40px'
-          }}></div>
-
-          {/* Central Satellite Image Mock */}
-          <div className="relative z-10 w-[90%] md:w-[800px] h-[90%] md:h-[500px] max-h-[500px] rounded-3xl border border-white/10 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center group">
-            {selectedProject === 1 ? (
-              <div 
-                className="absolute inset-0 flex flex-col items-center justify-center bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: "url('/amazon.png')" }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                <div className="z-10 w-64 h-64 border-2 border-emerald-400 border-dashed rounded-lg relative backdrop-blur-sm bg-emerald-500/10">
-                  <div className="absolute -top-3 -right-3 w-6 h-6 bg-emerald-500 rounded-full animate-ping"></div>
-                  <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded text-[10px] text-emerald-400 font-mono border border-emerald-500/30">SCANNING...</div>
-                </div>
-                <div className="z-10 mt-auto mb-10 text-center">
-                  <p className="font-mono text-sm text-emerald-400 drop-shadow-md bg-black/50 px-4 py-1 rounded-full border border-emerald-500/20">LAT: -3.42 LON: -62.40 | SENTINEL-2 L2A</p>
-                  <p className="text-xs text-white mt-3 font-semibold tracking-wide drop-shadow-md">AI Analysis: 84.5% Canopy Density (Verified)</p>
-                </div>
-              </div>
-            ) : (
-              <div 
-                className="absolute inset-0 flex flex-col items-center justify-center bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: "url('/borneo.png')" }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
-                <div className="z-10 w-64 h-64 border-2 border-red-500 border-dashed rounded-lg relative backdrop-blur-sm bg-red-500/10 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
-                  <div className="absolute bottom-4 right-4 bg-red-500/90 border border-red-400 rounded-sm px-3 py-1 animate-pulse">
-                    <span className="text-[11px] font-bold text-white whitespace-nowrap">DEFORESTATION DETECTED</span>
-                  </div>
-                </div>
-                <div className="z-10 mt-auto mb-10 text-center">
-                  <p className="font-mono text-sm text-red-400 drop-shadow-md bg-black/50 px-4 py-1 rounded-full border border-red-500/30">LAT: -1.25 LON: 114.12 | SENTINEL-2 L2A</p>
-                  <p className="text-xs text-white mt-3 font-semibold tracking-wide drop-shadow-md">AI Analysis: -5.4% Loss Detected. Tokens auto-burned.</p>
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Map Area */}
+        <div className="flex-1 relative bg-[#0a0f12] h-1/2 md:h-auto min-h-[300px] z-0">
+          <MapComponent selectedProject={selectedProject} onSelectProject={setSelectedProject} />
 
           {/* Floating Action Button */}
-          <button className="absolute bottom-8 right-8 px-6 py-3 bg-white text-black font-bold rounded-full shadow-lg hover:bg-gray-200 transition-colors">
+          <button className="absolute bottom-8 right-8 px-6 py-3 bg-white text-black font-bold rounded-full shadow-lg hover:bg-gray-200 transition-colors z-10">
             View On-Chain Oracle Report ↗
           </button>
         </div>

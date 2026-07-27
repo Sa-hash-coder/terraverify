@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 const LISTINGS = [
   { id: 1, project: "Amazon Block 7", cqs: "AAA", price: "0.15 SOL", amount: "500 tCO2e", seller: "Efnm...kwkoC" },
@@ -12,6 +13,13 @@ const LISTINGS = [
 
 export default function Marketplace() {
   const [selectedListing, setSelectedListing] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <main className="min-h-screen p-8 lg:p-12">
@@ -32,9 +40,7 @@ export default function Marketplace() {
           <Link href="/" className="hover:text-white transition-colors">Dashboard</Link>
           <Link href="/explorer" className="hover:text-white transition-colors">Explorer</Link>
           <span className="text-emerald-400 border-b border-emerald-400 pb-1">Marketplace</span>
-          <button className="px-5 py-2 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-all shadow-lg backdrop-blur-md">
-            Connect Wallet
-          </button>
+          <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
         </div>
       </nav>
 

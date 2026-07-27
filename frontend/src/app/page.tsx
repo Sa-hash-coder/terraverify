@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+
 // Mock Data for the MVP Pitch
 const STATS = {
   totalCredits: "1,245,000",
@@ -71,9 +73,7 @@ export default function Home() {
         <div className="flex flex-wrap justify-center gap-4 md:gap-6 items-center text-sm font-medium text-gray-300">
           <a href="/explorer" className="hover:text-white transition-colors">Explorer</a>
           <a href="/marketplace" className="hover:text-white transition-colors">Marketplace</a>
-          <button className="px-5 py-2 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-all shadow-lg backdrop-blur-md">
-            Connect Wallet
-          </button>
+          <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
         </div>
       </nav>
 
