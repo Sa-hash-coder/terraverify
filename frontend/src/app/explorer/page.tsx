@@ -110,18 +110,18 @@ export default function Explorer() {
             >
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-bold">Amazon Block 7</h3>
-                <span className="text-xs font-bold px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-md">AAA</span>
+                <span className="text-xs font-bold px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-md">{projectsData.amazon.cqs}</span>
               </div>
               <p className="text-xs text-gray-400 mb-4">Location: Amazonas, Brazil<br/>Area: 12,500 ha</p>
               
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-[#050505] p-2 rounded-lg border border-gray-800">
                   <div className="text-[10px] text-gray-500 uppercase">Forest Cover</div>
-                  <div className="text-sm font-bold text-emerald-400">84.5%</div>
+                  <div className="text-sm font-bold text-emerald-400">{projectsData.amazon.forestCover}</div>
                 </div>
                 <div className="bg-[#050505] p-2 rounded-lg border border-gray-800">
                   <div className="text-[10px] text-gray-500 uppercase">Status</div>
-                  <div className="text-sm font-bold text-white">Active</div>
+                  <div className="text-sm font-bold text-white">{projectsData.amazon.status}</div>
                 </div>
               </div>
             </div>
@@ -133,18 +133,18 @@ export default function Explorer() {
             >
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-bold">Borneo Peatlands</h3>
-                <span className="text-xs font-bold px-2 py-1 bg-red-500/20 text-red-400 rounded-md">C</span>
+                <span className="text-xs font-bold px-2 py-1 bg-red-500/20 text-red-400 rounded-md">{projectsData.borneo.cqs}</span>
               </div>
               <p className="text-xs text-gray-400 mb-4">Location: Kalimantan, ID<br/>Area: 8,200 ha</p>
               
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-[#050505] p-2 rounded-lg border border-gray-800">
                   <div className="text-[10px] text-gray-500 uppercase">Forest Cover</div>
-                  <div className="text-sm font-bold text-red-400">62.1% <span className="text-xs">(-5.4%)</span></div>
+                  <div className="text-sm font-bold text-red-400">{projectsData.borneo.forestCover} <span className="text-xs">({projectsData.borneo.trend})</span></div>
                 </div>
                 <div className="bg-[#050505] p-2 rounded-lg border border-red-900/30">
                   <div className="text-[10px] text-red-400 uppercase">Status</div>
-                  <div className="text-sm font-bold text-red-500">Revoked</div>
+                  <div className="text-sm font-bold text-red-500">{projectsData.borneo.status}</div>
                 </div>
               </div>
             </div>
