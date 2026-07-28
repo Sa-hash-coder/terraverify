@@ -18,10 +18,54 @@ const MapComponent = dynamic(() => import("../../components/map-component"), {
 export default function Explorer() {
   const [selectedProject, setSelectedProject] = useState<number | null>(1);
   const [mounted, setMounted] = useState(false);
+  const [projectsData, setProjectsData] = useState({
+    amazon: { forestCover: "84.5%", cqs: "AAA", status: "Active", cqsScore: 94 },
+    borneo: { forestCover: "62.1%", cqs: "C", status: "Revoked", cqsScore: 42, trend: "-5.4%" },
+  });
 
   useEffect(() => {
     setMounted(true);
+
+    const fetchTelemetry = async () => {
+      try {
+        const res = await fetch("/api/telemetry");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.projects) {
+            const p1 = data.projects.find((p: any) => p.id === "PRJ-001");
+            const p3 = data.projects.find((p: any) => p.id === "PRJ-003");
+            if (p1 || p3) {
+              setProjectsData({
+                amazon: {
+                  forestCover: p1?.forestCover || "84.5%",
+                  cqs: p1?.cqs || "AAA",
+                  status: p1?.status === "Verified" ? "Active" : p1?.status || "Active",
+                  cqsScore: p1?.cqsScore || 94,
+                },
+                borneo: {
+                  forestCover: p2_forestCover(p3?.forestCover),
+                  cqs: p3?.cqs || "C",
+                  status: p3?.status === "Suspended" ? "Revoked" : p3?.status || "Revoked",
+                  cqsScore: p3?.cqsScore || 42,
+                  trend: p3?.trend || "-5.4%",
+                },
+              });
+            }
+          }
+        }
+      } catch {
+        // fallback
+      }
+    };
+
+    fetchTelemetry();
+    const interval = setInterval(fetchTelemetry, 3000);
+    return () => clearInterval(interval);
   }, []);
+
+  function p2_forestCover(val?: string) {
+    return val || "62.1%";
+  }
 
   if (!mounted) return null;
 

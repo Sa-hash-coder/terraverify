@@ -50,9 +50,28 @@ const PROJECTS = [
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const [projects, setProjects] = useState(PROJECTS);
 
   useEffect(() => {
     setMounted(true);
+
+    const fetchTelemetry = async () => {
+      try {
+        const res = await fetch("/api/telemetry");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.projects && data.projects.length > 0) {
+            setProjects(data.projects);
+          }
+        }
+      } catch {
+        // Ignore fallback
+      }
+    };
+
+    fetchTelemetry();
+    const interval = setInterval(fetchTelemetry, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!mounted) return null;
@@ -132,7 +151,7 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/50">
-                {PROJECTS.map((project, i) => (
+                {projects.map((project, i) => (
                   <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
                     <td className="py-5">
                       <div className="font-medium text-white group-hover:text-emerald-400 transition-colors">{project.name}</div>
