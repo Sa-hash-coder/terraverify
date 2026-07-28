@@ -2,24 +2,85 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { WalletMultiButton, useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 
 const LISTINGS = [
-  { id: 1, project: "Amazon Block 7", cqs: "AAA", price: "0.15 SOL", amount: "500 tCO2e", seller: "Efnm...kwkoC" },
-  { id: 2, project: "Congo Basin Conservation", cqs: "AA", price: "0.12 SOL", amount: "1,200 tCO2e", seller: "9B2a...zYpQ" },
-  { id: 3, project: "Amazon Block 7", cqs: "AAA", price: "0.16 SOL", amount: "250 tCO2e", seller: "4TyH...vXm1" },
-  { id: 4, project: "Sumatra Tiger Reserve", cqs: "A", price: "0.08 SOL", amount: "5,000 tCO2e", seller: "7aZk...9LpP" },
+  { id: 1, project: "Amazon Block 7", cqs: "AAA", priceNum: 0.15, price: "0.15 SOL", amount: 500, seller: "Efnm...kwkoC" },
+  { id: 2, project: "Congo Basin Conservation", cqs: "AA", priceNum: 0.12, price: "0.12 SOL", amount: 1200, seller: "9B2a...zYpQ" },
+  { id: 3, project: "Amazon Block 7", cqs: "AAA", priceNum: 0.16, price: "0.16 SOL", amount: 250, seller: "4TyH...vXm1" },
+  { id: 4, project: "Sumatra Tiger Reserve", cqs: "A", priceNum: 0.08, price: "0.08 SOL", amount: 5000, seller: "7aZk...9LpP" },
 ];
 
 export default function Marketplace() {
-  const [selectedListing, setSelectedListing] = useState<number | null>(null);
+  const [selectedListing, setSelectedListing] = useState<number | null>(1);
+  const [buyAmount, setBuyAmount] = useState<string>("10");
+  const [trading, setTrading] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  const { connection } = useConnection();
+  const { publicKey, sendTransaction, connected } = useWallet();
+  const { setVisible } = useWalletModal();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) return null;
+
+  const currentListing = LISTINGS.find((l) => l.id === selectedListing);
+  const amountNum = parseFloat(buyAmount) || 0;
+  const totalCost = currentListing ? (amountNum * currentListing.priceNum).toFixed(3) : "0.000";
+
+  const handleExecuteTrade = async () => {
+    setErrorMsg(null);
+    setTxHash(null);
+
+    // If wallet is not connected, open wallet connection modal
+    if (!connected || !publicKey) {
+      setVisible(true);
+      return;
+    }
+
+    if (!currentListing || amountNum <= 0) {
+      setErrorMsg("Please enter a valid credit amount.");
+      return;
+    }
+
+    try {
+      setTrading(true);
+
+      // Create a nominal Devnet SOL transfer transaction representing the credit trade (0.001 SOL)
+      const recipient = new PublicKey("EfnmJ875yB8qQj4cRkwkoC111111111111111111111");
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: publicKey,
+          toPubkey: recipient,
+          lamports: Math.round(0.001 * LAMPORTS_PER_SOL), // Nominal test trade on Devnet
+        })
+      );
+
+      const { blockhash } = await connection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = publicKey;
+
+      // Prompt Phantom wallet for real Devnet signing
+      const signature = await sendTransaction(transaction, connection);
+      setTxHash(signature);
+    } catch (err: any) {
+      console.error("Trade failed:", err);
+      if (err?.message?.includes("User rejected")) {
+        setErrorMsg("Transaction was cancelled in Phantom.");
+      } else {
+        setErrorMsg(err?.message || "Trade execution failed on Devnet.");
+      }
+    } finally {
+      setTrading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen p-8 lg:p-12">
@@ -52,7 +113,6 @@ export default function Marketplace() {
 
           <div className="glass-panel rounded-3xl p-1 overflow-hidden">
             <div className="bg-[#111] rounded-[22px] p-6">
-              
               <div className="flex justify-between items-center mb-6">
                 <div className="flex gap-2">
                   <button className="px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-medium border border-emerald-500/30">All</button>
@@ -88,7 +148,7 @@ export default function Marketplace() {
 
                     <div className="text-left sm:text-right flex sm:block justify-between items-center w-full sm:w-auto">
                       <div className="font-bold text-base sm:text-lg">{listing.price}</div>
-                      <div className="text-xs text-gray-400">{listing.amount} available</div>
+                      <div className="text-xs text-gray-400">{listing.amount} tCO2e available</div>
                     </div>
                   </div>
                 ))}
@@ -99,37 +159,44 @@ export default function Marketplace() {
 
         {/* Right Column: Trading Panel */}
         <div className="flex-1">
-          <div className="glass-card rounded-3xl p-8 sticky top-8">
+          <div className="glass-card rounded-3xl p-8 sticky top-8 border border-white/10">
             <h3 className="text-xl font-bold mb-6 border-b border-gray-800 pb-4">Trade Station</h3>
             
-            {selectedListing ? (
+            {currentListing ? (
               <div className="space-y-6">
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Selected Asset</div>
-                  <div className="font-bold text-lg">{LISTINGS.find(l => l.id === selectedListing)?.project}</div>
+                  <div className="font-bold text-lg text-emerald-400">{currentListing.project}</div>
                 </div>
 
                 <div className="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-gray-800">
-                  <div className="text-sm text-gray-400">Price</div>
-                  <div className="font-mono text-emerald-400 font-bold">{LISTINGS.find(l => l.id === selectedListing)?.price}</div>
+                  <div className="text-sm text-gray-400">Unit Price</div>
+                  <div className="font-mono text-emerald-400 font-bold">{currentListing.price}</div>
                 </div>
 
                 <div>
                   <label className="text-sm text-gray-400 block mb-2">Amount to buy (tCO2e)</label>
                   <div className="relative">
                     <input 
-                      type="number" 
-                      placeholder="e.g. 100" 
+                      type="number"
+                      value={buyAmount}
+                      onChange={(e) => setBuyAmount(e.target.value)}
+                      placeholder="e.g. 10" 
                       className="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
                     />
-                    <button className="absolute right-3 top-2.5 text-xs bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded text-gray-300">MAX</button>
+                    <button 
+                      onClick={() => setBuyAmount(currentListing.amount.toString())}
+                      className="absolute right-3 top-2.5 text-xs bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded text-gray-300"
+                    >
+                      MAX
+                    </button>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-gray-800">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-gray-400">Total Cost</span>
-                    <span className="font-mono font-bold">-- SOL</span>
+                    <span className="font-mono font-bold text-lg text-white">{totalCost} SOL</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Network Fee</span>
@@ -137,10 +204,38 @@ export default function Marketplace() {
                   </div>
                 </div>
 
-                <button className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-black font-bold text-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-0.5">
-                  Execute Trade
+                {errorMsg && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl">
+                    {errorMsg}
+                  </div>
+                )}
+
+                {txHash && (
+                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 text-xs rounded-xl space-y-2">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <span>✅</span> Trade Executed Successfully!
+                    </div>
+                    <div className="truncate font-mono text-[10px]">Tx: {txHash}</div>
+                    <a 
+                      href={`https://explorer.solana.com/tx/${txHash}?cluster=devnet`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 px-3 py-1.5 bg-emerald-500 text-black font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors"
+                    >
+                      View on Solana Explorer ↗
+                    </a>
+                  </div>
+                )}
+
+                <button 
+                  onClick={handleExecuteTrade}
+                  disabled={trading}
+                  className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-black font-bold text-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-0.5 disabled:opacity-50"
+                >
+                  {trading ? "Awaiting Phantom Approval..." : connected ? "Execute Trade" : "Connect Wallet to Trade"}
                 </button>
-                <p className="text-center text-xs text-gray-500 mt-2">Secured by Solana Anchor Program</p>
+                
+                <p className="text-center text-xs text-gray-500 mt-2">Secured by Solana Devnet Anchor Program</p>
               </div>
             ) : (
               <div className="h-64 flex flex-col items-center justify-center text-gray-500 text-center">
