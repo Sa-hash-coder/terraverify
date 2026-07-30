@@ -122,6 +122,7 @@ export default function RegisterProject() {
           <Link href="/explorer" className="hover:text-white transition-colors">Explorer</Link>
           <Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link>
           <span className="text-emerald-400 border-b border-emerald-400 pb-1">Register Project</span>
+          <Link href="/retire" className="hover:text-white transition-colors">Retire Credits</Link>
           <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
         </div>
       </nav>
