@@ -90,10 +90,11 @@ export default function Home() {
         </div>
         
         <div className="flex flex-wrap justify-center gap-4 md:gap-6 items-center text-sm font-medium text-gray-300">
+          <span className="text-emerald-400 border-b border-emerald-400 pb-1">Dashboard</span>
           <a href="/explorer" className="hover:text-white transition-colors">Explorer</a>
           <a href="/marketplace" className="hover:text-white transition-colors">Marketplace</a>
-          <a href="/register" className="hover:text-white transition-colors">Register Project</a>
           <a href="/retire" className="hover:text-white transition-colors">Retire Credits</a>
+          <a href="/register" className="hover:text-white transition-colors">Register Project</a>
           <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
         </div>
       </nav>
