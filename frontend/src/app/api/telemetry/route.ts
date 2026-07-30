@@ -52,9 +52,22 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { id, status, cqs, cqsScore, forestCover, trend, lastScan } = body;
+    const { action, newProject, id, status, cqs, cqsScore, forestCover, trend, lastScan } = body;
 
-    // Update the matching project in memory
+    // Handle new project registration
+    if (action === "register" && newProject) {
+      // Avoid duplicate registration
+      const exists = telemetryProjects.some((p) => p.id === newProject.id);
+      if (!exists) {
+        telemetryProjects = [newProject, ...telemetryProjects];
+      }
+      return NextResponse.json({ success: true, projects: telemetryProjects }, {
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
+    // Update existing matching project in memory
+    let updated = false;
     telemetryProjects = telemetryProjects.map((project) => {
       const isMatch = 
         project.id === id || 
@@ -63,6 +76,7 @@ export async function POST(request: Request) {
         (id === "2" && project.id === "PRJ-003");
 
       if (isMatch) {
+        updated = true;
         return {
           ...project,
           ...(status && { status }),
@@ -76,10 +90,8 @@ export async function POST(request: Request) {
       return project;
     });
 
-    return NextResponse.json({ success: true, projects: telemetryProjects }, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
+    return NextResponse.json({ success: true, updated, projects: telemetryProjects }, {
+      headers: { "Access-Control-Allow-Origin": "*" },
     });
   } catch (err) {
     return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
