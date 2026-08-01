@@ -20,6 +20,7 @@ const MapComponent = dynamic(() => import("../../components/map-component"), {
 export default function Explorer() {
   const [selectedProject, setSelectedProject] = useState<number | null>(1);
   const [mounted, setMounted] = useState(false);
+  const [showOracleModal, setShowOracleModal] = useState(false);
   const [projectsData, setProjectsData] = useState({
     amazon: { forestCover: "84.5%", cqs: "AAA", status: "Active", cqsScore: 94 },
     borneo: { forestCover: "62.1%", cqs: "C", status: "Revoked", cqsScore: 42, trend: "-5.4%" },
@@ -139,12 +140,71 @@ export default function Explorer() {
           <MapComponent selectedProject={selectedProject} onSelectProject={setSelectedProject} />
 
           {/* Floating Action Button */}
-          <button className="absolute bottom-8 right-8 px-6 py-3 bg-white text-black font-bold rounded-full shadow-lg hover:bg-gray-200 transition-colors z-10">
+          <button 
+            onClick={() => setShowOracleModal(true)}
+            className="absolute bottom-8 right-8 px-6 py-3 bg-white text-black font-bold rounded-full shadow-lg hover:bg-gray-200 transition-colors z-10 text-xs sm:text-sm"
+          >
             View On-Chain Oracle Report ↗
           </button>
         </div>
 
       </div>
+
+      {/* On-Chain Oracle Report Modal */}
+      {showOracleModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-[#0c0d0e] border-2 border-emerald-500/30 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-[0_0_50px_rgba(16,185,129,0.15)] relative">
+            
+            {/* Close Button */}
+            <button 
+              onClick={() => setShowOracleModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-white text-xl font-bold font-sans"
+            >
+              ✕
+            </button>
+
+            {/* Title */}
+            <div>
+              <div className="text-[10px] tracking-[4px] uppercase text-emerald-400 font-bold mb-1">Live Oracle Telemetry</div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white">Sentinel-2 On-Chain Report</h3>
+            </div>
+
+            {/* Oracle JSON Raw Data */}
+            <div className="bg-black/60 border border-gray-800 p-5 rounded-2xl font-mono text-[11px] sm:text-xs text-emerald-400 space-y-1.5 overflow-x-auto leading-relaxed shadow-inner">
+              <div>{"{"}</div>
+              <div className="pl-4">"oracle_address": "Orac1e1111111111111111111111111111111111111",</div>
+              <div className="pl-4">"validator_node": "Sentinel-2 L2A European Space Agency",</div>
+              <div className="pl-4">"timestamp": "{new Date().toISOString()}",</div>
+              <div className="pl-4">"monitored_region": "{selectedProject === 1 ? "Amazon Reforestation Block 7" : "Borneo Peatland Protection"}",</div>
+              <div className="pl-4">"center_gps": "{selectedProject === 1 ? "-3.4200, -62.4000" : "-1.2500, 114.1200"}",</div>
+              <div className="pl-4">"calculated_ndvi": {selectedProject === 1 ? "0.845" : "0.584"},</div>
+              <div className="pl-4">"canopy_quality_score": {selectedProject === 1 ? "94" : "42"},</div>
+              <div className="pl-4">"project_tier": "{selectedProject === 1 ? "AAA" : "C"}",</div>
+              <div className="pl-4">"oracle_consensus_status": "{selectedProject === 1 ? "Verified (Active)" : "Suspended"}",</div>
+              <div className="pl-4">"action_enforced": "{selectedProject === 1 ? "None (Trading Active)" : "HALT_TRADING_AND_REVOKE_UNRETIRED_SUPPLY"}"</div>
+              <div>{"}"}</div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <a 
+                href={`https://explorer.solana.com/address/Orac1e1111111111111111111111111111111111111?cluster=devnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-3 text-center bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm rounded-xl transition-colors shadow-lg"
+              >
+                Verify Oracle Account ↗
+              </a>
+              <button 
+                onClick={() => setShowOracleModal(false)}
+                className="flex-1 py-3 border border-gray-800 hover:bg-white/5 text-white font-medium text-sm rounded-xl transition-colors"
+              >
+                Close Diagnostic
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }
