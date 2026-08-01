@@ -197,7 +197,15 @@ export default function RetireCredits() {
               <div class="detail">Coverage: ${coveragePercent}% of Reported Emissions</div>
               <div class="detail">Certificate ID: ${certId}</div>
               <div class="detail">Date Issued: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-              ${txHash ? `<div class="tx">Solana Blockchain Proof:<br/>${txHash}</div>` : ''}
+              ${txHash ? `
+              <div class="tx">Solana Blockchain Proof:<br/>${txHash}</div>
+              <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                <div style="background: white; padding: 8px; border-radius: 8px; display: inline-block; margin: 0 auto;">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`https://explorer.solana.com/tx/${txHash}?cluster=devnet`)}" style="width: 100px; height: 100px; display: block;" />
+                </div>
+                <div style="font-family: monospace; font-size: 9px; color: #9ca3af; letter-spacing: 1px;">SCAN TO VERIFY ON SOLANA</div>
+              </div>
+              ` : ''}
               <div class="footer">This certificate is permanently recorded on the Solana blockchain and can be independently verified at explorer.solana.com</div>
             </div>
           </body>
@@ -574,9 +582,22 @@ export default function RetireCredits() {
                   <div>Coverage: <span className={`font-bold ${isNetZero ? 'text-emerald-400' : 'text-yellow-400'}`}>{coveragePercent}%</span></div>
                 </div>
 
-                <div className="pt-4 border-t border-gray-800 space-y-1.5 text-xs text-gray-500">
+                 <div className="pt-4 border-t border-gray-800 space-y-1.5 text-xs text-gray-500">
                   <div>Certificate ID: <span className="text-white font-mono">{certId || "Pending burn transaction..."}</span></div>
                   <div>Date: <span className="text-white">{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                  
+                  {txHash && (
+                    <div className="flex flex-col items-center justify-center pt-4 border-t border-gray-800/60 space-y-2">
+                      <div className="bg-white p-2 rounded-xl inline-block shadow-lg">
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`https://explorer.solana.com/tx/${txHash}?cluster=devnet`)}`}
+                          alt="Solana Verification QR Code"
+                          className="w-24 h-24 block"
+                        />
+                      </div>
+                      <div className="text-[9px] text-gray-500 font-mono tracking-wider">SCAN TO VERIFY ON SOLANA</div>
+                    </div>
+                  )}
                 </div>
 
                 {txHash && (
