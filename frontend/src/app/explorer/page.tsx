@@ -172,7 +172,7 @@ export default function Explorer() {
             {/* Oracle JSON Raw Data */}
             <div className="bg-black/60 border border-gray-800 p-5 rounded-2xl font-mono text-[11px] sm:text-xs text-emerald-400 space-y-1.5 overflow-x-auto leading-relaxed shadow-inner radar-sweep">
               <div>{"{"}</div>
-              <div className="pl-4">"oracle_address": "Orac1e1111111111111111111111111111111111111",</div>
+              <div className="pl-4">"oracle_address": "Efnm4SRpWogLYYMXnrrwbJ1i7WFbM343rtoASXkxwkoC",</div>
               <div className="pl-4">"validator_node": "Sentinel-2 L2A European Space Agency",</div>
               <div className="pl-4">"timestamp": "{new Date().toISOString()}",</div>
               <div className="pl-4">"monitored_region": "{selectedProject === 1 ? "Amazon Reforestation Block 7" : "Borneo Peatland Protection"}",</div>
@@ -187,7 +187,7 @@ export default function Explorer() {
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <a 
-                href={`https://explorer.solana.com/address/Orac1e1111111111111111111111111111111111111?cluster=devnet`}
+                href={`https://explorer.solana.com/address/Efnm4SRpWogLYYMXnrrwbJ1i7WFbM343rtoASXkxwkoC?cluster=devnet`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 py-3 text-center bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm rounded-xl transition-colors shadow-lg"
