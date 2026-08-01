@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Header from "../../components/header";
 import { WalletMultiButton, useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
@@ -19,17 +20,10 @@ export default function Marketplace() {
   const [trading, setTrading] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
 
   const { connection } = useConnection();
   const { publicKey, sendTransaction, connected } = useWallet();
   const { setVisible } = useWalletModal();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
 
   const currentListing = LISTINGS.find((l) => l.id === selectedListing);
   const amountNum = parseFloat(buyAmount) || 0;
@@ -39,7 +33,6 @@ export default function Marketplace() {
     setErrorMsg(null);
     setTxHash(null);
 
-    // If wallet is not connected, open wallet connection modal
     if (!connected || !publicKey) {
       setVisible(true);
       return;
@@ -53,7 +46,6 @@ export default function Marketplace() {
     try {
       setTrading(true);
 
-      // Create a nominal Devnet SOL transfer transaction representing the credit trade (0.001 SOL)
       const recipient = new PublicKey("EfnmJ875yB8qQj4cRkwkoC111111111111111111111");
       const transaction = new Transaction().add(
         SystemProgram.transfer({
@@ -67,7 +59,6 @@ export default function Marketplace() {
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = publicKey;
 
-      // Prompt Phantom wallet for real Devnet signing
       const signature = await sendTransaction(transaction, connection);
       setTxHash(signature);
     } catch (err: any) {
@@ -83,29 +74,8 @@ export default function Marketplace() {
   };
 
   return (
-    <main className="min-h-screen p-8 lg:p-12">
-      {/* Navbar */}
-      <nav className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 mb-10 md:mb-16">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight">Terra<span className="text-gradient">Verify</span></h1>
-          </Link>
-        </div>
-        
-        <div className="flex flex-wrap justify-center gap-4 md:gap-6 items-center text-sm font-medium text-gray-300">
-          <Link href="/" className="hover:text-white transition-colors">Dashboard</Link>
-          <Link href="/explorer" className="hover:text-white transition-colors">Explorer</Link>
-          <span className="text-emerald-400 border-b border-emerald-400 pb-1">Marketplace</span>
-          <Link href="/retire" className="hover:text-white transition-colors">Retire Credits</Link>
-          <Link href="/register" className="hover:text-white transition-colors">Register Project</Link>
-          <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
-        </div>
-      </nav>
+    <main className="min-h-screen p-4 sm:p-8 lg:p-12">
+      <Header activeTab="marketplace" />
 
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
         {/* Left Column: Listings */}

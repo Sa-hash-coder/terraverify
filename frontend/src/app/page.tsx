@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Header from "../components/header";
 
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
@@ -21,6 +22,7 @@ const PROJECTS = [
     status: "Verified",
     cqs: "AAA",
     cqsScore: 94,
+    forestCover: "84.5%",
     lastScan: "2 hours ago",
     trend: "+0.2%",
   },
@@ -32,6 +34,7 @@ const PROJECTS = [
     status: "Verified",
     cqs: "AA",
     cqsScore: 88,
+    forestCover: "88.0%",
     lastScan: "5 hours ago",
     trend: "0.0%",
   },
@@ -43,6 +46,7 @@ const PROJECTS = [
     status: "Suspended", // Showcasing the auto-revoke feature
     cqs: "C",
     cqsScore: 42,
+    forestCover: "62.1%",
     lastScan: "12 hours ago",
     trend: "-5.4%",
   }
@@ -77,27 +81,8 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <main className="min-h-screen p-8 lg:p-12">
-      {/* Header / Navbar */}
-      <nav className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 mb-10 md:mb-16">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">Terra<span className="text-gradient">Verify</span></h1>
-        </div>
-        
-        <div className="flex flex-wrap justify-center gap-4 md:gap-6 items-center text-sm font-medium text-gray-300">
-          <span className="text-emerald-400 border-b border-emerald-400 pb-1">Dashboard</span>
-          <a href="/explorer" className="hover:text-white transition-colors">Explorer</a>
-          <a href="/marketplace" className="hover:text-white transition-colors">Marketplace</a>
-          <a href="/retire" className="hover:text-white transition-colors">Retire Credits</a>
-          <a href="/register" className="hover:text-white transition-colors">Register Project</a>
-          <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
-        </div>
-      </nav>
+    <main className="min-h-screen p-4 sm:p-8 lg:p-12">
+      <Header activeTab="dashboard" />
 
       {/* Hero Section */}
       <div className="max-w-4xl mb-12 md:mb-16 text-center md:text-left">

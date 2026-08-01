@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Header from "../../components/header";
 import { WalletMultiButton, useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
@@ -208,29 +209,8 @@ export default function RetireCredits() {
   };
 
   return (
-    <main className="min-h-screen p-8 lg:p-12">
-      {/* Navbar */}
-      <nav className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 mb-10 md:mb-16">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight">Terra<span className="text-gradient">Verify</span></h1>
-          </Link>
-        </div>
-        
-        <div className="flex flex-wrap justify-center gap-4 md:gap-6 items-center text-sm font-medium text-gray-300">
-          <Link href="/" className="hover:text-white transition-colors">Dashboard</Link>
-          <Link href="/explorer" className="hover:text-white transition-colors">Explorer</Link>
-          <Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link>
-          <span className="text-emerald-400 border-b border-emerald-400 pb-1">Retire Credits</span>
-          <Link href="/register" className="hover:text-white transition-colors">Register Project</Link>
-          <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
-        </div>
-      </nav>
+    <main className="min-h-screen p-4 sm:p-8 lg:p-12">
+      <Header activeTab="retire" />
 
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">

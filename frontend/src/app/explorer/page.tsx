@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import Header from "../../components/header";
+
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 // Load Leaflet dynamically with SSR disabled since it requires client window/document globals
@@ -70,38 +72,17 @@ export default function Explorer() {
   if (!mounted) return null;
 
   return (
-    <main className="h-screen flex flex-col overflow-hidden">
-      {/* Navbar */}
-      <nav className="flex flex-col md:flex-row justify-between items-center p-4 md:p-6 bg-[#050505]/80 backdrop-blur-md border-b border-gray-800 z-10 gap-4 md:gap-0">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold tracking-tight">Terra<span className="text-gradient">Verify</span></h1>
-          </Link>
-        </div>
-        
-        <div className="flex flex-wrap justify-center gap-4 md:gap-6 items-center text-sm font-medium text-gray-300">
-          <Link href="/" className="hover:text-white transition-colors">Dashboard</Link>
-          <span className="text-emerald-400 border-b border-emerald-400 pb-1">Explorer</span>
-          <Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link>
-          <Link href="/retire" className="hover:text-white transition-colors">Retire Credits</Link>
-          <Link href="/register" className="hover:text-white transition-colors">Register Project</Link>
-          <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
-        </div>
-      </nav>
+    <main className="h-screen flex flex-col overflow-hidden p-4 sm:p-8">
+      <Header activeTab="explorer" />
 
       {/* Main Content Split */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden rounded-2xl border border-gray-800">
         
         {/* Sidebar Panel */}
-        <div className="w-full md:w-96 bg-[#0a0a0a] border-b md:border-r md:border-b-0 border-gray-800 flex flex-col z-10 shadow-2xl overflow-y-auto md:overflow-hidden h-1/2 md:h-auto">
-          <div className="p-6 border-b border-gray-800">
-            <h2 className="text-xl font-bold mb-2">Verified Projects</h2>
-            <p className="text-sm text-gray-400">Select a region to view live satellite telemetry and mint status.</p>
+        <div className="w-full md:w-96 bg-[#0a0a0a] border-b md:border-r md:border-b-0 border-gray-800 flex flex-col z-10 shadow-2xl overflow-y-auto md:overflow-hidden h-[38vh] md:h-auto">
+          <div className="p-5 border-b border-gray-800">
+            <h2 className="text-xl font-bold mb-1">Verified Projects</h2>
+            <p className="text-xs text-gray-400 font-medium">Select a region to view live satellite telemetry and mint status.</p>
           </div>
           
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -154,7 +135,7 @@ export default function Explorer() {
         </div>
 
         {/* Map Area */}
-        <div className="flex-1 relative bg-[#0a0f12] h-1/2 md:h-auto min-h-[300px] z-0">
+        <div className="flex-1 relative bg-[#0a0f12] h-[45vh] md:h-auto min-h-[300px] z-0">
           <MapComponent selectedProject={selectedProject} onSelectProject={setSelectedProject} />
 
           {/* Floating Action Button */}

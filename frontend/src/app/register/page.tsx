@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Header from "../../components/header";
 import { useRouter } from "next/navigation";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -15,41 +16,22 @@ export default function RegisterProject() {
   const [projectName, setProjectName] = useState("Western Ghats Private Preserve");
   const [location, setLocation] = useState("India (Karnataka)");
   const [landDeedId, setLandDeedId] = useState("BHU-IN-2026-994821");
-  
-  // Boundary Definition Method State
   const [boundaryMethod, setBoundaryMethod] = useState<"file" | "radius">("file");
-  
-  // Method 1: File Upload
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  const [fileArea, setFileArea] = useState<string>("1,420"); // Parsed from file
-  
-  // Method 2: Center & Radius
+  const [fileArea, setFileArea] = useState<string>("1,420");
   const [radiusMeters, setRadiusMeters] = useState("500");
-  
-  // Coordinates (Hidden under advanced)
   const [showAdvancedCoords, setShowAdvancedCoords] = useState(false);
   const [latitude, setLatitude] = useState("13.52");
   const [longitude, setLongitude] = useState("75.60");
-  
-  // Geocoding Search State
   const [searchQuery, setSearchQuery] = useState("");
   const [searchingLocation, setSearchingLocation] = useState(false);
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
-
-  // Scanning & Minting State
   const [scanning, setScanning] = useState(false);
   const [scanStep, setScanStep] = useState(0);
   const [scanComplete, setScanComplete] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [registeredSuccess, setRegisteredSuccess] = useState(false);
-
-  // Calculated AI Telemetry Results
-  const [aiResult, setAiResult] = useState<{
-    cqs: string;
-    cqsScore: number;
-    forestCover: string;
-    area: string;
-  } | null>(null);
+  const [aiResult, setAiResult] = useState<{ cqs: string; cqsScore: number; forestCover: string; area: string } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -57,7 +39,6 @@ export default function RegisterProject() {
 
   if (!mounted) return null;
 
-  // OpenStreetMap Nominatim Geocoding Search
   const handleGeocodingSearch = async () => {
     if (!searchQuery.trim()) return;
     setSearchingLocation(true);
@@ -87,19 +68,16 @@ export default function RegisterProject() {
     }
   };
 
-  // Simulated File Drop / Upload
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       setUploadedFileName(files[0].name);
-      // Simulate reading a KML/GeoJSON and parsing the area
       const mockAreas = ["450", "1,250", "2,840", "85"];
       setFileArea(mockAreas[Math.floor(Math.random() * mockAreas.length)]);
     }
   };
 
-  // Handle AI Satellite Verification Scan
   const handleRunScan = () => {
     setScanning(true);
     setScanStep(1);
@@ -110,7 +88,6 @@ export default function RegisterProject() {
     setTimeout(() => {
       setScanning(false);
       setScanComplete(true);
-      
       const computedArea = boundaryMethod === "file" 
         ? `${fileArea} ha` 
         : `${((Math.PI * Math.pow(parseFloat(radiusMeters) || 500, 2)) / 10000).toFixed(1)} ha`;
@@ -124,7 +101,6 @@ export default function RegisterProject() {
     }, 3600);
   };
 
-  // Handle Final On-Chain Minting & Registration
   const handleRegisterOnChain = async () => {
     if (!aiResult) return;
     setRegistering(true);
@@ -169,29 +145,8 @@ export default function RegisterProject() {
   };
 
   return (
-    <main className="min-h-screen p-8 lg:p-12">
-      {/* Navbar */}
-      <nav className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 mb-10 md:mb-16">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight">Terra<span className="text-gradient">Verify</span></h1>
-          </Link>
-        </div>
-        
-        <div className="flex flex-wrap justify-center gap-4 md:gap-6 items-center text-sm font-medium text-gray-300">
-          <Link href="/" className="hover:text-white transition-colors">Dashboard</Link>
-          <Link href="/explorer" className="hover:text-white transition-colors">Explorer</Link>
-          <Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link>
-          <Link href="/retire" className="hover:text-white transition-colors">Retire Credits</Link>
-          <span className="text-emerald-400 border-b border-emerald-400 pb-1">Register Project</span>
-          <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
-        </div>
-      </nav>
+    <main className="min-h-screen p-4 sm:p-8 lg:p-12">
+      <Header activeTab="register" />
 
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
