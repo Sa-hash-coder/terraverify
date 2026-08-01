@@ -100,3 +100,69 @@ h1, h2, h3, h4, h5, h6 {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Page fade-in transition */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fadeInSlide 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Radar scanner sweep effect for Oracle JSON */
+@keyframes radarSweep {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+.radar-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.radar-sweep::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+  animation: radarSweep 4s linear infinite;
+  pointer-events: none;
+}
+
+/* Premium Gold Glow for active Offset Certificates */
+.gold-glow {
+  box-shadow: 0 0 40px rgba(245, 158, 11, 0.08), inset 0 0 20px rgba(245, 158, 11, 0.05);
+  border: 2px solid rgba(245, 158, 11, 0.25) !important;
+  transition: all 0.5s ease;
+}
+.gold-glow:hover {
+  box-shadow: 0 0 50px rgba(245, 158, 11, 0.15), inset 0 0 30px rgba(245, 158, 11, 0.1);
+  border: 2px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Smooth micro-interaction for primary buttons */
+.btn-premium {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-premium:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+.btn-premium:active {
+  transform: translateY(1px);
+}

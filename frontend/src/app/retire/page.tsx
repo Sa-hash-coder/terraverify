@@ -535,7 +535,11 @@ export default function RetireCredits() {
 
           {/* Right Column: Live Certificate */}
           <div>
-            <div className="glass-card rounded-3xl p-8 border-2 border-emerald-500/30 bg-gradient-to-br from-[#0a0f0a] to-[#0a1a0a] shadow-[0_0_30px_rgba(16,185,129,0.08)] sticky top-8">
+            <div className={`glass-card rounded-3xl p-8 bg-gradient-to-br from-[#0a0f0a] to-[#0a1a0a] sticky top-8 transition-all duration-500 ${
+              txHash 
+                ? 'gold-glow' 
+                : 'border-2 border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.08)]'
+            }`}>
               {/* Certificate Header */}
               <div className="text-center border-b border-emerald-500/20 pb-6 mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">

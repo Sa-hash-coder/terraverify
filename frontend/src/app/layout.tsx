@@ -31,7 +31,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <WalletProviderComponent>
-          {children}
+          <div className="flex-1 flex flex-col animate-fade-in">
+            {children}
+          </div>
         </WalletProviderComponent>
       </body>
     </html>

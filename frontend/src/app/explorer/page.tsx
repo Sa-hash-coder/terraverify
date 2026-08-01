@@ -170,7 +170,7 @@ export default function Explorer() {
             </div>
 
             {/* Oracle JSON Raw Data */}
-            <div className="bg-black/60 border border-gray-800 p-5 rounded-2xl font-mono text-[11px] sm:text-xs text-emerald-400 space-y-1.5 overflow-x-auto leading-relaxed shadow-inner">
+            <div className="bg-black/60 border border-gray-800 p-5 rounded-2xl font-mono text-[11px] sm:text-xs text-emerald-400 space-y-1.5 overflow-x-auto leading-relaxed shadow-inner radar-sweep">
               <div>{"{"}</div>
               <div className="pl-4">"oracle_address": "Orac1e1111111111111111111111111111111111111",</div>
               <div className="pl-4">"validator_node": "Sentinel-2 L2A European Space Agency",</div>
