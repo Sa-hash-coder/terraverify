@@ -1,30 +1,34 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #050505;
+  --color-background: #020508;
   --color-foreground: #ededed;
   
-  --color-primary: #10B981; /* Emerald green for ecology */
-  --color-primary-glow: rgba(16, 185, 129, 0.2);
+  --color-primary: #00f2fe;
+  --color-primary-glow: rgba(0, 242, 254, 0.25);
   
-  --color-surface: #111111;
-  --color-surface-border: #222222;
+  --color-surface: #070d14;
+  --color-surface-border: #132235;
   
-  --color-accent: #3B82F6; /* Blue for tech/satellite */
+  --color-accent: #39ff14;
   
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
 body {
-  background-color: var(--color-background);
+  background-color: #020508;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
   background-image: 
-    radial-gradient(circle at 15% 50%, rgba(16, 185, 129, 0.05), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.05), transparent 25%);
+    radial-gradient(circle at 50% -20%, rgba(0, 242, 254, 0.15), transparent 45%),
+    radial-gradient(circle at 10% 60%, rgba(16, 185, 129, 0.08), transparent 35%),
+    radial-gradient(circle at 90% 40%, rgba(59, 130, 246, 0.1), transparent 40%),
+    linear-gradient(to bottom, rgba(2, 5, 8, 0.7), rgba(2, 5, 8, 0.95)),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2000f2fe' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
 }
 
 /* Glassmorphism Utilities */

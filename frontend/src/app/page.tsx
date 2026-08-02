@@ -84,33 +84,80 @@ export default function Home() {
     <main className="min-h-screen p-4 sm:p-8 lg:p-12">
       <Header activeTab="dashboard" />
 
-      {/* Hero Section */}
-      <div className="max-w-4xl mb-12 md:mb-16 text-center md:text-left">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-6">
-          <span className="status-indicator"></span>
-          Satellite AI Pipeline Active
+      {/* Visual Hero Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-16">
+        <div className="lg:col-span-7 text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold mb-6 shadow-[0_0_15px_rgba(0,242,254,0.15)]">
+            <span className="status-indicator"></span>
+            Sentinel-2 L2A AI Pipeline Connected
+          </div>
+          <h2 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6">
+            Don't trust. <br className="hidden sm:block"/> <span className="text-gradient">Verify from space.</span>
+          </h2>
+          <p className="text-base sm:text-lg text-gray-400 max-w-xl leading-relaxed mx-auto lg:mx-0 mb-8 font-normal">
+            The first Solana-native carbon credit protocol backed by continuous satellite imagery. Offsets are dynamically monitored—if deforestation is detected, credits are automatically revoked on-chain.
+          </p>
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+            <a href="/explorer" className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 text-black font-bold text-sm shadow-[0_0_25px_rgba(0,242,254,0.3)] hover:scale-[1.02] transition-all btn-premium">
+              🛰️ Launch Satellite Explorer
+            </a>
+            <a href="/marketplace" className="px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-gray-800 font-semibold text-sm transition-all">
+              Trade Credits →
+            </a>
+          </div>
         </div>
-        <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight mb-6">
-          Don't trust. <br className="hidden md:block"/> <span className="text-gradient">Verify from space.</span>
-        </h2>
-        <p className="text-lg md:text-xl text-gray-400 max-w-2xl leading-relaxed mx-auto md:mx-0">
-          The first Solana-native carbon credit protocol with automated, AI-driven satellite verification. Credits are continuously monitored and automatically revoked if deforestation is detected.
-        </p>
+
+        {/* Live Satellite Visual HUD Card */}
+        <div className="lg:col-span-5">
+          <div className="relative rounded-3xl p-1 bg-gradient-to-br from-cyan-500/30 via-emerald-500/10 to-transparent shadow-[0_0_40px_rgba(0,242,254,0.15)] hologram-glow">
+            <div className="relative rounded-[22px] overflow-hidden bg-[#070d14] border border-cyan-500/20">
+              <div className="relative h-64 sm:h-72 w-full overflow-hidden">
+                <img 
+                  src="/amazon.png" 
+                  alt="Amazon Rainforest Satellite Sensor View"
+                  className="w-full h-full object-cover opacity-85 hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#070d14] via-transparent to-black/30"></div>
+                <div className="radar-sweep absolute inset-0"></div>
+
+                {/* Badges on image */}
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-cyan-500/40 text-cyan-400 text-[11px] font-mono font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                  LIVE SCAN: PRJ-001
+                </div>
+
+                <div className="absolute top-4 right-4 px-3 py-1 rounded-lg bg-emerald-500/20 backdrop-blur-md border border-emerald-500/40 text-emerald-400 text-xs font-bold">
+                  GRADE AAA
+                </div>
+
+                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                  <div>
+                    <div className="text-xs text-gray-300 font-medium">Amazon Reforestation Block 7</div>
+                    <div className="text-[10px] text-cyan-400 font-mono">NDVI Index: 0.845 • 84.5% Canopy</div>
+                  </div>
+                  <div className="text-xs font-mono text-emerald-400 bg-black/60 px-2 py-1 rounded border border-emerald-500/30">
+                    Active
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Key Stats (Premium Cards) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
         {[
           { label: "Total Verified Credits", value: STATS.totalCredits, suffix: " tCO2e" },
           { label: "Active Projects", value: STATS.activeProjects, suffix: "" },
           { label: "Area Monitored", value: STATS.hectaresMonitored, suffix: " ha" },
           { label: "Auto-Revoked Credits", value: STATS.revokedCredits, suffix: " tCO2e", color: "text-red-400" },
         ].map((stat, i) => (
-          <div key={i} className="premium-card p-6 rounded-2xl">
-            <h3 className="text-gray-400 text-sm font-medium mb-2">{stat.label}</h3>
+          <div key={i} className="premium-card p-6 rounded-2xl border border-cyan-500/10">
+            <h3 className="text-gray-400 text-xs uppercase tracking-wider font-semibold mb-2">{stat.label}</h3>
             <div className="flex items-baseline gap-1">
-              <span className={`text-3xl font-bold ${stat.color || "text-white"}`}>{stat.value}</span>
-              <span className="text-sm text-gray-500">{stat.suffix}</span>
+              <span className={`text-3xl font-extrabold ${stat.color || "text-white"}`}>{stat.value}</span>
+              <span className="text-xs text-gray-400 font-mono">{stat.suffix}</span>
             </div>
           </div>
         ))}
@@ -121,16 +168,17 @@ export default function Home() {
         <div className="bg-[#05080c]/90 rounded-[22px] p-6 lg:p-8">
           <div className="flex justify-between items-end mb-8">
             <div>
-              <h3 className="text-2xl font-bold mb-2">Live Project Registry</h3>
-              <p className="text-sm text-gray-400 font-medium">Continuous satellite monitoring via Sentinel-2 L2A</p>
+              <h3 className="text-2xl font-bold mb-1">Live Project Registry</h3>
+              <p className="text-xs text-gray-400 font-medium">Continuous satellite monitoring via Sentinel-2 L2A</p>
             </div>
-            <button className="text-sm font-medium text-cyan-400 hover:text-cyan-300">View All →</button>
+            <a href="/explorer" className="text-xs font-bold text-cyan-400 hover:text-cyan-300 tracking-wide uppercase">View Explorer →</a>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-gray-800">
+                  <th className="pb-4 font-medium">Parcel View</th>
                   <th className="pb-4 font-medium">Project Name</th>
                   <th className="pb-4 font-medium">Location</th>
                   <th className="pb-4 font-medium">CQS Score</th>
@@ -139,42 +187,51 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/50">
-                {projects.map((project, i) => (
-                  <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
-                    <td className="py-5">
-                      <div className="font-semibold text-white group-hover:text-cyan-400 transition-colors">{project.name}</div>
-                      <div className="text-xs text-gray-500 mt-1">{project.id} • {project.area}</div>
-                    </td>
-                    <td className="py-5 text-sm text-gray-300 font-medium">{project.location}</td>
-                    <td className="py-5">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
-                          project.cqsScore >= 90 ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" :
-                          project.cqsScore >= 80 ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" :
-                          "bg-red-500/20 text-red-400 border border-red-500/30"
-                        }`}>
-                          {project.cqs}
+                {projects.map((project, i) => {
+                  const imgThumb = project.id === "PRJ-003" ? "/borneo.png" : "/amazon.png";
+                  return (
+                    <tr key={i} className="group hover:bg-white/[0.03] transition-colors">
+                      <td className="py-4 pr-4">
+                        <div className="w-16 h-12 rounded-xl overflow-hidden relative border border-cyan-500/20 shadow-md shrink-0">
+                          <img src={imgThumb} alt={project.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          <div className="absolute inset-0 bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </div>
-                        <span className="text-xs text-gray-400">{project.cqsScore}/100</span>
-                      </div>
-                    </td>
-                    <td className="py-5">
-                      <div className="text-sm text-gray-300 font-mono">{project.lastScan}</div>
-                      <div className={`text-xs mt-1 font-medium ${project.trend.startsWith('-') ? 'text-red-400' : 'text-cyan-400'}`}>
-                        {project.trend} forest cover
-                      </div>
-                    </td>
-                    <td className="py-5">
-                      <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${
-                        project.status === 'Verified' 
-                          ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
-                          : 'border-red-500/30 bg-red-500/10 text-red-400'
-                      }`}>
-                        {project.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-4">
+                        <div className="font-semibold text-white group-hover:text-cyan-400 transition-colors">{project.name}</div>
+                        <div className="text-xs text-gray-500 mt-1 font-mono">{project.id} • {project.area}</div>
+                      </td>
+                      <td className="py-4 text-sm text-gray-300 font-medium">{project.location}</td>
+                      <td className="py-4">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                            project.cqsScore >= 90 ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" :
+                            project.cqsScore >= 80 ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" :
+                            "bg-red-500/20 text-red-400 border border-red-500/30"
+                          }`}>
+                            {project.cqs}
+                          </div>
+                          <span className="text-xs text-gray-400 font-mono">{project.cqsScore}/100</span>
+                        </div>
+                      </td>
+                      <td className="py-4">
+                        <div className="text-xs text-gray-300 font-mono">{project.lastScan}</div>
+                        <div className={`text-xs mt-1 font-medium ${project.trend.startsWith('-') ? 'text-red-400' : 'text-cyan-400'}`}>
+                          {project.trend} forest cover
+                        </div>
+                      </td>
+                      <td className="py-4">
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${
+                          project.status === 'Verified' 
+                            ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
+                            : 'border-red-500/30 bg-red-500/10 text-red-400'
+                        }`}>
+                          {project.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

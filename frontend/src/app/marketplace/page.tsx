@@ -100,13 +100,20 @@ export default function Marketplace() {
                     onClick={() => setSelectedListing(listing.id)}
                     className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 p-4 rounded-xl border cursor-pointer transition-all ${
                       selectedListing === listing.id 
-                        ? 'bg-emerald-500/10 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
+                        ? 'bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_15px_rgba(0,242,254,0.15)]' 
                         : 'bg-black/40 border-gray-800 hover:border-gray-700'
                     }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
-                          listing.cqs === 'AAA' ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" :
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-14 h-12 rounded-xl overflow-hidden shrink-0 border border-cyan-500/20 shadow-md relative">
+                        <img 
+                          src={listing.project.includes("Amazon") ? "/amazon.png" : "/borneo.png"} 
+                          alt={listing.project} 
+                          className="w-full h-full object-cover" 
+                        />
+                      </div>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+                          listing.cqs === 'AAA' ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" :
                           listing.cqs === 'AA' ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" :
                           "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
                         }`}>
@@ -114,12 +121,12 @@ export default function Marketplace() {
                       </div>
                       <div>
                         <div className="font-bold text-sm sm:text-base">{listing.project}</div>
-                        <div className="text-[10px] sm:text-xs text-gray-500 font-mono mt-1">Seller: {listing.seller}</div>
+                        <div className="text-[10px] sm:text-xs text-gray-500 font-mono mt-0.5">Seller: {listing.seller}</div>
                       </div>
                     </div>
 
                     <div className="text-left sm:text-right flex sm:block justify-between items-center w-full sm:w-auto">
-                      <div className="font-bold text-base sm:text-lg">{listing.price}</div>
+                      <div className="font-bold text-base sm:text-lg text-cyan-400">{listing.price}</div>
                       <div className="text-xs text-gray-400">{listing.amount} tCO2e available</div>
                     </div>
                   </div>
@@ -131,14 +138,31 @@ export default function Marketplace() {
 
         {/* Right Column: Trading Panel */}
         <div className="flex-1">
-          <div className="glass-card rounded-3xl p-8 sticky top-8 border border-white/10">
-            <h3 className="text-xl font-bold mb-6 border-b border-gray-800 pb-4">Trade Station</h3>
+          <div className="glass-card rounded-3xl p-6 sm:p-8 sticky top-8 border border-cyan-500/20 shadow-[0_0_30px_rgba(0,242,254,0.06)]">
+            <h3 className="text-xl font-bold mb-4 border-b border-gray-800 pb-3">Trade Station</h3>
             
             {currentListing ? (
-              <div className="space-y-6">
+              <div className="space-y-5">
+                {/* Visual Satellite Preview Header */}
+                <div className="relative h-28 w-full rounded-2xl overflow-hidden border border-cyan-500/30 shadow-inner">
+                  <img 
+                    src={currentListing.project.includes("Amazon") ? "/amazon.png" : "/borneo.png"} 
+                    alt={currentListing.project} 
+                    className="w-full h-full object-cover opacity-80" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                  <div className="radar-sweep absolute inset-0"></div>
+                  <div className="absolute bottom-2 left-3 text-xs font-bold text-white font-mono">
+                    {currentListing.project}
+                  </div>
+                  <div className="absolute top-2 right-3 px-2 py-0.5 rounded bg-black/60 text-[10px] font-mono text-cyan-400 border border-cyan-500/30">
+                    VERIFIED SENSOR
+                  </div>
+                </div>
+
                 <div>
-                  <div className="text-sm text-gray-400 mb-1">Selected Asset</div>
-                  <div className="font-bold text-lg text-emerald-400">{currentListing.project}</div>
+                  <div className="text-xs text-gray-400 mb-1">Selected Asset</div>
+                  <div className="font-bold text-lg text-cyan-400">{currentListing.project}</div>
                 </div>
 
                 <div className="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-gray-800">
