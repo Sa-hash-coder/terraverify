@@ -82,9 +82,9 @@ export default function Header({ activeTab }: HeaderProps) {
           <img 
             src="/logo.png" 
             alt="TerraVerify Logo" 
-            className="h-14 sm:h-16 lg:h-18 w-auto object-contain drop-shadow-[0_0_25px_rgba(0,242,254,0.6)] group-hover:scale-105 transition-transform duration-300 shrink-0" 
+            className="h-14 sm:h-16 lg:h-18 w-auto object-contain drop-shadow-[0_0_25px_rgba(0,242,254,0.6)] group-hover:scale-105 transition-transform duration-300 shrink-0 translate-x-1 translate-y-1" 
           />
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none flex items-center">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-none flex items-center">
             Terra<span className="text-gradient">Verify</span>
           </h1>
         </Link>
