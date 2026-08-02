@@ -109,37 +109,13 @@ export default function Home() {
 
         {/* Live Satellite Visual HUD Card */}
         <div className="lg:col-span-5">
-          <div className="relative rounded-3xl p-1 bg-gradient-to-br from-cyan-500/30 via-emerald-500/10 to-transparent shadow-[0_0_40px_rgba(0,242,254,0.15)] hologram-glow">
-            <div className="relative rounded-[22px] overflow-hidden bg-[#070d14] border border-cyan-500/20">
-              <div className="relative h-64 sm:h-72 w-full overflow-hidden">
-                <img 
-                  src="/dashboard.png" 
-                  alt="Amazon Rainforest Satellite Sensor View"
-                  className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#070d14] via-transparent to-black/30"></div>
-                <div className="radar-sweep absolute inset-0"></div>
-
-                {/* Badges on image */}
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-cyan-500/40 text-cyan-400 text-[11px] font-mono font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                  LIVE SCAN: PRJ-001
-                </div>
-
-                <div className="absolute top-4 right-4 px-3 py-1 rounded-lg bg-emerald-500/20 backdrop-blur-md border border-emerald-500/40 text-emerald-400 text-xs font-bold">
-                  GRADE AAA
-                </div>
-
-                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                  <div>
-                    <div className="text-xs text-gray-300 font-medium">Amazon Reforestation Block 7</div>
-                    <div className="text-[10px] text-cyan-400 font-mono">NDVI Index: 0.845 • 84.5% Canopy</div>
-                  </div>
-                  <div className="text-xs font-mono text-emerald-400 bg-black/60 px-2 py-1 rounded border border-emerald-500/30">
-                    Active
-                  </div>
-                </div>
-              </div>
+          <div className="relative rounded-3xl p-1 bg-gradient-to-br from-cyan-500/30 via-emerald-500/10 to-transparent shadow-[0_0_40px_rgba(0,242,254,0.15)]">
+            <div className="relative rounded-[22px] overflow-hidden bg-[#070d14] border border-cyan-500/20 shadow-2xl">
+              <img 
+                src="/dashboard.png" 
+                alt="TerraVerify Satellite Sensor View"
+                className="w-full h-auto object-cover opacity-95 hover:scale-105 transition-transform duration-700 block rounded-[22px]"
+              />
             </div>
           </div>
         </div>
