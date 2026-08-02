@@ -78,13 +78,13 @@ export default function Header({ activeTab }: HeaderProps) {
     <nav className="flex flex-col lg:flex-row justify-between items-center gap-4 lg:gap-0 mb-8 md:mb-12 border-b border-gray-800 pb-5">
       {/* Brand Logo */}
       <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
-        <Link href="/" className="flex items-center gap-3 group select-none">
+        <Link href="/" className="flex items-center gap-3.5 sm:gap-4 group select-none">
           <img 
             src="/logo.png" 
             alt="TerraVerify Logo" 
-            className="h-9 sm:h-10 lg:h-11 w-auto object-contain drop-shadow-[0_0_15px_rgba(0,242,254,0.4)] group-hover:scale-105 transition-transform duration-300 shrink-0" 
+            className="h-14 sm:h-16 lg:h-18 w-auto object-contain drop-shadow-[0_0_25px_rgba(0,242,254,0.6)] group-hover:scale-105 transition-transform duration-300 shrink-0" 
           />
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-none flex items-center">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none flex items-center">
             Terra<span className="text-gradient">Verify</span>
           </h1>
         </Link>
