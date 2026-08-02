@@ -113,9 +113,9 @@ export default function Home() {
             <div className="relative rounded-[22px] overflow-hidden bg-[#070d14] border border-cyan-500/20">
               <div className="relative h-64 sm:h-72 w-full overflow-hidden">
                 <img 
-                  src="/amazon.png" 
+                  src="/dashboard.png" 
                   alt="Amazon Rainforest Satellite Sensor View"
-                  className="w-full h-full object-cover opacity-85 hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#070d14] via-transparent to-black/30"></div>
                 <div className="radar-sweep absolute inset-0"></div>
@@ -188,7 +188,7 @@ export default function Home() {
               </thead>
               <tbody className="divide-y divide-gray-800/50">
                 {projects.map((project, i) => {
-                  const imgThumb = project.id === "PRJ-003" ? "/borneo.png" : "/amazon.png";
+                  const imgThumb = project.id === "PRJ-003" ? "/borneo.png" : "/dashboard.png";
                   return (
                     <tr key={i} className="group hover:bg-white/[0.03] transition-colors">
                       <td className="py-4 pr-4">

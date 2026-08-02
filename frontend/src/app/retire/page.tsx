@@ -551,11 +551,11 @@ export default function RetireCredits() {
               {/* Certificate Header */}
               <div className="text-center border-b border-emerald-500/20 pb-6 mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                  </div>
+                  <img 
+                    src="/logo.png" 
+                    alt="TerraVerify Logo" 
+                    className="h-9 w-auto object-contain drop-shadow-[0_0_12px_rgba(0,242,254,0.4)]" 
+                  />
                   <span className="text-xl font-bold">TerraVerify</span>
                 </div>
                 <div className="text-[10px] text-gray-500 uppercase tracking-[4px]">Solana-Native Carbon Credit Protocol</div>

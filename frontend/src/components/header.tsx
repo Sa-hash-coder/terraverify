@@ -79,11 +79,11 @@ export default function Header({ activeTab }: HeaderProps) {
       {/* Brand Logo */}
       <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
         <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center shadow-[0_0_20px_rgba(0,242,254,0.4)] hologram-glow">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="TerraVerify Logo" 
+            className="h-10 sm:h-11 w-auto object-contain drop-shadow-[0_0_15px_rgba(0,242,254,0.4)] hover:scale-105 transition-transform duration-300" 
+          />
           <h1 className="text-2xl font-bold tracking-tight">Terra<span className="text-gradient">Verify</span></h1>
         </Link>
         
