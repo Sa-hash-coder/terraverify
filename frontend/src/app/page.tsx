@@ -98,7 +98,7 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Key Stats (Glass Cards) */}
+      {/* Key Stats (Premium Cards) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
         {[
           { label: "Total Verified Credits", value: STATS.totalCredits, suffix: " tCO2e" },
@@ -106,7 +106,7 @@ export default function Home() {
           { label: "Area Monitored", value: STATS.hectaresMonitored, suffix: " ha" },
           { label: "Auto-Revoked Credits", value: STATS.revokedCredits, suffix: " tCO2e", color: "text-red-400" },
         ].map((stat, i) => (
-          <div key={i} className="glass-card p-6 rounded-2xl">
+          <div key={i} className="premium-card p-6 rounded-2xl">
             <h3 className="text-gray-400 text-sm font-medium mb-2">{stat.label}</h3>
             <div className="flex items-baseline gap-1">
               <span className={`text-3xl font-bold ${stat.color || "text-white"}`}>{stat.value}</span>
@@ -117,14 +117,14 @@ export default function Home() {
       </div>
 
       {/* Project Registry Table */}
-      <div className="glass-panel rounded-3xl p-1 overflow-hidden">
-        <div className="bg-[#111] rounded-[22px] p-6 lg:p-8">
+      <div className="glass-panel rounded-3xl p-1 overflow-hidden hologram-glow">
+        <div className="bg-[#05080c]/90 rounded-[22px] p-6 lg:p-8">
           <div className="flex justify-between items-end mb-8">
             <div>
               <h3 className="text-2xl font-bold mb-2">Live Project Registry</h3>
-              <p className="text-sm text-gray-400">Continuous satellite monitoring via Sentinel-2 L2A</p>
+              <p className="text-sm text-gray-400 font-medium">Continuous satellite monitoring via Sentinel-2 L2A</p>
             </div>
-            <button className="text-sm font-medium text-emerald-400 hover:text-emerald-300">View All →</button>
+            <button className="text-sm font-medium text-cyan-400 hover:text-cyan-300">View All →</button>
           </div>
 
           <div className="overflow-x-auto">
@@ -142,16 +142,16 @@ export default function Home() {
                 {projects.map((project, i) => (
                   <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
                     <td className="py-5">
-                      <div className="font-medium text-white group-hover:text-emerald-400 transition-colors">{project.name}</div>
+                      <div className="font-semibold text-white group-hover:text-cyan-400 transition-colors">{project.name}</div>
                       <div className="text-xs text-gray-500 mt-1">{project.id} • {project.area}</div>
                     </td>
-                    <td className="py-5 text-sm text-gray-300">{project.location}</td>
+                    <td className="py-5 text-sm text-gray-300 font-medium">{project.location}</td>
                     <td className="py-5">
                       <div className="flex items-center gap-2">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
-                          project.cqsScore >= 90 ? "bg-emerald-500/20 text-emerald-400" :
-                          project.cqsScore >= 80 ? "bg-blue-500/20 text-blue-400" :
-                          "bg-red-500/20 text-red-400"
+                          project.cqsScore >= 90 ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" :
+                          project.cqsScore >= 80 ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" :
+                          "bg-red-500/20 text-red-400 border border-red-500/30"
                         }`}>
                           {project.cqs}
                         </div>
@@ -159,15 +159,15 @@ export default function Home() {
                       </div>
                     </td>
                     <td className="py-5">
-                      <div className="text-sm text-gray-300">{project.lastScan}</div>
-                      <div className={`text-xs mt-1 ${project.trend.startsWith('-') ? 'text-red-400' : 'text-emerald-400'}`}>
+                      <div className="text-sm text-gray-300 font-mono">{project.lastScan}</div>
+                      <div className={`text-xs mt-1 font-medium ${project.trend.startsWith('-') ? 'text-red-400' : 'text-cyan-400'}`}>
                         {project.trend} forest cover
                       </div>
                     </td>
                     <td className="py-5">
-                      <span className={`px-3 py-1 text-xs font-medium rounded-full border ${
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${
                         project.status === 'Verified' 
-                          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                          ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
                           : 'border-red-500/30 bg-red-500/10 text-red-400'
                       }`}>
                         {project.status}

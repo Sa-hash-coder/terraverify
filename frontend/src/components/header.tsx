@@ -79,7 +79,7 @@ export default function Header({ activeTab }: HeaderProps) {
       {/* Brand Logo */}
       <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
         <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center shadow-[0_0_20px_rgba(0,242,254,0.4)] hologram-glow">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
@@ -89,7 +89,7 @@ export default function Header({ activeTab }: HeaderProps) {
         
         {/* Tiny mobile badge showing address if connected */}
         {connected && publicKey && (
-          <div className="lg:hidden text-[10px] bg-emerald-500/10 text-emerald-400 font-mono px-2 py-1 rounded-md border border-emerald-500/20">
+          <div className="lg:hidden text-[10px] bg-cyan-500/10 text-cyan-400 font-mono px-2 py-1 rounded-md border border-cyan-500/20">
             {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
           </div>
         )}
@@ -103,7 +103,7 @@ export default function Header({ activeTab }: HeaderProps) {
           {navLinks.map((link) => {
             const isActive = activeTab === link.id;
             return isActive ? (
-              <span key={link.id} className="text-emerald-400 border-b-2 border-emerald-400 pb-1 font-semibold cursor-default">
+              <span key={link.id} className="text-cyan-400 border-b-2 border-cyan-400 pb-1 font-semibold cursor-default">
                 {link.label}
               </span>
             ) : (
@@ -122,15 +122,15 @@ export default function Header({ activeTab }: HeaderProps) {
             <button
               onClick={handleRequestFaucet}
               disabled={requestingFaucet}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all shadow-md flex items-center gap-1.5 border border-emerald-500/30 ${
+              className={`px-4 py-2 rounded-full text-xs font-bold transition-all shadow-md flex items-center gap-1.5 border border-cyan-500/30 ${
                 faucetSuccess 
-                  ? "bg-emerald-500 text-black border-transparent"
-                  : "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 animate-pulse"
+                  ? "bg-cyan-500 text-black border-transparent"
+                  : "bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 animate-pulse"
               }`}
             >
               {requestingFaucet ? (
                 <>
-                  <span className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+                  <span className="w-3 h-3 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></span>
                   Requesting...
                 </>
               ) : faucetSuccess ? (
