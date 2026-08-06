@@ -164,7 +164,7 @@ export default function Home() {
               </thead>
               <tbody className="divide-y divide-gray-800/50">
                 {projects.map((project, i) => {
-                  const imgThumb = project.id === "PRJ-003" ? "/borneo.png" : "/dashboard.png";
+                  const imgThumb = project.id === "PRJ-003" ? "/borneo.png" : "/amazon.png";
                   return (
                     <tr key={i} className="group hover:bg-white/[0.03] transition-colors">
                       <td className="py-4 pr-4">

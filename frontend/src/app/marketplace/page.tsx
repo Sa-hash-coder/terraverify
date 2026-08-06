@@ -107,7 +107,7 @@ export default function Marketplace() {
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="w-14 h-12 rounded-xl overflow-hidden shrink-0 border border-cyan-500/20 shadow-md relative">
                         <img 
-                          src={listing.project.includes("Amazon") ? "/dashboard.png" : "/borneo.png"} 
+                          src={listing.project.includes("Amazon") ? "/amazon.png" : "/borneo.png"} 
                           alt={listing.project} 
                           className="w-full h-full object-cover" 
                         />
@@ -146,7 +146,7 @@ export default function Marketplace() {
                 {/* Visual Satellite Preview Header */}
                 <div className="relative h-28 w-full rounded-2xl overflow-hidden border border-cyan-500/30 shadow-inner">
                   <img 
-                    src={currentListing.project.includes("Amazon") ? "/dashboard.png" : "/borneo.png"} 
+                    src={currentListing.project.includes("Amazon") ? "/amazon.png" : "/borneo.png"} 
                     alt={currentListing.project} 
                     className="w-full h-full object-cover opacity-80" 
                   />
