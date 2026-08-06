@@ -37,6 +37,30 @@ export default function Header({ activeTab }: HeaderProps) {
     return () => clearInterval(interval);
   }, [publicKey, connected, connection]);
 
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  // Load and apply theme from localStorage
+  useEffect(() => {
+    const savedTheme = (localStorage.getItem("terra_theme") as "dark" | "light") || "dark";
+    setTheme(savedTheme);
+    if (savedTheme === "light") {
+      document.body.classList.add("light");
+    } else {
+      document.body.classList.remove("light");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    localStorage.setItem("terra_theme", nextTheme);
+    if (nextTheme === "light") {
+      document.body.classList.add("light");
+    } else {
+      document.body.classList.remove("light");
+    }
+  };
+
   // Request 1 SOL Faucet Airdrop directly on Devnet
   const handleRequestFaucet = async () => {
     if (!publicKey) return;
@@ -58,7 +82,7 @@ export default function Header({ activeTab }: HeaderProps) {
       const newBal = await connection.getBalance(publicKey);
       setBalance(newBal / 1000000000);
       
-      setTimeout(() => setFaucetSuccess(false), 3000);
+      setTimeout(() => setFaucetSuccess(false), 4000);
     } catch (err) {
       console.error("Faucet request failed:", err);
     } finally {
@@ -116,7 +140,7 @@ export default function Header({ activeTab }: HeaderProps) {
           })}
         </div>
 
-        {/* Action Buttons: Faucet & Wallet MultiButton */}
+        {/* Action Buttons: Faucet, Theme Toggle & Wallet MultiButton */}
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           
           {/* pulsing green Devnet Faucet Button for low balances (< 0.05 SOL) */}
@@ -142,6 +166,31 @@ export default function Header({ activeTab }: HeaderProps) {
               )}
             </button>
           )}
+
+          {/* Theme Toggle Button (Light/Dark) */}
+          <button
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
+            className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-yellow-400 hover:scale-105 transition-all shadow-md flex items-center justify-center cursor-pointer shrink-0"
+          >
+            {theme === "dark" ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            )}
+          </button>
 
           <WalletMultiButton className="!px-5 !py-2 !rounded-full !bg-white/10 !border !border-white/20 hover:!bg-white/20 !transition-all !shadow-lg !backdrop-blur-md !text-white !font-medium !text-sm !h-auto !line-height-normal" />
         </div>

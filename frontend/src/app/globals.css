@@ -31,6 +31,69 @@ body {
   background-attachment: fixed;
 }
 
+/* Light Theme Overrides */
+body.light {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  background-image: 
+    radial-gradient(circle at 50% -20%, rgba(2, 132, 199, 0.12), transparent 45%),
+    radial-gradient(circle at 10% 60%, rgba(16, 185, 129, 0.08), transparent 35%),
+    linear-gradient(to bottom, rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.98)),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230284c7' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") !important;
+}
+
+body.light .glass-panel {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light .glass-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light .premium-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light .bg-\[\#05080c\]\/90, 
+body.light .bg-\[\#070d14\], 
+body.light .bg-\[\#050505\], 
+body.light .bg-black\/40, 
+body.light .bg-black\/60, 
+body.light .bg-\[\#0a0f0a\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+body.light .border-gray-800, 
+body.light .border-gray-700 {
+  border-color: #e2e8f0 !important;
+}
+
+body.light .text-gray-400, 
+body.light .text-gray-500, 
+body.light .text-gray-300 {
+  color: #475569 !important;
+}
+
+body.light .text-white {
+  color: #0f172a !important;
+}
+
+body.light .text-gradient {
+  background: linear-gradient(to right, #0284c7, #059669) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
 /* Glassmorphism Utilities */
 .glass-panel {
   background: rgba(17, 17, 17, 0.6);
