@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import ParticleDrift from "../originkit/particle-drift";
 import WalletDialog from "../wallet/wallet-dialog";
+import { smoothScrollTo } from "../../lib/scroll";
 
 export default function HeroSection() {
   const router = useRouter();
@@ -107,9 +108,21 @@ export default function HeroSection() {
               </button>
               <a
                 href="#how-it-works"
-                className="w-full sm:w-auto px-6 py-3.5 text-sm font-medium text-[#f4f5ef] bg-[#0d1714] hover:bg-[#13221d] rounded border border-[#162922] hover:border-[#a8c7b5]/30 transition-all flex items-center justify-center gap-2"
+                onClick={(e) => smoothScrollTo("how-it-works", e)}
+                className="w-full sm:w-auto px-6 py-3.5 text-sm font-medium text-[#f4f5ef] bg-[#0d1714] hover:bg-[#13221d] rounded border border-[#162922] hover:border-[#a8c7b5]/30 transition-all flex items-center justify-center gap-2 group cursor-pointer"
               >
                 <span>How Verification Works</span>
+                <svg
+                  className="w-4 h-4 text-[#8a9d93] group-hover:text-[#38b87c] group-hover:translate-y-0.5 transition-transform"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
               </a>
             </div>
 

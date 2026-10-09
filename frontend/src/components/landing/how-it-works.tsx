@@ -117,7 +117,7 @@ export default function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="py-20 md:py-32 border-b border-[#d6dfd9] bg-[#edf1eb] text-[#101814] transition-colors"
+      className="py-20 md:py-32 border-b border-[#d6dfd9] bg-[#edf1eb] text-[#101814] transition-colors scroll-mt-20 md:scroll-mt-24"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}

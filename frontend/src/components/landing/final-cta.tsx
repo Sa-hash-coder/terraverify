@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { smoothScrollTo } from "../../lib/scroll";
 
 export default function FinalCtaSection() {
   return (
@@ -53,7 +54,8 @@ export default function FinalCtaSection() {
 
           <a
             href="#how-it-works"
-            className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-[#101814] bg-[#ffffff] hover:bg-[#f0f4f1] rounded-lg border border-[#d6dfd9] shadow-sm transition-all flex items-center justify-center gap-2"
+            onClick={(e) => smoothScrollTo("how-it-works", e)}
+            className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-[#101814] bg-[#ffffff] hover:bg-[#f0f4f1] rounded-lg border border-[#d6dfd9] shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>See How Verification Works</span>
           </a>

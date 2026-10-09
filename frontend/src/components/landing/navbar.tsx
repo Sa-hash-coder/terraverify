@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import WalletDialog from "../wallet/wallet-dialog";
+import { smoothScrollTo } from "../../lib/scroll";
 
 export default function LandingNavbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -113,25 +114,29 @@ export default function LandingNavbar() {
           >
             <a
               href="#how-it-works"
-              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c]"
+              onClick={(e) => smoothScrollTo("how-it-works", e)}
+              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c] cursor-pointer"
             >
               How It Works
             </a>
             <a
               href="#verification"
-              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c]"
+              onClick={(e) => smoothScrollTo("verification", e)}
+              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c] cursor-pointer"
             >
               Verification
             </a>
             <a
               href="#technology"
-              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c]"
+              onClick={(e) => smoothScrollTo("technology", e)}
+              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c] cursor-pointer"
             >
               Technology
             </a>
             <a
               href="#about"
-              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c]"
+              onClick={(e) => smoothScrollTo("about", e)}
+              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c] cursor-pointer"
             >
               About
             </a>
@@ -236,29 +241,41 @@ export default function LandingNavbar() {
           <nav className="flex flex-col space-y-3 text-sm font-medium text-[#a8c7b5]">
             <a
               href="#how-it-works"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 hover:text-[#f4f5ef]"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                smoothScrollTo("how-it-works", e);
+              }}
+              className="py-1 hover:text-[#f4f5ef] cursor-pointer"
             >
               How It Works
             </a>
             <a
               href="#verification"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 hover:text-[#f4f5ef]"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                smoothScrollTo("verification", e);
+              }}
+              className="py-1 hover:text-[#f4f5ef] cursor-pointer"
             >
               Verification
             </a>
             <a
               href="#technology"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 hover:text-[#f4f5ef]"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                smoothScrollTo("technology", e);
+              }}
+              className="py-1 hover:text-[#f4f5ef] cursor-pointer"
             >
               Technology
             </a>
             <a
               href="#about"
-              onClick={() => setMobileMenuOpen(false)}
-              className="py-1 hover:text-[#f4f5ef]"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                smoothScrollTo("about", e);
+              }}
+              className="py-1 hover:text-[#f4f5ef] cursor-pointer"
             >
               About
             </a>

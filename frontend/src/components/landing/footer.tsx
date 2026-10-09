@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { smoothScrollTo } from "../../lib/scroll";
 
 export default function LandingFooter() {
   return (
@@ -85,22 +86,22 @@ export default function LandingFooter() {
               </div>
               <ul className="space-y-2.5 text-xs">
                 <li>
-                  <a href="#verification" className="hover:text-[#f4f5ef] transition-colors">
+                  <a href="#verification" onClick={(e) => smoothScrollTo("verification", e)} className="hover:text-[#f4f5ef] transition-colors cursor-pointer">
                     Live Telemetry
                   </a>
                 </li>
                 <li>
-                  <a href="#how-it-works" className="hover:text-[#f4f5ef] transition-colors">
+                  <a href="#how-it-works" onClick={(e) => smoothScrollTo("how-it-works", e)} className="hover:text-[#f4f5ef] transition-colors cursor-pointer">
                     NDVI Methodology
                   </a>
                 </li>
                 <li>
-                  <a href="#how-it-works" className="hover:text-[#f4f5ef] transition-colors">
+                  <a href="#how-it-works" onClick={(e) => smoothScrollTo("how-it-works", e)} className="hover:text-[#f4f5ef] transition-colors cursor-pointer">
                     Canopy Quality (CQS)
                   </a>
                 </li>
                 <li>
-                  <a href="#verification" className="hover:text-[#f4f5ef] transition-colors">
+                  <a href="#verification" onClick={(e) => smoothScrollTo("verification", e)} className="hover:text-[#f4f5ef] transition-colors cursor-pointer">
                     Auto-Revocation
                   </a>
                 </li>
