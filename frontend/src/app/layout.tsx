@@ -48,11 +48,31 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function() {
+              try {
+                var stored = localStorage.getItem('terra_theme');
+                var theme = stored ? stored : 'dark';
+                if (theme === 'light') {
+                  document.documentElement.classList.add('light');
+                  document.documentElement.style.colorScheme = 'light';
+                } else {
+                  document.documentElement.classList.remove('light');
+                  document.documentElement.style.colorScheme = 'dark';
+                }
+              } catch (e) {}
+            })();`,
+          }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-[var(--bg-app)] text-[var(--text)]">
         <WalletProviderComponent>
-          <div className="flex-1 flex flex-col animate-fade-in">
+          <div className="flex-1 flex flex-col">
             {children}
           </div>
         </WalletProviderComponent>
