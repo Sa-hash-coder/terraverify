@@ -3,10 +3,42 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useWallet } from "@solana/wallet-adapter-react";
 import ParticleDrift from "../originkit/particle-drift";
+import WalletDialog from "../wallet/wallet-dialog";
 
 export default function HeroSection() {
+  const router = useRouter();
+  const { connected, publicKey } = useWallet();
   const [activeLayer, setActiveLayer] = useState<"optical" | "ndvi">("optical");
+  const [walletDialogOpen, setWalletDialogOpen] = useState(false);
+
+  // Check if wallet is connected or locally stored
+  const checkHasWallet = () => {
+    if (connected && publicKey) return true;
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("terra_local_wallet");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed?.publicKey) return true;
+        } catch {}
+      }
+    }
+    return false;
+  };
+
+  const handleExploreProjects = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (checkHasWallet()) {
+      // Wallet is already added: log user in and proceed to explorer
+      router.push("/explorer");
+    } else {
+      // No wallet added till now: direct open create/add wallet dialog
+      setWalletDialogOpen(true);
+    }
+  };
 
   return (
     <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden border-b border-[#162922]">
@@ -55,9 +87,9 @@ export default function HeroSection() {
 
             {/* Primary Action Buttons */}
             <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto mb-12">
-              <Link
-                href="/explorer"
-                className="w-full sm:w-auto px-6 py-3.5 text-sm font-semibold text-[#07130f] bg-[#38b87c] hover:bg-[#42cb8a] rounded transition-all flex items-center justify-center gap-2 shadow-[0_2px_12px_rgba(56,184,124,0.25)]"
+              <button
+                onClick={handleExploreProjects}
+                className="w-full sm:w-auto px-6 py-3.5 text-sm font-semibold text-[#07130f] bg-[#38b87c] hover:bg-[#42cb8a] rounded transition-all flex items-center justify-center gap-2 shadow-[0_2px_12px_rgba(56,184,124,0.25)] cursor-pointer"
               >
                 <span>Explore Projects</span>
                 <svg
@@ -72,7 +104,7 @@ export default function HeroSection() {
                   <path d="M5 12h14" />
                   <path d="m12 5 7 7-7 7" />
                 </svg>
-              </Link>
+              </button>
               <a
                 href="#how-it-works"
                 className="w-full sm:w-auto px-6 py-3.5 text-sm font-medium text-[#f4f5ef] bg-[#0d1714] hover:bg-[#13221d] rounded border border-[#162922] hover:border-[#a8c7b5]/30 transition-all flex items-center justify-center gap-2"
@@ -282,6 +314,16 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
+
+      {/* Direct Wallet Creation / Connect Dialog Modal */}
+      <WalletDialog
+        isOpen={walletDialogOpen}
+        onClose={() => setWalletDialogOpen(false)}
+        onSuccess={() => {
+          setWalletDialogOpen(false);
+          router.push("/explorer");
+        }}
+      />
     </section>
   );
 }

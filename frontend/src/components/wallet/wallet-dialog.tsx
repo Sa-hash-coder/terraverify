@@ -18,9 +18,10 @@ interface CreatedWallet {
 interface WalletDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: (publicKey: string) => void;
 }
 
-export default function WalletDialog({ isOpen, onClose }: WalletDialogProps) {
+export default function WalletDialog({ isOpen, onClose, onSuccess }: WalletDialogProps) {
   const [mounted, setMounted] = useState(false);
   const { setVisible: setAdapterModalVisible } = useWalletModal();
   const { connected, publicKey, disconnect } = useWallet();
@@ -373,6 +374,19 @@ export default function WalletDialog({ isOpen, onClose }: WalletDialogProps) {
                     </a>
                   </div>
 
+                  {/* Continue / Log In Button */}
+                  <div className="pt-2">
+                    <button
+                      onClick={() => {
+                        if (onSuccess) onSuccess(createdWallet.publicKey);
+                        else onClose();
+                      }}
+                      className="w-full py-2.5 px-4 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                    >
+                      <span>Continue to Explorer →</span>
+                    </button>
+                  </div>
+
                   <div className="pt-1 text-center">
                     <button
                       onClick={handleGenerateWallet}
@@ -413,6 +427,19 @@ export default function WalletDialog({ isOpen, onClose }: WalletDialogProps) {
                       className="py-1.5 px-3 rounded bg-[#201818] hover:bg-[#2c1e1e] border border-[#3a2222] text-xs text-[#fca5a5] transition-colors cursor-pointer"
                     >
                       Disconnect
+                    </button>
+                  </div>
+
+                  {/* Continue / Log In Button */}
+                  <div className="pt-1">
+                    <button
+                      onClick={() => {
+                        if (onSuccess) onSuccess(publicKey.toBase58());
+                        else onClose();
+                      }}
+                      className="w-full py-2.5 px-4 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                    >
+                      <span>Continue to Explorer →</span>
                     </button>
                   </div>
                 </div>

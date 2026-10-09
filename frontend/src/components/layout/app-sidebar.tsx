@@ -23,6 +23,7 @@ import {
   X,
   ExternalLink
 } from "lucide-react";
+import { PublicKey } from "@solana/web3.js";
 import WalletDialog from "../wallet/wallet-dialog";
 
 export interface AppSidebarProps {
@@ -42,6 +43,30 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
   const [copied, setCopied] = useState(false);
   const [createWalletOpen, setCreateWalletOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [localWallet, setLocalWallet] = useState<{ publicKey: string; balance?: number } | null>(null);
+
+  // Sync saved local wallet from localStorage
+  const loadLocalWallet = () => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("terra_local_wallet");
+      if (saved) {
+        try {
+          setLocalWallet(JSON.parse(saved));
+        } catch {
+          setLocalWallet(null);
+        }
+      } else {
+        setLocalWallet(null);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadLocalWallet();
+    const handleStorage = () => loadLocalWallet();
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [createWalletOpen]);
 
   // Load persisted sidebar state & theme
   useEffect(() => {
@@ -94,30 +119,54 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
     }
   };
 
+  // Determine active wallet
+  const activePubkey = publicKey ? publicKey.toBase58() : localWallet?.publicKey || null;
+  const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
+
   // Fetch balance
   useEffect(() => {
-    if (!connected || !publicKey) {
-      setBalance(null);
-      return;
-    }
-    const fetchBalance = async () => {
+    if (connected && publicKey) {
+      const fetchBalance = async () => {
+        try {
+          const bal = await connection.getBalance(publicKey);
+          setBalance(bal / 1e9);
+        } catch {}
+      };
+      fetchBalance();
+      const interval = setInterval(fetchBalance, 8000);
+      return () => clearInterval(interval);
+    } else if (localWallet?.publicKey) {
       try {
-        const bal = await connection.getBalance(publicKey);
-        setBalance(bal / 1e9);
-      } catch {}
-    };
-    fetchBalance();
-    const interval = setInterval(fetchBalance, 8000);
-    return () => clearInterval(interval);
-  }, [connected, publicKey, connection]);
+        const pk = new PublicKey(localWallet.publicKey);
+        connection.getBalance(pk).then((bal) => setBalance(bal / 1e9)).catch(() => {
+          setBalance(localWallet.balance ?? 1.0);
+        });
+      } catch {
+        setBalance(localWallet.balance ?? 1.0);
+      }
+    } else {
+      setBalance(null);
+    }
+  }, [connected, publicKey, localWallet, connection]);
 
   const handleCopyAddress = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (publicKey) {
-      navigator.clipboard.writeText(publicKey.toBase58());
+    if (activePubkey) {
+      navigator.clipboard.writeText(activePubkey);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const handleDisconnect = () => {
+    if (connected) {
+      disconnect();
+    }
+    if (localWallet) {
+      localStorage.removeItem("terra_local_wallet");
+      setLocalWallet(null);
+    }
+    setBalance(null);
   };
 
   const navItems = [
@@ -399,18 +448,18 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
           )}
 
           {/* Wallet Block */}
-          {!connected || !publicKey ? (
+          {!isWalletConnected || !activePubkey ? (
             collapsed ? (
               <button
-                onClick={() => setAdapterModalVisible(true)}
+                onClick={() => setCreateWalletOpen(true)}
                 className="w-10 h-10 mx-auto rounded-lg bg-[var(--accent)] text-[var(--bg-app)] flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer"
-                title="Connect Wallet"
+                title="Connect or Create Wallet"
               >
                 <Wallet className="w-4 h-4" />
               </button>
             ) : (
               <button
-                onClick={() => setAdapterModalVisible(true)}
+                onClick={() => setCreateWalletOpen(true)}
                 className="w-full py-2 px-3 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs flex items-center justify-center gap-2 transition-opacity cursor-pointer shadow-xs"
               >
                 <Wallet className="w-3.5 h-3.5" />
@@ -421,9 +470,9 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
             collapsed ? (
               <div className="flex justify-center">
                 <button
-                  onClick={() => disconnect()}
+                  onClick={handleDisconnect}
                   className="w-10 h-10 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)] text-[var(--accent)] hover:text-[var(--danger)] flex items-center justify-center transition-colors cursor-pointer relative"
-                  title={`${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)} (${balance !== null ? balance.toFixed(2) + " SOL" : ""}) - Click to Disconnect`}
+                  title={`${activePubkey.slice(0, 4)}...${activePubkey.slice(-4)} (${balance !== null ? balance.toFixed(2) + " SOL" : ""}) - Click to Disconnect`}
                 >
                   <span className="w-2 h-2 rounded-full bg-[var(--accent)] absolute top-2 right-2" />
                   <Wallet className="w-4 h-4" />
@@ -434,7 +483,7 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-[11px] text-[var(--text)]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-                    <span>{publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}</span>
+                    <span>{activePubkey.slice(0, 4)}...{activePubkey.slice(-4)}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
@@ -445,7 +494,7 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
                       {copied ? <Check className="w-3 h-3 text-[var(--accent)]" /> : <Copy className="w-3 h-3" />}
                     </button>
                     <button
-                      onClick={() => disconnect()}
+                      onClick={handleDisconnect}
                       className="p-1 text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors cursor-pointer"
                       title="Disconnect Wallet"
                     >
@@ -482,6 +531,10 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
       <WalletDialog
         isOpen={createWalletOpen}
         onClose={() => setCreateWalletOpen(false)}
+        onSuccess={() => {
+          setCreateWalletOpen(false);
+          loadLocalWallet();
+        }}
       />
     </>
   );
