@@ -1,34 +1,57 @@
 @import "tailwindcss";
 
+:root {
+  --color-bg-dark: #07130f;
+  --color-secondary: #0d1714;
+  --color-accent-green: #38b87c;
+  --color-accent-green-rgb: 56, 184, 124;
+  --color-accent-earth: #a8c7b5;
+  --color-accent-earth-rgb: 168, 199, 181;
+  --color-bg-light: #f4f5ef;
+  --color-text-dark: #101814;
+  --color-text-muted: #718078;
+  --color-text-light: #f4f5ef;
+  --color-surface-dark: #0b1713;
+  --color-surface-card: #0e1c17;
+  --color-surface-border: rgba(168, 199, 181, 0.12);
+  --color-border-subtle: rgba(168, 199, 181, 0.1);
+  --color-border-hover: rgba(56, 184, 124, 0.3);
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 @theme {
-  --color-background: #020508;
-  --color-foreground: #ededed;
-  
-  --color-primary: #00f2fe;
-  --color-primary-glow: rgba(0, 242, 254, 0.25);
-  
-  --color-surface: #070d14;
-  --color-surface-border: #132235;
-  
-  --color-accent: #39ff14;
-  
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-primary: #07130f;
+  --color-secondary: #0d1714;
+  --color-accent: #38b87c;
+  --color-accent-earth: #a8c7b5;
+  --color-bg-light: #f4f5ef;
+  --color-text-dark: #101814;
+  --color-text-muted: #718078;
 }
 
 body {
-  background-color: #020508;
-  color: var(--color-foreground);
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-light);
   font-family: var(--font-sans);
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
   background-image: 
-    radial-gradient(circle at 50% -20%, rgba(0, 242, 254, 0.15), transparent 45%),
-    radial-gradient(circle at 10% 60%, rgba(16, 185, 129, 0.08), transparent 35%),
-    radial-gradient(circle at 90% 40%, rgba(59, 130, 246, 0.1), transparent 40%),
-    linear-gradient(to bottom, rgba(2, 5, 8, 0.7), rgba(2, 5, 8, 0.95)),
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2000f2fe' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    radial-gradient(circle at 50% -10%, rgba(56, 184, 124, 0.07), transparent 60%),
+    radial-gradient(circle at 85% 30%, rgba(168, 199, 181, 0.03), transparent 45%),
+    linear-gradient(to bottom, rgba(7, 19, 15, 0.8), rgba(7, 19, 15, 0.98));
   background-attachment: fixed;
+}
+
+/* Accessibility: Respect prefers-reduced-motion across the entire application */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Light Theme Overrides */
@@ -153,7 +176,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .text-gradient {
-  background: linear-gradient(to right, #00f2fe, #39ff14);
+  background: linear-gradient(135deg, #f4f5ef 30%, #a8c7b5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-green {
+  background: linear-gradient(135deg, #38b87c 30%, #a8c7b5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -172,7 +202,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes zoomInSlide {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(8px);
+    transform: scale(0.98) translateY(6px);
   }
   to {
     opacity: 1;
@@ -180,10 +210,10 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 .animate-fade-in {
-  animation: zoomInSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: zoomInSlide 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Radar scanner sweep effect for Oracle JSON */
+/* Minimal Radar sweep for scientific telemetry */
 @keyframes radarSweep {
   0% {
     top: 0%;
@@ -204,61 +234,81 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   left: 0;
   right: 0;
-  height: 2px;
-  background: rgba(0, 242, 254, 0.4);
-  box-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
-  animation: radarSweep 3.5s linear infinite;
+  height: 1px;
+  background: rgba(56, 184, 124, 0.4);
+  box-shadow: 0 0 8px rgba(56, 184, 124, 0.6);
+  animation: radarSweep 4s linear infinite;
   pointer-events: none;
 }
 
-/* Premium Gold Glow for active Offset Certificates */
-.gold-glow {
-  box-shadow: 0 0 40px rgba(245, 158, 11, 0.12), inset 0 0 20px rgba(245, 158, 11, 0.05);
-  border: 2px solid rgba(245, 158, 11, 0.3) !important;
-  transition: all 0.5s ease;
-}
-.gold-glow:hover {
-  box-shadow: 0 0 50px rgba(245, 158, 11, 0.22), inset 0 0 30px rgba(245, 158, 11, 0.1);
-  border: 2px solid rgba(245, 158, 11, 0.5) !important;
-}
-
-/* Steady Cyan Ambient Glow (No blinking/color shifts) */
-.hologram-glow {
-  box-shadow: 0 0 30px rgba(0, 242, 254, 0.12);
-  transition: box-shadow 0.3s ease;
+/* Minimal Status dot */
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-accent-green);
+  box-shadow: 0 0 6px rgba(56, 184, 124, 0.5);
 }
 
-/* Rotating Loader Orbit for Satellite HUD */
-@keyframes spinOrbit {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Subtle satellite line grid texture */
+.bg-grid-subtle {
+  background-image: 
+    linear-gradient(to right, rgba(168, 199, 181, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(168, 199, 181, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
-.animate-orbit {
-  animation: spinOrbit 20s linear infinite;
+
+/* Restrained Scientific Card */
+.terra-card {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-surface-border);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.terra-card:hover {
+  border-color: var(--color-border-hover);
+}
+
+/* Restrained button styles */
+.btn-primary-terra {
+  background-color: var(--color-accent-green);
+  color: #07130f;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-primary-terra:hover {
+  background-color: #42cb8a;
+  transform: translateY(-1px);
+}
+.btn-secondary-terra {
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--color-text-light);
+  border: 1px solid var(--color-surface-border);
+  transition: all 0.2s ease;
+}
+.btn-secondary-terra:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+  border-color: var(--color-accent-earth);
+  transform: translateY(-1px);
 }
 
 /* Smooth micro-interaction for premium hover states */
 .premium-card {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  background: rgba(4, 7, 9, 0.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(11, 23, 19, 0.6) !important;
+  border: 1px solid rgba(168, 199, 181, 0.12);
 }
 .premium-card:hover {
-  transform: translateY(-2px) scale(1.01);
-  border-color: rgba(0, 242, 254, 0.25);
-  box-shadow: 0 10px 30px rgba(0, 242, 254, 0.08);
+  transform: translateY(-2px);
+  border-color: rgba(56, 184, 124, 0.3);
+  box-shadow: 0 8px 24px rgba(7, 19, 15, 0.5);
 }
 
 .btn-premium {
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-premium:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+  transform: translateY(-1px);
 }
 .btn-premium:active {
   transform: translateY(0.5px);

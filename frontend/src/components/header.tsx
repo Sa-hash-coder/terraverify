@@ -106,7 +106,7 @@ export default function Header({ activeTab }: HeaderProps) {
           <img 
             src="/logo.png" 
             alt="TerraVerify Logo" 
-            className="h-14 sm:h-16 lg:h-18 w-auto object-contain drop-shadow-[0_0_25px_rgba(0,242,254,0.6)] group-hover:scale-105 transition-transform duration-300 shrink-0 translate-x-1 translate-y-1" 
+            className="h-12 sm:h-14 w-auto object-contain drop-shadow-[0_2px_8px_rgba(56,184,124,0.3)] group-hover:scale-105 transition-transform duration-300 shrink-0" 
           />
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-none flex items-center">
             Terra<span className="text-gradient">Verify</span>
@@ -115,7 +115,7 @@ export default function Header({ activeTab }: HeaderProps) {
         
         {/* Tiny mobile badge showing address if connected */}
         {connected && publicKey && (
-          <div className="lg:hidden text-[10px] bg-cyan-500/10 text-cyan-400 font-mono px-2 py-1 rounded-md border border-cyan-500/20">
+          <div className="lg:hidden text-[10px] bg-[#38b87c]/10 text-[#38b87c] font-mono px-2 py-1 rounded-md border border-[#38b87c]/20">
             {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
           </div>
         )}
@@ -129,7 +129,7 @@ export default function Header({ activeTab }: HeaderProps) {
           {navLinks.map((link) => {
             const isActive = activeTab === link.id;
             return isActive ? (
-              <span key={link.id} className="text-cyan-400 border-b-2 border-cyan-400 pb-1 font-semibold cursor-default">
+              <span key={link.id} className="text-[#38b87c] border-b-2 border-[#38b87c] pb-1 font-semibold cursor-default">
                 {link.label}
               </span>
             ) : (
