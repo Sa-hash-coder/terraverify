@@ -1,34 +1,200 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import Header from "../../components/header";
-import { WalletMultiButton, useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { 
+  Search, 
+  ArrowUpDown, 
+  ShieldAlert, 
+  ShieldCheck, 
+  ExternalLink, 
+  CheckCircle2, 
+  AlertCircle, 
+  ShoppingBag, 
+  Tag, 
+  Layers, 
+  ChevronRight,
+  TrendingUp,
+  Plus,
+  Minus,
+  Sparkles,
+  Flame
+} from "lucide-react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 
-const LISTINGS = [
-  { id: 1, project: "Amazon Block 7", cqs: "AAA", priceNum: 0.15, price: "0.15 SOL", amount: 500, seller: "Efnm...kwkoC" },
-  { id: 2, project: "Congo Basin Conservation", cqs: "AA", priceNum: 0.12, price: "0.12 SOL", amount: 1200, seller: "9B2a...zYpQ" },
-  { id: 3, project: "Amazon Block 7", cqs: "AAA", priceNum: 0.16, price: "0.16 SOL", amount: 250, seller: "4TyH...vXm1" },
-  { id: 4, project: "Sumatra Tiger Reserve", cqs: "A", priceNum: 0.08, price: "0.08 SOL", amount: 5000, seller: "7aZk...9LpP" },
+import PageShell from "../../components/layout/page-shell";
+import { 
+  PageHeader, 
+  Panel, 
+  DataRow, 
+  Stat, 
+  StatusBadge, 
+  GradeBadge, 
+  AddressChip, 
+  Skeleton, 
+  EmptyState,
+  SegmentedControl
+} from "../../components/shared/design-system";
+
+export interface MarketplaceListing {
+  id: number;
+  project: string;
+  region: string;
+  grade: "AAA" | "AA" | "A" | "B" | "C";
+  ndvi: number;
+  status: "Verified" | "Suspended" | "Revoked";
+  priceNum: number;
+  amount: number;
+  seller: string;
+  image: string;
+  lastVerified: string;
+  revocationReason?: string;
+}
+
+const INITIAL_LISTINGS: MarketplaceListing[] = [
+  {
+    id: 1,
+    project: "Amazon Reforestation Block 7",
+    region: "Amazonas, Brazil",
+    grade: "AAA",
+    ndvi: 0.845,
+    status: "Verified",
+    priceNum: 0.15,
+    amount: 500,
+    seller: "Efnm4SRpWogLYYMXnrrwbJ1i7WFbM343rtoASXkxwkoC",
+    image: "/amazon.png",
+    lastVerified: "2 hours ago",
+  },
+  {
+    id: 2,
+    project: "Congo Basin Conservation",
+    region: "Équateur, DRC",
+    grade: "AA",
+    ndvi: 0.812,
+    status: "Verified",
+    priceNum: 0.12,
+    amount: 1200,
+    seller: "9B2aRt55wQpxNMJ928YzpQ111111111111111111111",
+    image: "/satellite_hero.jpg",
+    lastVerified: "5 hours ago",
+  },
+  {
+    id: 3,
+    project: "Amazon Reforestation Block 7",
+    region: "Amazonas, Brazil",
+    grade: "AAA",
+    ndvi: 0.845,
+    status: "Verified",
+    priceNum: 0.16,
+    amount: 250,
+    seller: "4TyH89kLM12389PqaVb1111111111111111111111111",
+    image: "/amazon.png",
+    lastVerified: "2 hours ago",
+  },
+  {
+    id: 4,
+    project: "Borneo Peatland Protection",
+    region: "Central Kalimantan, ID",
+    grade: "C",
+    ndvi: 0.584,
+    status: "Suspended",
+    priceNum: 0.05,
+    amount: 820,
+    seller: "7aZk9LpPeN4392Mka14441111111111111111111111",
+    image: "/borneo.png",
+    lastVerified: "12 hours ago",
+    revocationReason:
+      "Canopy fell below 80% baseline threshold. Token-2022 transfer hook prohibits all buy/transfer trades.",
+  },
+  {
+    id: 5,
+    project: "Sumatra Tiger Reserve",
+    region: "Sumatra, Indonesia",
+    grade: "A",
+    ndvi: 0.760,
+    status: "Verified",
+    priceNum: 0.08,
+    amount: 3500,
+    seller: "3KqmRt88xPqLM09187111111111111111111111111",
+    image: "/amazon.png",
+    lastVerified: "1 day ago",
+  },
 ];
 
-export default function Marketplace() {
-  const [selectedListing, setSelectedListing] = useState<number | null>(1);
+export default function MarketplacePage() {
+  const [activeTab, setActiveTab] = useState<"market" | "holdings" | "list">("market");
+  const [listings, setListings] = useState<MarketplaceListing[]>(INITIAL_LISTINGS);
+  const [selectedListingId, setSelectedListingId] = useState<number>(1);
   const [buyAmount, setBuyAmount] = useState<string>("10");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [gradeFilter, setGradeFilter] = useState<string>("all");
+  const [showSuspended, setShowSuspended] = useState(true);
+  const [sortBy, setSortBy] = useState<"price-asc" | "price-desc" | "amount-desc">("price-asc");
+
+  // Trading status
   const [trading, setTrading] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // New listing form state
+  const [newProjectName, setNewProjectName] = useState("Amazon Reforestation Block 7");
+  const [newAmount, setNewAmount] = useState("100");
+  const [newPrice, setNewPrice] = useState("0.15");
+  const [listSuccess, setListSuccess] = useState(false);
+
   const { connection } = useConnection();
   const { publicKey, sendTransaction, connected } = useWallet();
   const { setVisible } = useWalletModal();
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
 
-  const currentListing = LISTINGS.find((l) => l.id === selectedListing);
+  // Fetch wallet SOL balance
+  useEffect(() => {
+    if (connected && publicKey) {
+      connection.getBalance(publicKey).then((lamports) => {
+        setWalletBalance(lamports / 1e9);
+      }).catch(() => {
+        setWalletBalance(null);
+      });
+    } else {
+      setWalletBalance(null);
+    }
+  }, [connected, publicKey, connection, txHash]);
+
+  const selectedListing = useMemo(
+    () => listings.find((l) => l.id === selectedListingId) || listings[0],
+    [listings, selectedListingId]
+  );
+
   const amountNum = parseFloat(buyAmount) || 0;
-  const totalCost = currentListing ? (amountNum * currentListing.priceNum).toFixed(3) : "0.000";
+  const unitPrice = selectedListing ? selectedListing.priceNum : 0;
+  const totalCost = (amountNum * unitPrice).toFixed(3);
+  const totalCostNum = parseFloat(totalCost);
+  const isSuspended = selectedListing?.status === "Suspended" || selectedListing?.status === "Revoked";
+  const hasInsufficientBalance = walletBalance !== null && totalCostNum > walletBalance;
 
+  // Filter & Sort
+  const filteredListings = useMemo(() => {
+    return listings
+      .filter((l) => {
+        const matchesSearch =
+          l.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.seller.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesGrade = gradeFilter === "all" ? true : l.grade === gradeFilter;
+        const matchesSuspended = showSuspended ? true : l.status === "Verified";
+        return matchesSearch && matchesGrade && matchesSuspended;
+      })
+      .sort((a, b) => {
+        if (sortBy === "price-asc") return a.priceNum - b.priceNum;
+        if (sortBy === "price-desc") return b.priceNum - a.priceNum;
+        if (sortBy === "amount-desc") return b.amount - a.amount;
+        return 0;
+      });
+  }, [listings, searchQuery, gradeFilter, showSuspended, sortBy]);
+
+  // Execute on-chain trade
   const handleExecuteTrade = async () => {
     setErrorMsg(null);
     setTxHash(null);
@@ -38,20 +204,35 @@ export default function Marketplace() {
       return;
     }
 
-    if (!currentListing || amountNum <= 0) {
-      setErrorMsg("Please enter a valid credit amount.");
+    if (isSuspended) {
+      setErrorMsg("Trade blocked by Token-2022 transfer hook. Parcel canopy is degraded.");
+      return;
+    }
+
+    if (!selectedListing || amountNum <= 0) {
+      setErrorMsg("Please enter a valid credit quantity.");
+      return;
+    }
+
+    if (amountNum > selectedListing.amount) {
+      setErrorMsg(`Maximum available for this listing is ${selectedListing.amount} tCO2e.`);
+      return;
+    }
+
+    if (hasInsufficientBalance) {
+      setErrorMsg(`Insufficient balance: you need ${totalCost} SOL but have ${walletBalance?.toFixed(3)} SOL.`);
       return;
     }
 
     try {
       setTrading(true);
 
-      const recipient = new PublicKey("EfnmJ875yB8qQj4cRkwkoC111111111111111111111");
+      const recipient = new PublicKey("Efnm4SRpWogLYYMXnrrwbJ1i7WFbM343rtoASXkxwkoC");
       const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: publicKey,
           toPubkey: recipient,
-          lamports: Math.round(0.001 * LAMPORTS_PER_SOL), // Nominal test trade on Devnet
+          lamports: Math.round(0.001 * LAMPORTS_PER_SOL), // Nominal Devnet test trade
         })
       );
 
@@ -61,189 +242,550 @@ export default function Marketplace() {
 
       const signature = await sendTransaction(transaction, connection);
       setTxHash(signature);
-    } catch (err: any) {
-      console.error("Trade failed:", err);
-      if (err?.message?.includes("User rejected")) {
-        setErrorMsg("Transaction was cancelled in Phantom.");
+
+      // Decrement available amount locally
+      setListings((prev) =>
+        prev.map((l) => (l.id === selectedListing.id ? { ...l, amount: Math.max(0, l.amount - amountNum) } : l))
+      );
+    } catch (err: unknown) {
+      const errStr = err instanceof Error ? err.message : String(err);
+      if (errStr.includes("User rejected")) {
+        setErrorMsg("Transaction was declined in your wallet.");
       } else {
-        setErrorMsg(err?.message || "Trade execution failed on Devnet.");
+        setErrorMsg(errStr || "Trade execution failed on Solana Devnet.");
       }
     } finally {
       setTrading(false);
     }
   };
 
+  // Handle new listing submission
+  const handleCreateListing = (e: React.FormEvent) => {
+    e.preventDefault();
+    const qty = parseFloat(newAmount);
+    const prc = parseFloat(newPrice);
+    if (!qty || !prc) return;
+
+    const newEntry: MarketplaceListing = {
+      id: Date.now(),
+      project: newProjectName,
+      region: newProjectName.includes("Amazon") ? "Amazonas, Brazil" : "Équateur, DRC",
+      grade: "AAA",
+      ndvi: 0.845,
+      status: "Verified",
+      priceNum: prc,
+      amount: qty,
+      seller: publicKey ? publicKey.toBase58() : "Self (Connected)",
+      image: "/amazon.png",
+      lastVerified: "Just now",
+    };
+
+    setListings([newEntry, ...listings]);
+    setListSuccess(true);
+    setTimeout(() => {
+      setListSuccess(false);
+      setActiveTab("market");
+      setSelectedListingId(newEntry.id);
+    }, 1500);
+  };
+
   return (
-    <main className="min-h-screen p-4 sm:p-8 lg:p-12">
-      <Header activeTab="marketplace" />
+    <PageShell>
+      <PageHeader
+        title="Carbon Credit Marketplace"
+        description="Buy and sell satellite-verified, on-chain carbon credits settled on Solana."
+        actions={
+          <SegmentedControl
+            value={activeTab}
+            onChange={setActiveTab}
+            options={[
+              { value: "market", label: "Catalog" },
+              { value: "holdings", label: "My Holdings" },
+              { value: "list", label: "List Credits" },
+            ]}
+          />
+        }
+      />
 
-      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
-        {/* Left Column: Listings */}
-        <div className="flex-[2]">
-          <h2 className="text-3xl font-bold mb-2">Carbon Credit Marketplace</h2>
-          <p className="text-gray-400 mb-8">Buy and sell AI-verified, Solana-native carbon credits. Prices are set by the free market.</p>
-
-          <div className="glass-panel rounded-3xl p-1 overflow-hidden">
-            <div className="bg-[#111] rounded-[22px] p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex gap-2">
-                  <button className="px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-medium border border-emerald-500/30">All</button>
-                  <button className="px-4 py-1.5 rounded-full bg-white/5 text-gray-400 text-sm font-medium hover:bg-white/10 transition-colors">AAA Only</button>
+      {/* Tab 1: Market Catalog */}
+      {activeTab === "market" && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Table / List (8 Columns) */}
+          <div className="lg:col-span-8 space-y-4">
+            {/* Filter Toolbar */}
+            <Panel className="p-3.5 space-y-3">
+              <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                {/* Search */}
+                <div className="relative w-full sm:w-72">
+                  <Search className="w-3.5 h-3.5 text-[#718078] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search project or seller..."
+                    className="w-full bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#f4f5ef] light:text-slate-900 placeholder-[#718078] focus:outline-none focus:border-[#38b87c]"
+                  />
                 </div>
-                <div className="text-sm text-gray-500">Showing {LISTINGS.length} active listings</div>
+
+                {/* Grade Chips */}
+                <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+                  <span className="text-[11px] text-[#718078] mr-1 hidden sm:inline">Grade:</span>
+                  {["all", "AAA", "AA", "A", "C"].map((grade) => (
+                    <button
+                      key={grade}
+                      onClick={() => setGradeFilter(grade)}
+                      className={`px-2 py-0.5 rounded text-xs font-mono transition-colors cursor-pointer ${
+                        gradeFilter === grade
+                          ? "bg-[#162922] light:bg-slate-200 text-[#f4f5ef] light:text-slate-900 font-bold"
+                          : "text-[#8e9f96] hover:text-[#f4f5ef]"
+                      }`}
+                    >
+                      {grade}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="space-y-3">
-                {LISTINGS.map((listing) => (
-                  <div 
-                    key={listing.id}
-                    onClick={() => setSelectedListing(listing.id)}
-                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 p-4 rounded-xl border cursor-pointer transition-all ${
-                      selectedListing === listing.id 
-                        ? 'bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_15px_rgba(0,242,254,0.15)]' 
-                        : 'bg-black/40 border-gray-800 hover:border-gray-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="w-14 h-12 rounded-xl overflow-hidden shrink-0 border border-cyan-500/20 shadow-md relative">
-                        <img 
-                          src={listing.project.includes("Amazon") ? "/amazon.png" : "/borneo.png"} 
-                          alt={listing.project} 
-                          className="w-full h-full object-cover" 
-                        />
-                      </div>
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-                          listing.cqs === 'AAA' ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" :
-                          listing.cqs === 'AA' ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" :
-                          "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
-                        }`}>
-                        {listing.cqs}
-                      </div>
-                      <div>
-                        <div className="font-bold text-sm sm:text-base">{listing.project}</div>
-                        <div className="text-[10px] sm:text-xs text-gray-500 font-mono mt-0.5">Seller: {listing.seller}</div>
-                      </div>
-                    </div>
+              {/* Status and Sort Bar */}
+              <div className="flex items-center justify-between text-xs pt-2 border-t border-[#162922]/60 light:border-slate-100">
+                <label className="flex items-center gap-2 cursor-pointer text-[#8e9f96] hover:text-[#f4f5ef]">
+                  <input
+                    type="checkbox"
+                    checked={showSuspended}
+                    onChange={(e) => setShowSuspended(e.target.checked)}
+                    className="rounded accent-[#38b87c] w-3.5 h-3.5"
+                  />
+                  <span>Show suspended projects (Oracle Hook)</span>
+                </label>
 
-                    <div className="text-left sm:text-right flex sm:block justify-between items-center w-full sm:w-auto">
-                      <div className="font-bold text-base sm:text-lg text-cyan-400">{listing.price}</div>
-                      <div className="text-xs text-gray-400">{listing.amount} tCO2e available</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[#718078] text-[11px]">Sort:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as "price-asc" | "price-desc" | "amount-desc")}
+                    className="bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 rounded px-2 py-1 text-xs text-[#f4f5ef] light:text-slate-900 focus:outline-none"
+                  >
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="amount-desc">Volume: High to Low</option>
+                  </select>
+                </div>
+              </div>
+            </Panel>
+
+            {/* Listings Table */}
+            <Panel className="overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#07130f] light:bg-slate-50 border-b border-[#162922] light:border-slate-200 text-[#8e9f96] font-mono text-[11px] uppercase tracking-wider">
+                    <tr>
+                      <th className="py-3 px-4">Project</th>
+                      <th className="py-3 px-3">Grade</th>
+                      <th className="py-3 px-3">NDVI</th>
+                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 px-3 text-right">Price (SOL)</th>
+                      <th className="py-3 px-3 text-right">Available</th>
+                      <th className="py-3 px-4 text-right">Seller</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#162922]/60 light:divide-slate-100">
+                    {filteredListings.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-[#8e9f96]">
+                          No carbon credit listings found matching the selected criteria.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredListings.map((item) => {
+                        const isSelected = selectedListingId === item.id;
+                        const isRevoked = item.status === "Suspended" || item.status === "Revoked";
+
+                        return (
+                          <tr
+                            key={item.id}
+                            onClick={() => setSelectedListingId(item.id)}
+                            className={`transition-colors cursor-pointer ${
+                              isSelected
+                                ? "bg-[#10241b] light:bg-emerald-50"
+                                : isRevoked
+                                ? "bg-[#120a0a]/50 hover:bg-[#1a0e0e] opacity-80"
+                                : "hover:bg-[#11201b]/50 light:hover:bg-slate-50"
+                            }`}
+                          >
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                <img
+                                  src={item.image}
+                                  alt={item.project}
+                                  className="w-9 h-9 rounded object-cover border border-[#162922] light:border-slate-200 shrink-0"
+                                />
+                                <div>
+                                  <div className="font-semibold text-[#f4f5ef] light:text-slate-900 leading-tight">
+                                    {item.project}
+                                  </div>
+                                  <div className="text-[11px] text-[#8e9f96] light:text-slate-500">
+                                    {item.region}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3">
+                              <GradeBadge grade={item.grade} />
+                            </td>
+                            <td className="py-3 px-3 font-mono text-[#a8c7b5] light:text-slate-700">
+                              {item.ndvi.toFixed(3)}
+                            </td>
+                            <td className="py-3 px-3">
+                              <StatusBadge status={item.status} size="sm" />
+                            </td>
+                            <td className="py-3 px-3 text-right font-mono font-bold text-[#f4f5ef] light:text-slate-900">
+                              {item.priceNum.toFixed(2)} SOL
+                            </td>
+                            <td className="py-3 px-3 text-right font-mono text-[#8e9f96] light:text-slate-600">
+                              {item.amount.toLocaleString()} t
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <AddressChip address={item.seller} truncateLen={3} />
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Panel>
+          </div>
+
+          {/* Right Sticky Trade Panel (4 Columns) */}
+          <div className="lg:col-span-4 sticky top-24">
+            <Panel className="p-6 space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[#162922] light:border-slate-200">
+                <span className="text-xs font-mono uppercase tracking-wider text-[#8e9f96] font-semibold">
+                  Trade Execution
+                </span>
+                <span className="text-xs font-mono text-[#38b87c]">
+                  SPL Token-2022
+                </span>
+              </div>
+
+              {selectedListing ? (
+                <>
+                  {/* Selected Item Card */}
+                  <div className="flex gap-3 items-center p-3 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200">
+                    <img
+                      src={selectedListing.image}
+                      alt={selectedListing.project}
+                      className="w-12 h-12 rounded object-cover border border-[#162922]"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <GradeBadge grade={selectedListing.grade} />
+                        <span className="text-xs font-bold text-[#f4f5ef] light:text-slate-900 truncate">
+                          {selectedListing.project}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-[#8e9f96] font-mono">
+                        {selectedListing.priceNum.toFixed(2)} SOL / tCO2e
+                      </div>
                     </div>
                   </div>
-                ))}
+
+                  {/* Suspended Hook Warning Banner */}
+                  {isSuspended && (
+                    <div className="p-3.5 rounded-lg bg-[#291313] border border-red-500/40 text-xs text-red-300 space-y-1.5">
+                      <div className="flex items-center gap-1.5 font-bold text-red-400">
+                        <ShieldAlert className="w-4 h-4 shrink-0" />
+                        <span>Trading Prohibited by Oracle</span>
+                      </div>
+                      <p className="text-[11px] text-red-200/90 leading-relaxed">
+                        {selectedListing.revocationReason ||
+                          "This project has been suspended due to canopy telemetry loss. Token-2022 Transfer Hook refuses settlement."}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Quantity Input */}
+                  <div className="space-y-1.5 text-left">
+                    <div className="flex items-center justify-between text-xs">
+                      <label className="text-[#8e9f96] font-medium">Quantity (tCO2e)</label>
+                      <span className="text-[11px] font-mono text-[#718078]">
+                        Avail: {selectedListing.amount} t
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center border border-[#162922] light:border-slate-200 rounded-lg bg-[#07130f] light:bg-slate-50 px-2 py-1 flex-1">
+                        <input
+                          type="number"
+                          min="1"
+                          max={selectedListing.amount}
+                          value={buyAmount}
+                          onChange={(e) => setBuyAmount(e.target.value)}
+                          disabled={isSuspended}
+                          className="w-full bg-transparent text-sm font-mono text-[#f4f5ef] light:text-slate-900 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setBuyAmount(String(selectedListing.amount))}
+                          disabled={isSuspended}
+                          className="text-[10px] font-mono font-bold text-[#38b87c] hover:underline px-1 cursor-pointer"
+                        >
+                          MAX
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cost Summary Breakdown */}
+                  <div className="space-y-2 pt-2 border-t border-[#162922] light:border-slate-200 text-xs font-mono">
+                    <div className="flex justify-between text-[#8e9f96] light:text-slate-500">
+                      <span>Subtotal</span>
+                      <span>{totalCost} SOL</span>
+                    </div>
+                    <div className="flex justify-between text-[#8e9f96] light:text-slate-500">
+                      <span>Network Fee</span>
+                      <span>~0.00005 SOL</span>
+                    </div>
+                    <div className="flex justify-between text-[#8e9f96] light:text-slate-500">
+                      <span>Wallet Balance</span>
+                      <span className={hasInsufficientBalance ? "text-red-400 font-bold" : "text-[#f4f5ef] light:text-slate-900"}>
+                        {walletBalance !== null ? `${walletBalance.toFixed(3)} SOL` : "Not connected"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm font-bold text-[#f4f5ef] light:text-slate-900 pt-2 border-t border-[#162922]/60 light:border-slate-100">
+                      <span>Total</span>
+                      <span className="text-[#38b87c]">{totalCost} SOL</span>
+                    </div>
+                  </div>
+
+                  {/* Feedback Message */}
+                  {errorMsg && (
+                    <div className="p-2.5 rounded bg-[#291313] border border-red-500/40 text-xs text-red-300 flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+                      <span>{errorMsg}</span>
+                    </div>
+                  )}
+
+                  {txHash && (
+                    <div className="p-3 rounded bg-[#0d2218] border border-[#38b87c]/40 text-xs text-[#38b87c] space-y-1">
+                      <div className="font-bold flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Trade Confirmed on Solana Devnet</span>
+                      </div>
+                      <a
+                        href={`https://explorer.solana.com/tx/${txHash}?cluster=devnet`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] underline flex items-center gap-1 break-all"
+                      >
+                        <span>View signature: {txHash.slice(0, 16)}...</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Action Button */}
+                  {!connected ? (
+                    <button
+                      onClick={() => setVisible(true)}
+                      className="w-full py-3 px-4 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors cursor-pointer shadow-sm"
+                    >
+                      Connect Wallet to Trade
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleExecuteTrade}
+                      disabled={trading || isSuspended || hasInsufficientBalance}
+                      className={`w-full py-3 px-4 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${
+                        isSuspended
+                          ? "bg-[#291313] text-red-400 border border-red-500/30 cursor-not-allowed"
+                          : hasInsufficientBalance
+                          ? "bg-[#291f13] text-amber-400 border border-amber-500/30 cursor-not-allowed"
+                          : "bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f]"
+                      }`}
+                    >
+                      {trading ? (
+                        <span>Submitting to Solana...</span>
+                      ) : isSuspended ? (
+                        <span>Trading Blocked by Hook</span>
+                      ) : hasInsufficientBalance ? (
+                        <span>Insufficient SOL Balance</span>
+                      ) : (
+                        <span>Execute Buy Order ({totalCost} SOL)</span>
+                      )}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <EmptyState
+                  title="No Listing Selected"
+                  description="Click on any row in the catalog to prepare a trade."
+                />
+              )}
+            </Panel>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 2: My Holdings */}
+      {activeTab === "holdings" && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Stat label="Total Holdings" value="300 tCO2e" subtext="Across 2 verified projects" />
+            <Stat label="Estimated Value" value="45.00 SOL" subtext="Current market midpoint" />
+            <Stat label="Retired to Date" value="12,500 tCO2e" subtext="Permanent on-chain burns" />
+          </div>
+
+          <Panel className="p-6">
+            <h3 className="text-sm font-bold text-[#f4f5ef] light:text-slate-900 mb-4">
+              Active Ecological Token Balances
+            </h3>
+
+            <div className="divide-y divide-[#162922] light:divide-slate-100 text-xs">
+              <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <img
+                    src="/amazon.png"
+                    alt="Amazon Block 7"
+                    className="w-10 h-10 rounded object-cover border border-[#162922]"
+                  />
+                  <div>
+                    <div className="font-bold text-[#f4f5ef] light:text-slate-900">
+                      Amazon Reforestation Block 7
+                    </div>
+                    <div className="text-[11px] text-[#8e9f96]">
+                      Token ID: TCO2-AMZ7 · Grade AAA · 100% Intact
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="text-right font-mono">
+                    <div className="font-bold text-[#f4f5ef] light:text-slate-900">250 tCO2e</div>
+                    <div className="text-[11px] text-[#38b87c]">~37.5 SOL value</div>
+                  </div>
+                  <Link
+                    href="/retire?project=Amazon%20Reforestation%20Block%207&amount=250"
+                    className="px-3.5 py-1.5 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center gap-1.5"
+                  >
+                    <Flame className="w-3.5 h-3.5" />
+                    <span>Retire Credits</span>
+                  </Link>
+                </div>
+              </div>
+
+              <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <img
+                    src="/satellite_hero.jpg"
+                    alt="Congo Basin"
+                    className="w-10 h-10 rounded object-cover border border-[#162922]"
+                  />
+                  <div>
+                    <div className="font-bold text-[#f4f5ef] light:text-slate-900">
+                      Congo Basin Conservation
+                    </div>
+                    <div className="text-[11px] text-[#8e9f96]">
+                      Token ID: TCO2-CGO2 · Grade AA · 100% Intact
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="text-right font-mono">
+                    <div className="font-bold text-[#f4f5ef] light:text-slate-900">50 tCO2e</div>
+                    <div className="text-[11px] text-[#38b87c]">~6.0 SOL value</div>
+                  </div>
+                  <Link
+                    href="/retire?project=Congo%20Basin%20Conservation&amount=50"
+                    className="px-3.5 py-1.5 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center gap-1.5"
+                  >
+                    <Flame className="w-3.5 h-3.5" />
+                    <span>Retire Credits</span>
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
+          </Panel>
         </div>
+      )}
 
-        {/* Right Column: Trading Panel */}
-        <div className="flex-1">
-          <div className="glass-card rounded-3xl p-6 sm:p-8 sticky top-8 border border-cyan-500/20 shadow-[0_0_30px_rgba(0,242,254,0.06)]">
-            <h3 className="text-xl font-bold mb-4 border-b border-gray-800 pb-3">Trade Station</h3>
-            
-            {currentListing ? (
-              <div className="space-y-5">
-                {/* Visual Satellite Preview Header */}
-                <div className="relative h-28 w-full rounded-2xl overflow-hidden border border-cyan-500/30 shadow-inner">
-                  <img 
-                    src={currentListing.project.includes("Amazon") ? "/amazon.png" : "/borneo.png"} 
-                    alt={currentListing.project} 
-                    className="w-full h-full object-cover opacity-80" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                  <div className="radar-sweep absolute inset-0"></div>
-                  <div className="absolute bottom-2 left-3 text-xs font-bold text-white font-mono">
-                    {currentListing.project}
-                  </div>
-                  <div className="absolute top-2 right-3 px-2 py-0.5 rounded bg-black/60 text-[10px] font-mono text-cyan-400 border border-cyan-500/30">
-                    VERIFIED SENSOR
-                  </div>
-                </div>
+      {/* Tab 3: List Credits For Sale */}
+      {activeTab === "list" && (
+        <div className="max-w-2xl mx-auto">
+          <Panel className="p-8 space-y-6">
+            <div>
+              <h3 className="text-base font-bold text-[#f4f5ef] light:text-slate-900">
+                Create Carbon Credit Sell Order
+              </h3>
+              <p className="text-xs text-[#8e9f96] mt-1">
+                List verified credits from your wallet on the decentralized order book.
+              </p>
+            </div>
 
-                <div>
-                  <div className="text-xs text-gray-400 mb-1">Selected Asset</div>
-                  <div className="font-bold text-lg text-cyan-400">{currentListing.project}</div>
-                </div>
-
-                <div className="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-gray-800">
-                  <div className="text-sm text-gray-400">Unit Price</div>
-                  <div className="font-mono text-emerald-400 font-bold">{currentListing.price}</div>
-                </div>
-
-                <div>
-                  <label className="text-sm text-gray-400 block mb-2">Amount to buy (tCO2e)</label>
-                  <div className="relative">
-                    <input 
-                      type="number"
-                      value={buyAmount}
-                      onChange={(e) => setBuyAmount(e.target.value)}
-                      placeholder="e.g. 10" 
-                      className="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                    />
-                    <button 
-                      onClick={() => setBuyAmount(currentListing.amount.toString())}
-                      className="absolute right-3 top-2.5 text-xs bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded text-gray-300"
-                    >
-                      MAX
-                    </button>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-gray-800">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-400">Total Cost</span>
-                    <span className="font-mono font-bold text-lg text-white">{totalCost} SOL</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Network Fee</span>
-                    <span className="font-mono text-emerald-400">&lt; 0.0001 SOL</span>
-                  </div>
-                </div>
-
-                {errorMsg && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl">
-                    {errorMsg}
-                  </div>
-                )}
-
-                {txHash && (
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 text-xs rounded-xl space-y-2">
-                    <div className="font-bold flex items-center gap-1.5">
-                      <span>✅</span> Trade Executed Successfully!
-                    </div>
-                    <div className="truncate font-mono text-[10px]">Tx: {txHash}</div>
-                    <a 
-                      href={`https://explorer.solana.com/tx/${txHash}?cluster=devnet`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-block mt-2 px-3 py-1.5 bg-emerald-500 text-black font-bold text-xs rounded-lg hover:bg-emerald-400 transition-colors"
-                    >
-                      View on Solana Explorer ↗
-                    </a>
-                  </div>
-                )}
-
-                <button 
-                  onClick={handleExecuteTrade}
-                  disabled={trading}
-                  className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-black font-bold text-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:-translate-y-0.5 disabled:opacity-50"
-                >
-                  {trading ? "Awaiting Phantom Approval..." : connected ? "Execute Trade" : "Connect Wallet to Trade"}
-                </button>
-                
-                <p className="text-center text-xs text-gray-500 mt-2">Secured by Solana Devnet Anchor Program</p>
-              </div>
-            ) : (
-              <div className="h-64 flex flex-col items-center justify-center text-gray-500 text-center">
-                <svg className="w-12 h-12 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-                Select a listing<br/>to begin trading
+            {listSuccess && (
+              <div className="p-3 rounded bg-[#0d2218] border border-[#38b87c]/40 text-xs text-[#38b87c] flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Order published! Redirecting to catalog...</span>
               </div>
             )}
-          </div>
+
+            <form onSubmit={handleCreateListing} className="space-y-4 text-xs text-left">
+              <div>
+                <label className="text-[#8e9f96] block mb-1.5 font-medium">Select Monitored Project</label>
+                <select
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  className="w-full p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 focus:outline-none focus:border-[#38b87c]"
+                >
+                  <option value="Amazon Reforestation Block 7">Amazon Reforestation Block 7 (Grade AAA)</option>
+                  <option value="Congo Basin Conservation">Congo Basin Conservation (Grade AA)</option>
+                  <option value="Sumatra Tiger Reserve">Sumatra Tiger Reserve (Grade A)</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[#8e9f96] block mb-1.5 font-medium">Quantity to Sell (tCO2e)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newAmount}
+                    onChange={(e) => setNewAmount(e.target.value)}
+                    className="w-full p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 font-mono focus:outline-none focus:border-[#38b87c]"
+                    placeholder="100"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[#8e9f96] block mb-1.5 font-medium">Asking Price per Ton (SOL)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    className="w-full p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 font-mono focus:outline-none focus:border-[#38b87c]"
+                    placeholder="0.15"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[#162922] light:border-slate-200">
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors cursor-pointer shadow-sm"
+                >
+                  Publish Sell Order to Solana Order Book
+                </button>
+              </div>
+            </form>
+          </Panel>
         </div>
-      </div>
-    </main>
+      )}
+    </PageShell>
   );
 }
