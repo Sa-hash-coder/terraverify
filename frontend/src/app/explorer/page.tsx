@@ -40,10 +40,10 @@ import { ParcelProject, MapLayerType } from "../../components/map-component";
 const MapComponent = dynamic(() => import("../../components/map-component"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full bg-[#0c1611] flex items-center justify-center text-sm font-mono text-[var(--text-muted)] animate-pulse">
-      <div className="flex items-center gap-3 bg-[#122119] px-6 py-3.5 rounded-2xl border border-[var(--border)] shadow-xl">
-        <RefreshCw className="w-5 h-5 animate-spin text-[var(--accent)]" />
-        <span className="text-[var(--text)] font-sans font-medium">Initializing Sentinel-2 Telemetry Engine...</span>
+    <div className="w-full h-full bg-[#080c10] flex items-center justify-center text-sm font-mono text-slate-400 animate-pulse">
+      <div className="flex items-center gap-3 bg-[#111923] px-6 py-3.5 rounded-2xl border border-slate-800 shadow-xl">
+        <RefreshCw className="w-5 h-5 animate-spin text-emerald-400" />
+        <span className="text-white font-sans font-medium">Initializing Sentinel-2 Telemetry Engine...</span>
       </div>
     </div>
   ),
@@ -271,31 +271,31 @@ export default function ExplorerPage() {
 
   return (
     <PageShell fullWidth noScroll>
-      <div className="flex-1 flex flex-col md:flex-row h-full min-h-0 w-full overflow-hidden relative">
+      <div className="flex-1 flex flex-col md:flex-row h-full min-h-0 w-full overflow-hidden relative bg-[#080c10]">
 
         {/* ================================================================= */}
-        {/* 1. LEFT CONSOLE PANEL (Collapsible, Spacious, Pachama-style)       */}
+        {/* 1. LEFT CONSOLE PANEL (Collapsible, Sleek Dark Slate, High Contrast)*/}
         {/* ================================================================= */}
         {consoleOpen ? (
-          <aside className="w-full md:w-[360px] md:min-w-[360px] md:max-w-[360px] h-auto md:h-full flex flex-col shrink-0 bg-[#0c1611] border-r border-[var(--border)] z-20 shadow-2xl transition-all duration-200">
+          <aside className="w-full md:w-[350px] md:min-w-[350px] md:max-w-[350px] h-auto md:h-full flex flex-col shrink-0 bg-[#0b1016] border-r border-slate-800 z-20 shadow-2xl transition-all duration-200">
             {/* Top Bar: Brand, Sync & Collapse Button */}
-            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between bg-[#0e1a14]">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-[#0f1722]">
               <div>
-                <h1 className="text-base font-bold text-[var(--text)] tracking-tight flex items-center gap-2">
+                <h1 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
                   <span>Forest Explorer</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--accent)]/15 text-[var(--accent)] font-mono font-medium border border-[var(--accent)]/30">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono font-medium border border-emerald-500/30">
                     Sentinel-2
                   </span>
                 </h1>
-                <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mt-1 font-sans">
-                  <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
-                  <span>Live telemetry · synced <span className="font-mono text-[var(--text)]">{lastSyncedTime}</span></span>
+                <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1 font-sans">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Live telemetry · synced <span className="font-mono text-slate-200">{lastSyncedTime}</span></span>
                 </div>
               </div>
 
               <button
                 onClick={() => setConsoleOpen(false)}
-                className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[#15251c] transition-colors cursor-pointer"
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                 title="Collapse sidebar for full map"
                 aria-label="Collapse sidebar"
               >
@@ -304,14 +304,14 @@ export default function ExplorerPage() {
             </div>
 
             {/* Navigation Tabs: Forests vs Layers */}
-            <div className="p-3 border-b border-[var(--border)] bg-[#09110d]">
-              <div className="grid grid-cols-2 p-1 rounded-xl bg-[#122119] border border-[var(--border)]">
+            <div className="p-3 border-b border-slate-800 bg-[#090d13]">
+              <div className="grid grid-cols-2 p-1 rounded-xl bg-[#111923] border border-slate-800">
                 <button
                   onClick={() => setActiveTab("projects")}
                   className={`py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     activeTab === "projects"
-                      ? "bg-[var(--accent)] text-[#060b08] shadow-sm font-bold"
-                      : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                      ? "bg-emerald-500 text-slate-950 font-bold shadow-sm"
+                      : "text-slate-300 hover:text-white"
                   }`}
                 >
                   <MapPin className="w-3.5 h-3.5" />
@@ -322,8 +322,8 @@ export default function ExplorerPage() {
                   onClick={() => setActiveTab("layers")}
                   className={`py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     activeTab === "layers"
-                      ? "bg-[var(--accent)] text-[#060b08] shadow-sm font-bold"
-                      : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                      ? "bg-emerald-500 text-slate-950 font-bold shadow-sm"
+                      : "text-slate-300 hover:text-white"
                   }`}
                 >
                   <Layers className="w-3.5 h-3.5" />
@@ -336,9 +336,9 @@ export default function ExplorerPage() {
             {activeTab === "projects" && (
               <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Search Bar & Filter Strip */}
-                <div className="p-3.5 border-b border-[var(--border)] space-y-3 bg-[#0c1611]">
+                <div className="p-3.5 border-b border-slate-800 space-y-3 bg-[#0b1016]">
                   <div className="relative">
-                    <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       value={searchQuery}
@@ -347,12 +347,12 @@ export default function ExplorerPage() {
                         startTransition(() => setSearchQuery(val));
                       }}
                       placeholder="Search forest or region..."
-                      className="w-full bg-[#122119] border border-[var(--border)] rounded-xl pl-10 pr-9 py-2.5 text-xs text-[var(--text)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                      className="w-full bg-[#141e2a] border border-slate-750 rounded-xl pl-10 pr-9 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
                     />
                     {searchQuery && (
                       <button
                         onClick={() => setSearchQuery("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text)]"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -370,8 +370,8 @@ export default function ExplorerPage() {
                             onClick={() => startTransition(() => setStatusFilter(filter))}
                             className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
                               isActive
-                                ? "bg-[var(--accent)] text-[#060b08] shadow-xs"
-                                : "bg-[#122119] text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)]"
+                                ? "bg-emerald-500 text-slate-950 font-bold shadow-xs"
+                                : "bg-[#141e2a] text-slate-300 hover:text-white border border-slate-800"
                             }`}
                           >
                             {filter === "all" ? "All" : filter === "verified" ? "Verified" : "Revoked"}
@@ -380,16 +380,16 @@ export default function ExplorerPage() {
                       })}
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
                       <ArrowUpDown className="w-3.5 h-3.5" />
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as "grade" | "canopy" | "scan")}
-                        className="bg-transparent text-xs text-[var(--text)] focus:outline-none cursor-pointer font-medium"
+                        className="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-medium"
                       >
-                        <option value="grade" className="bg-[#0c1611]">Grade</option>
-                        <option value="canopy" className="bg-[#0c1611]">Canopy %</option>
-                        <option value="scan" className="bg-[#0c1611]">Recency</option>
+                        <option value="grade" className="bg-[#0b1016]">Grade</option>
+                        <option value="canopy" className="bg-[#0b1016]">Canopy %</option>
+                        <option value="scan" className="bg-[#0b1016]">Recency</option>
                       </select>
                     </div>
                   </div>
@@ -398,7 +398,7 @@ export default function ExplorerPage() {
                 {/* Forest Cards List */}
                 <div className="flex-1 overflow-y-auto p-3.5 space-y-2.5">
                   {filteredProjects.length === 0 ? (
-                    <div className="py-12 text-center text-sm text-[var(--text-muted)]">
+                    <div className="py-12 text-center text-sm text-slate-400">
                       No forest projects found matching your filters.
                     </div>
                   ) : (
@@ -415,18 +415,18 @@ export default function ExplorerPage() {
                           }}
                           className={`p-4 rounded-2xl border transition-all cursor-pointer text-left relative ${
                             isSelected
-                              ? "bg-[#15251c] border-[var(--accent)] shadow-lg ring-1 ring-[var(--accent)]/40"
-                              : "bg-[#0f1b14] border-[var(--border)] hover:bg-[#132219] hover:border-[var(--border-hover)]"
+                              ? "bg-[#162230] border-2 border-emerald-500 shadow-lg ring-1 ring-emerald-500/40 text-white"
+                              : "bg-[#111923] border-slate-800 hover:bg-[#16212e] hover:border-slate-700 text-slate-200"
                           }`}
                         >
                           {/* Card Header */}
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div className="min-w-0">
-                              <h3 className="text-sm font-bold text-[var(--text)] truncate">
+                              <h3 className="text-sm font-bold text-white truncate">
                                 {proj.name}
                               </h3>
-                              <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mt-0.5">
-                                <MapPin className="w-3.5 h-3.5 shrink-0 text-[var(--accent)]" />
+                              <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5">
+                                <MapPin className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
                                 <span className="truncate">{proj.region}</span>
                               </div>
                             </div>
@@ -436,22 +436,22 @@ export default function ExplorerPage() {
                           </div>
 
                           {/* Card Metrics Row */}
-                          <div className="grid grid-cols-3 gap-2 py-2.5 px-3 rounded-xl bg-[#0a130e] border border-[var(--border-subtle)] text-xs mt-3">
+                          <div className="grid grid-cols-3 gap-2 py-2.5 px-3 rounded-xl bg-[#0a0f15] border border-slate-800 text-xs mt-3">
                             <div>
-                              <div className="text-[11px] text-[var(--text-muted)]">NDVI Index</div>
-                              <div className="font-mono font-bold text-[var(--text)] mt-0.5">{proj.ndvi.toFixed(3)}</div>
+                              <div className="text-[11px] text-slate-400">NDVI Index</div>
+                              <div className="font-mono font-bold text-white mt-0.5">{proj.ndvi.toFixed(3)}</div>
                             </div>
 
                             <div>
-                              <div className="text-[11px] text-[var(--text-muted)]">Canopy</div>
-                              <div className="font-mono font-bold text-[var(--text)] mt-0.5">{proj.forestCover}</div>
+                              <div className="text-[11px] text-slate-400">Canopy</div>
+                              <div className="font-mono font-bold text-white mt-0.5">{proj.forestCover}</div>
                             </div>
 
                             <div>
-                              <div className="text-[11px] text-[var(--text-muted)]">Status</div>
+                              <div className="text-[11px] text-slate-400">Status</div>
                               <div className="flex items-center gap-1 mt-0.5 font-medium">
-                                <span className={`w-2 h-2 rounded-full ${isRevoked ? "bg-[var(--danger)]" : "bg-[var(--accent)]"}`} />
-                                <span className={isRevoked ? "text-[var(--danger)]" : "text-[var(--accent)]"}>
+                                <span className={`w-2 h-2 rounded-full ${isRevoked ? "bg-red-400" : "bg-emerald-400"}`} />
+                                <span className={isRevoked ? "text-red-400 font-semibold" : "text-emerald-400 font-semibold"}>
                                   {proj.status}
                                 </span>
                               </div>
@@ -459,9 +459,9 @@ export default function ExplorerPage() {
                           </div>
 
                           {/* Bottom Row */}
-                          <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-2.5 mt-1 font-mono">
+                          <div className="flex items-center justify-between text-xs text-slate-400 pt-2.5 mt-1 font-mono">
                             <span>Area: {proj.area}</span>
-                            <span className="text-[var(--accent)] font-sans font-medium flex items-center gap-1">
+                            <span className="text-emerald-400 font-sans font-medium flex items-center gap-1">
                               Inspect Data <ChevronRight className="w-3.5 h-3.5" />
                             </span>
                           </div>
@@ -477,10 +477,9 @@ export default function ExplorerPage() {
             {activeTab === "layers" && (
               <div className="flex-1 overflow-y-auto p-4 space-y-5">
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-3">
-                    Select Sentinel-2 Spectral Layer
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                    Available Copernicus Bands
                   </h3>
-
                   <div className="space-y-2.5">
                     {layerOptions.map((layer) => {
                       const isSelected = activeLayer === layer.id;
@@ -488,23 +487,23 @@ export default function ExplorerPage() {
                         <div
                           key={layer.id}
                           onClick={() => setActiveLayer(layer.id)}
-                          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                          className={`p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
                             isSelected
-                              ? "bg-[#15251c] border-[var(--accent)] ring-1 ring-[var(--accent)]/40 shadow-md"
-                              : "bg-[#0f1b14] border-[var(--border)] hover:bg-[#132219]"
+                              ? "bg-[#162230] border-2 border-emerald-500 shadow-md ring-1 ring-emerald-500/30"
+                              : "bg-[#111923] border-slate-800 hover:bg-[#16212e] hover:border-slate-750"
                           }`}
                         >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-sm font-bold text-[var(--text)]">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-bold text-white">
                               {layer.name}
                             </span>
                             <span className={`text-[11px] font-mono px-2 py-0.5 rounded-md font-semibold ${
-                              isSelected ? "bg-[var(--accent)] text-[#060b08]" : "bg-[#122119] text-[var(--text-muted)]"
+                              isSelected ? "bg-emerald-500 text-slate-950 font-bold" : "bg-slate-800 text-slate-300"
                             }`}>
                               {layer.tag}
                             </span>
                           </div>
-                          <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                          <p className="text-xs text-slate-400 leading-relaxed">
                             {layer.desc}
                           </p>
                         </div>
@@ -514,13 +513,13 @@ export default function ExplorerPage() {
                 </div>
 
                 {/* Layer Opacity Slider */}
-                <div className="p-4 rounded-2xl bg-[#0f1b14] border border-[var(--border)] space-y-3">
+                <div className="p-4 rounded-2xl bg-[#111923] border border-slate-800 space-y-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-[var(--text)] flex items-center gap-2">
-                      <Sliders className="w-4 h-4 text-[var(--accent)]" />
+                    <span className="font-bold text-white flex items-center gap-2">
+                      <Sliders className="w-4 h-4 text-emerald-400" />
                       Layer Opacity
                     </span>
-                    <span className="font-mono text-sm font-bold text-[var(--accent)]">
+                    <span className="font-mono text-sm font-bold text-emerald-400">
                       {layerOpacity}%
                     </span>
                   </div>
@@ -530,20 +529,20 @@ export default function ExplorerPage() {
                     max="100"
                     value={layerOpacity}
                     onChange={(e) => setLayerOpacity(Number(e.target.value))}
-                    className="w-full accent-[var(--accent)] h-2 bg-[#122119] rounded-lg cursor-pointer"
+                    className="w-full accent-emerald-500 h-2 bg-slate-800 rounded-lg cursor-pointer"
                   />
                 </div>
 
                 {/* Sentinel-2 Orbit Pass Selector */}
-                <div className="p-4 rounded-2xl bg-[#0f1b14] border border-[var(--border)] space-y-2.5">
-                  <div className="text-xs font-bold text-[var(--text)] flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-[var(--accent)]" />
+                <div className="p-4 rounded-2xl bg-[#111923] border border-slate-800 space-y-2.5">
+                  <div className="text-xs font-bold text-white flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-emerald-400" />
                     <span>Orbital Pass Revisit</span>
                   </div>
                   <select
                     value={scanDate}
                     onChange={(e) => setScanDate(e.target.value)}
-                    className="w-full bg-[#122119] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] font-medium cursor-pointer focus:outline-none focus:border-[var(--accent)]"
+                    className="w-full bg-[#141e2a] border border-slate-750 rounded-xl px-3.5 py-2.5 text-xs text-white font-medium cursor-pointer focus:outline-none focus:border-emerald-500"
                   >
                     <option value="latest">Latest Sentinel-2 L2A Orbit (Oct 9, 2026)</option>
                     <option value="prev1">Prior Orbital Pass (Oct 4, 2026)</option>
@@ -557,9 +556,9 @@ export default function ExplorerPage() {
           /* Collapsed Console Button */
           <button
             onClick={() => setConsoleOpen(true)}
-            className="absolute top-5 left-5 z-[500] px-4 py-2.5 rounded-2xl bg-[#0c1611]/95 backdrop-blur-xl border border-[var(--border)] text-xs text-[var(--text)] hover:border-[var(--accent)] shadow-2xl flex items-center gap-2 cursor-pointer font-bold transition-all"
+            className="absolute top-5 left-5 z-[500] px-4 py-2.5 rounded-2xl bg-[#0b1016]/95 backdrop-blur-xl border border-slate-750 text-xs text-white hover:border-emerald-500 shadow-2xl flex items-center gap-2 cursor-pointer font-bold transition-all"
           >
-            <PanelLeftOpen className="w-4 h-4 text-[var(--accent)]" />
+            <PanelLeftOpen className="w-4 h-4 text-emerald-400" />
             <span>Open Forest Console</span>
           </button>
         )}
@@ -567,7 +566,7 @@ export default function ExplorerPage() {
         {/* ================================================================= */}
         {/* 2. MAIN MAP CANVAS (Expansive, Full Viewport, Hero Feature)        */}
         {/* ================================================================= */}
-        <div className="flex-1 min-w-0 h-full relative overflow-hidden bg-[#060b08]">
+        <div className="flex-1 min-w-0 h-full relative overflow-hidden bg-[#080c10]">
           <MapComponent
             projects={projects}
             selectedProject={selectedProjectId}
@@ -581,8 +580,8 @@ export default function ExplorerPage() {
             fitAllTrigger={fitAllTrigger}
           />
 
-          {/* Floating Quick Layer Switcher Bar (Pachama / Sentinel Hub style directly on map) */}
-          <div className="absolute top-5 left-1/2 -translate-x-1/2 z-[400] flex items-center gap-1.5 p-1.5 rounded-2xl bg-[#0c1611]/92 backdrop-blur-xl border border-[var(--border)] shadow-2xl max-w-[95vw] overflow-x-auto">
+          {/* Floating Quick Layer Switcher Bar (Glassmorphic Bar on Map) */}
+          <div className="absolute top-5 left-1/2 -translate-x-1/2 z-[400] flex items-center gap-1.5 p-1.5 rounded-2xl bg-[#0b1016]/92 backdrop-blur-xl border border-slate-750 shadow-2xl max-w-[95vw] overflow-x-auto">
             {layerOptions.map((l) => {
               const isSelected = activeLayer === l.id;
               return (
@@ -591,8 +590,8 @@ export default function ExplorerPage() {
                   onClick={() => setActiveLayer(l.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-[var(--accent)] text-[#060b08] font-bold shadow-sm"
-                      : "text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[#15251c]"
+                      ? "bg-emerald-500 text-slate-950 font-bold shadow-sm"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/70"
                   }`}
                 >
                   {l.name.split(" ")[0]}
@@ -600,15 +599,15 @@ export default function ExplorerPage() {
               );
             })}
 
-            <div className="w-[1px] h-4 bg-[var(--border)] mx-1 shrink-0" />
+            <div className="w-[1px] h-4 bg-slate-700 mx-1 shrink-0" />
 
             {/* Reset Map View Button */}
             <button
               onClick={() => setFitAllTrigger((t) => t + 1)}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[var(--text)] hover:bg-[#15251c] transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-emerald-400 hover:bg-slate-800/70 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               title="Fit all forest parcels into view"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-[var(--accent)]" />
+              <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
               <span>Fit All</span>
             </button>
           </div>
@@ -617,9 +616,9 @@ export default function ExplorerPage() {
           {!detailOpen && selectedProject && (
             <button
               onClick={() => setDetailOpen(true)}
-              className="absolute top-5 right-5 z-[400] px-4 py-2.5 rounded-2xl bg-[#0c1611]/95 backdrop-blur-xl border border-[var(--border)] text-xs text-[var(--text)] hover:border-[var(--accent)] shadow-2xl flex items-center gap-2 cursor-pointer font-bold transition-all"
+              className="absolute top-5 right-5 z-[400] px-4 py-2.5 rounded-2xl bg-[#0b1016]/95 backdrop-blur-xl border border-slate-750 text-xs text-white hover:border-emerald-500 shadow-2xl flex items-center gap-2 cursor-pointer font-bold transition-all"
             >
-              <Eye className="w-4 h-4 text-[var(--accent)]" />
+              <Eye className="w-4 h-4 text-emerald-400" />
               <span>Inspect {selectedProject.name.split(" ")[0]} Data</span>
             </button>
           )}
@@ -629,26 +628,26 @@ export default function ExplorerPage() {
         {/* 3. RIGHT DETAIL INSPECTOR (Spacious, Legible, Docked Drawer)      */}
         {/* ================================================================= */}
         {detailOpen && selectedProject && (
-          <aside className="w-full md:w-[380px] md:min-w-[380px] md:max-w-[380px] h-auto md:h-full flex flex-col shrink-0 bg-[#0c1611] border-l border-[var(--border)] z-20 shadow-2xl transition-all duration-200">
+          <aside className="w-full md:w-[380px] md:min-w-[380px] md:max-w-[380px] h-auto md:h-full flex flex-col shrink-0 bg-[#0b1016] border-l border-slate-800 z-20 shadow-2xl transition-all duration-200">
             {/* Header: Title, Region, Badges & Close Button */}
-            <div className="p-5 border-b border-[var(--border)] bg-[#0e1a14] flex items-start justify-between gap-3">
+            <div className="p-5 border-b border-slate-800 bg-[#0f1722] flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1.5">
                   <GradeBadge grade={selectedProject.grade} score={selectedProject.cqsScore} />
                   <StatusBadge status={selectedProject.status} />
                 </div>
-                <h2 className="text-base font-bold text-[var(--text)] leading-snug">
+                <h2 className="text-base font-bold text-white leading-snug">
                   {selectedProject.name}
                 </h2>
-                <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-[var(--accent)] shrink-0" />
+                <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span>{selectedProject.region} · {selectedProject.area}</span>
                 </p>
               </div>
 
               <button
                 onClick={() => setDetailOpen(false)}
-                className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[#15251c] transition-colors cursor-pointer"
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                 title="Close telemetry inspector"
                 aria-label="Close telemetry inspector"
               >
@@ -660,47 +659,47 @@ export default function ExplorerPage() {
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
               {/* PRIMARY STAT GRID (Large, bold, high contrast numbers) */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3.5 rounded-2xl bg-[#0f1b14] border border-[var(--border)]">
-                  <div className="text-xs text-[var(--text-muted)] font-medium">NDVI Index</div>
-                  <div className="font-mono text-2xl font-bold text-[var(--text)] mt-1">
+                <div className="p-3.5 rounded-2xl bg-[#111923] border border-slate-800/80">
+                  <div className="text-xs text-slate-400 font-medium">NDVI Index</div>
+                  <div className="font-mono text-2xl font-bold text-white mt-1">
                     {selectedProject.ndvi.toFixed(3)}
                   </div>
-                  <div className="text-xs font-mono text-[var(--text-muted)] mt-1">
+                  <div className="text-xs font-mono text-slate-400 mt-1">
                     Baseline: {selectedProject.baselineNdvi.toFixed(3)} (
-                    <span className={selectedProject.ndvi >= selectedProject.baselineNdvi ? "text-[var(--accent)] font-semibold" : "text-[var(--danger)] font-semibold"}>
+                    <span className={selectedProject.ndvi >= selectedProject.baselineNdvi ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>
                       {(selectedProject.ndvi - selectedProject.baselineNdvi > 0 ? "+" : "")}
                       {(selectedProject.ndvi - selectedProject.baselineNdvi).toFixed(3)}
                     </span>)
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#0f1b14] border border-[var(--border)]">
-                  <div className="text-xs text-[var(--text-muted)] font-medium">Canopy Cover</div>
-                  <div className="font-mono text-2xl font-bold text-[var(--text)] mt-1">
+                <div className="p-3.5 rounded-2xl bg-[#111923] border border-slate-800/80">
+                  <div className="text-xs text-slate-400 font-medium">Canopy Cover</div>
+                  <div className="font-mono text-2xl font-bold text-white mt-1">
                     {selectedProject.forestCover}
                   </div>
-                  <div className="text-xs font-mono text-[var(--text-muted)] mt-1">
+                  <div className="text-xs font-mono text-slate-400 mt-1">
                     Area: {selectedProject.area}
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#0f1b14] border border-[var(--border)]">
-                  <div className="text-xs text-[var(--text-muted)] font-medium">Canopy Quality</div>
-                  <div className="font-mono text-2xl font-bold text-[var(--text)] mt-1">
-                    {selectedProject.cqsScore} <span className="text-xs font-normal text-[var(--text-muted)]">/ 100</span>
+                <div className="p-3.5 rounded-2xl bg-[#111923] border border-slate-800/80">
+                  <div className="text-xs text-slate-400 font-medium">Canopy Quality</div>
+                  <div className="font-mono text-2xl font-bold text-white mt-1">
+                    {selectedProject.cqsScore} <span className="text-xs font-normal text-slate-400">/ 100</span>
                   </div>
-                  <div className="text-xs font-mono text-[var(--accent)] mt-1 flex items-center gap-1 font-semibold">
+                  <div className="text-xs font-mono text-emerald-400 mt-1 flex items-center gap-1 font-semibold">
                     <TrendingUp className="w-3.5 h-3.5" />
                     Trend: {selectedProject.trend}
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#0f1b14] border border-[var(--border)]">
-                  <div className="text-xs text-[var(--text-muted)] font-medium">Cloud Obscurity</div>
-                  <div className="font-mono text-2xl font-bold text-[var(--text)] mt-1">
+                <div className="p-3.5 rounded-2xl bg-[#111923] border border-slate-800/80">
+                  <div className="text-xs text-slate-400 font-medium">Cloud Obscurity</div>
+                  <div className="font-mono text-2xl font-bold text-white mt-1">
                     {selectedProject.cloudCover}
                   </div>
-                  <div className="text-xs font-mono text-[var(--text-muted)] mt-1">
+                  <div className="text-xs font-mono text-slate-400 mt-1">
                     Sentinel-2 L2A scene
                   </div>
                 </div>
@@ -708,10 +707,10 @@ export default function ExplorerPage() {
 
               {/* 90-DAY NDVI SPARKLINE CHART */}
               {selectedProject.sparkline && (
-                <div className="p-4 rounded-2xl bg-[#0f1b14] border border-[var(--border)] space-y-3">
+                <div className="p-4 rounded-2xl bg-[#111923] border border-slate-800/80 space-y-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-[var(--text)]">90-Day NDVI Stability Trend</span>
-                    <span className="font-mono text-xs text-[var(--accent)] font-semibold">
+                    <span className="font-bold text-white">90-Day NDVI Stability Trend</span>
+                    <span className="font-mono text-xs text-emerald-400 font-semibold">
                       Baseline: {selectedProject.baselineNdvi}
                     </span>
                   </div>
@@ -731,7 +730,7 @@ export default function ExplorerPage() {
                       {/* Sparkline curve */}
                       <polyline
                         fill="none"
-                        stroke={selectedProject.status === "Revoked" ? "#ef4444" : "#10b981"}
+                        stroke={selectedProject.status === "Revoked" ? "#f43f5e" : "#10b981"}
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -745,7 +744,7 @@ export default function ExplorerPage() {
                       />
                     </svg>
                   </div>
-                  <div className="flex justify-between text-xs font-mono text-[var(--text-muted)]">
+                  <div className="flex justify-between text-xs font-mono text-slate-400">
                     <span>90 days ago</span>
                     <span>Latest scan</span>
                   </div>
@@ -754,27 +753,27 @@ export default function ExplorerPage() {
 
               {/* SOLANA TRANSFER HOOK STATUS BANNER */}
               {selectedProject.status === "Revoked" || selectedProject.status === "Suspended" ? (
-                <div className="p-4 rounded-2xl bg-[var(--danger-subtle)] border border-[var(--danger)]/30 text-xs space-y-3">
-                  <div className="flex items-center gap-2 font-bold text-sm text-[var(--danger)]">
+                <div className="p-4 rounded-2xl bg-rose-950/30 border border-rose-500/40 text-xs space-y-3">
+                  <div className="flex items-center gap-2 font-bold text-sm text-rose-400">
                     <ShieldAlert className="w-4 h-4 shrink-0" />
                     <span>Transfers Blocked on Solana</span>
                   </div>
-                  <p className="text-xs text-[var(--text)] leading-relaxed font-normal">
+                  <p className="text-xs text-slate-200 leading-relaxed font-normal">
                     {selectedProject.revocationReason}
                   </p>
                   {selectedProject.revocationDate && (
-                    <div className="text-xs font-mono text-[var(--danger)] font-medium">
+                    <div className="text-xs font-mono text-rose-400 font-medium">
                       Permanently revoked on {selectedProject.revocationDate}
                     </div>
                   )}
 
                   {/* Satellite Comparison Slider for Revoked Projects */}
                   <div className="pt-2">
-                    <div className="text-xs font-bold text-[var(--text)] mb-2 flex items-center justify-between">
+                    <div className="text-xs font-bold text-white mb-2 flex items-center justify-between">
                       <span>Satellite Degradation Comparison</span>
-                      <span className="font-mono text-xs text-[var(--danger)]">Split View</span>
+                      <span className="font-mono text-xs text-rose-400">Split View</span>
                     </div>
-                    <div className="relative h-32 rounded-xl overflow-hidden border border-[var(--danger)]/40 select-none shadow-md">
+                    <div className="relative h-32 rounded-xl overflow-hidden border border-rose-500/40 select-none shadow-md">
                       <img
                         src={selectedProject.afterImage || "/borneo.png"}
                         alt="Degraded state"
@@ -814,41 +813,41 @@ export default function ExplorerPage() {
                   </div>
                 </div>
               ) : (
-                <div className="p-4 rounded-2xl bg-[var(--accent-subtle)] border border-[var(--accent)]/30 text-xs space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-sm text-[var(--accent)]">
+                <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 text-xs space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-sm text-emerald-400">
                     <ShieldCheck className="w-4 h-4 shrink-0" />
                     <span>Transfers Permitted on Solana</span>
                   </div>
-                  <p className="text-xs text-[var(--text)] leading-relaxed">
+                  <p className="text-xs text-slate-200 leading-relaxed">
                     Automated Token-2022 Transfer Hook active. Multispectral biomass satisfies all permanence and additionality thresholds.
                   </p>
                 </div>
               )}
 
               {/* ORACLE ACCOUNT & ATTESTATION TIMELINE */}
-              <div className="p-4 rounded-2xl bg-[#0f1b14] border border-[var(--border)] space-y-3">
+              <div className="p-4 rounded-2xl bg-[#111923] border border-slate-800/80 space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-[var(--text)]">Solana Oracle Account</span>
-                  <span className="text-[var(--accent)] font-mono text-xs font-semibold">Devnet</span>
+                  <span className="font-bold text-white">Solana Oracle Account</span>
+                  <span className="text-emerald-400 font-mono text-xs font-semibold">Devnet</span>
                 </div>
                 <AddressChip address={selectedProject.oracleAddress} />
 
                 {/* Scan Cadence Info */}
-                <div className="pt-2 border-t border-[var(--border-subtle)] space-y-1.5 text-xs">
-                  <div className="flex justify-between text-[var(--text-muted)]">
+                <div className="pt-2 border-t border-slate-800 space-y-1.5 text-xs">
+                  <div className="flex justify-between text-slate-400">
                     <span>Last Scan:</span>
-                    <span className="font-mono text-[var(--text)] font-semibold">{selectedProject.lastScan}</span>
+                    <span className="font-mono text-white font-semibold">{selectedProject.lastScan}</span>
                   </div>
                   {selectedProject.nextScan && (
-                    <div className="flex justify-between text-[var(--text-muted)]">
+                    <div className="flex justify-between text-slate-400">
                       <span>Next Orbit:</span>
-                      <span className="font-mono text-[var(--text)] font-semibold">{selectedProject.nextScan}</span>
+                      <span className="font-mono text-white font-semibold">{selectedProject.nextScan}</span>
                     </div>
                   )}
                   {selectedProject.cadence && (
-                    <div className="flex justify-between text-[var(--text-muted)]">
+                    <div className="flex justify-between text-slate-400">
                       <span>Cadence:</span>
-                      <span className="font-mono text-[var(--text)]">{selectedProject.cadence}</span>
+                      <span className="font-mono text-white">{selectedProject.cadence}</span>
                     </div>
                   )}
                 </div>
@@ -856,8 +855,8 @@ export default function ExplorerPage() {
 
               {/* TIMELINE OF ORACLE EVENTS */}
               {selectedProject.timelineEvents && (
-                <div className="p-4 rounded-2xl bg-[#0f1b14] border border-[var(--border)] space-y-3">
-                  <div className="text-xs font-bold text-[var(--text)]">
+                <div className="p-4 rounded-2xl bg-[#111923] border border-slate-800/80 space-y-3">
+                  <div className="text-xs font-bold text-white">
                     Attestation Event History
                   </div>
                   <div className="space-y-3 text-xs">
@@ -865,12 +864,12 @@ export default function ExplorerPage() {
                       <div key={idx} className="flex items-start gap-2.5">
                         <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${
                           evt.type === "revoked" || evt.type === "alert"
-                            ? "bg-[var(--danger)]"
-                            : "bg-[var(--accent)]"
+                            ? "bg-rose-500"
+                            : "bg-emerald-400"
                         }`} />
                         <div>
-                          <div className="font-medium text-[var(--text)]">{evt.title}</div>
-                          <div className="text-xs font-mono text-[var(--text-muted)] mt-0.5">{evt.date}</div>
+                          <div className="font-medium text-white">{evt.title}</div>
+                          <div className="text-xs font-mono text-slate-400 mt-0.5">{evt.date}</div>
                         </div>
                       </div>
                     ))}
@@ -883,7 +882,7 @@ export default function ExplorerPage() {
                 href={`https://explorer.solana.com/address/${selectedProject.oracleAddress}?cluster=devnet`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 rounded-xl bg-[var(--accent)] hover:opacity-95 text-[#060b08] font-bold text-xs transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg"
               >
                 <span>View Oracle Account on Solana Explorer</span>
                 <ExternalLink className="w-3.5 h-3.5" />

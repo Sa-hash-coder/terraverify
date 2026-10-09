@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import AppSidebar from "./app-sidebar";
+import AppHeader from "./app-header";
 
 interface PageShellProps {
   children: React.ReactNode;
@@ -17,14 +17,14 @@ export default function PageShell({
   noScroll = false,
 }: PageShellProps) {
   return (
-    <div className="h-dvh w-screen flex flex-col md:flex-row bg-[var(--bg-app)] text-[var(--text)] overflow-hidden antialiased">
-      {/* Persistent Left Sidebar */}
-      <AppSidebar />
+    <div className="min-h-dvh w-full flex flex-col bg-[var(--bg-app)] text-[var(--text)] antialiased">
+      {/* Top Navigation Header */}
+      <AppHeader />
 
       {/* Main Content Viewport */}
       <main
-        className={`flex-1 min-w-0 flex flex-col h-[calc(100dvh-3.5rem)] md:h-dvh ${
-          noScroll ? "overflow-hidden" : "overflow-y-auto"
+        className={`flex-1 min-w-0 flex flex-col ${
+          noScroll ? "h-[calc(100dvh-4rem)] overflow-hidden" : "overflow-y-auto"
         } ${
           fullWidth
             ? "p-0"

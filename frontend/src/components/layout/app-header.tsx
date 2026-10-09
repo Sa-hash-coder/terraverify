@@ -163,7 +163,6 @@ export default function AppHeader() {
   };
 
   const navItems = [
-    { label: "Home", href: "/" },
     { label: "Explorer", href: "/explorer" },
     { label: "Marketplace", href: "/marketplace" },
     { label: "Retire", href: "/retire" },
@@ -180,13 +179,13 @@ export default function AppHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#0a1410] backdrop-blur-md border-b border-[#182921] transition-colors">
+      <header className="sticky top-0 z-40 w-full bg-[#080d12]/95 backdrop-blur-md border-b border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Left: Brand Wordmark */}
+          {/* Left: Brand Wordmark (links to /) */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-7 h-7 rounded border border-[#38b87c]/40 bg-[#12221b] flex items-center justify-center text-[#38b87c] group-hover:border-[#38b87c] transition-colors">
+            <div className="w-8 h-8 rounded-lg border border-emerald-500/30 bg-slate-900 flex items-center justify-center text-emerald-400 group-hover:border-emerald-500 transition-colors">
               <svg
-                className="w-3.5 h-3.5"
+                className="w-4 h-4"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -199,27 +198,24 @@ export default function AppHeader() {
                 <path d="M12 22a10 10 0 0 0 7.07-17.07" />
               </svg>
             </div>
-            <span className="text-base font-semibold tracking-tight text-white">
-              Terra<span className="text-[#38b87c]">Verify</span>
+            <span className="text-base font-bold tracking-tight text-white">
+              Terra<span className="text-emerald-400">Verify</span>
             </span>
           </Link>
 
-          {/* Center: Desktop Navigation with Lightened Buttons */}
-          <nav className="hidden md:flex items-center gap-1.5 bg-[#14261f] p-1.5 rounded-xl border border-[#274538] shadow-inner">
+          {/* Center: Desktop Navigation with No Home Button */}
+          <nav className="hidden md:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 shadow-inner">
             {navItems.map((item) => {
-              const isActive =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.href);
+              const isActive = pathname.startsWith(item.href);
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-emerald-500 text-white shadow-sm border border-emerald-400/50"
-                      : "bg-[#203a2e] hover:bg-[#2b4c3e] text-slate-100 hover:text-white border border-[#2e5242] shadow-xs"
+                      ? "bg-emerald-500 text-slate-950 font-bold shadow-[0_2px_8px_rgba(16,185,129,0.3)]"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/70"
                   }`}
                 >
                   {item.label}
@@ -234,7 +230,7 @@ export default function AppHeader() {
             <button
               onClick={toggleTheme}
               title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
-              className="p-2 rounded-lg bg-[#13231c] hover:bg-[#1a3026] border border-[#233c30] text-slate-200 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
@@ -363,7 +359,7 @@ export default function AppHeader() {
             {/* Mobile Nav Toggle */}
             <button
               onClick={() => setMobileNavOpen(!mobileNavOpen)}
-              className="md:hidden p-2 rounded-lg bg-[#13231c] border border-[#233c30] text-slate-200 hover:text-white"
+              className="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
               aria-label="Toggle navigation"
             >
               {mobileNavOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -373,12 +369,9 @@ export default function AppHeader() {
 
         {/* Mobile Navigation Drawer */}
         {mobileNavOpen && (
-          <div className="md:hidden border-t border-[#182921] bg-[#0a1410] px-4 py-3 space-y-1.5">
+          <div className="md:hidden border-t border-slate-800 bg-[#080d12] px-4 py-3 space-y-1.5">
             {navItems.map((item) => {
-              const isActive =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.href);
+              const isActive = pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
@@ -386,8 +379,8 @@ export default function AppHeader() {
                   onClick={() => setMobileNavOpen(false)}
                   className={`block px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-emerald-500 text-white shadow-sm border border-emerald-400/50"
-                      : "bg-[#1d352b] hover:bg-[#28483b] text-slate-100 hover:text-white border border-[#2b4c3e]"
+                      ? "bg-emerald-500 text-slate-950 font-bold shadow-sm"
+                      : "bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800"
                   }`}
                 >
                   {item.label}
