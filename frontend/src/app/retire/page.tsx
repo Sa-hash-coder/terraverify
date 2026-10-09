@@ -25,7 +25,6 @@ const PROJECTS = [
 ];
 
 export default function RetireCredits() {
-  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<"form" | "ai">("form");
 
   // Main Form State
@@ -63,12 +62,6 @@ export default function RetireCredits() {
   const { connection } = useConnection();
   const { publicKey, sendTransaction, connected } = useWallet();
   const { setVisible } = useWalletModal();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
 
   // AI Math Calculations
   let calculatedEmissions = 0;

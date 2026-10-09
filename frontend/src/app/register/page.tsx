@@ -10,7 +10,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 export default function RegisterProject() {
   const router = useRouter();
   const { connected } = useWallet();
-  const [mounted, setMounted] = useState(false);
 
   // Form State
   const [projectName, setProjectName] = useState("Western Ghats Private Preserve");
@@ -32,12 +31,6 @@ export default function RegisterProject() {
   const [registering, setRegistering] = useState(false);
   const [registeredSuccess, setRegisteredSuccess] = useState(false);
   const [aiResult, setAiResult] = useState<{ cqs: string; cqsScore: number; forestCover: string; area: string } | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
 
   const handleGeocodingSearch = async () => {
     if (!searchQuery.trim()) return;

@@ -19,7 +19,6 @@ const MapComponent = dynamic(() => import("../../components/map-component"), {
 
 export default function Explorer() {
   const [selectedProject, setSelectedProject] = useState<number | null>(1);
-  const [mounted, setMounted] = useState(false);
   const [showOracleModal, setShowOracleModal] = useState(false);
   const [projectsData, setProjectsData] = useState({
     amazon: { forestCover: "84.5%", cqs: "AAA", status: "Active", cqsScore: 94 },
@@ -27,8 +26,6 @@ export default function Explorer() {
   });
 
   useEffect(() => {
-    setMounted(true);
-
     const fetchTelemetry = async () => {
       try {
         const res = await fetch("/api/telemetry");
@@ -69,8 +66,6 @@ export default function Explorer() {
   function p2_forestCover(val?: string) {
     return val || "62.1%";
   }
-
-  if (!mounted) return null;
 
   return (
     <main className="h-screen flex flex-col overflow-hidden p-4 sm:p-8">
