@@ -41,6 +41,7 @@ interface MapComponentProps {
   activeLayer: MapLayerType;
   layerOpacity?: number;
   detailOpen?: boolean;
+  fitAllTrigger?: number;
 }
 
 export default function MapComponent({
@@ -50,6 +51,7 @@ export default function MapComponent({
   activeLayer,
   layerOpacity = 100,
   detailOpen = true,
+  fitAllTrigger,
 }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
@@ -266,6 +268,21 @@ export default function MapComponent({
     }
   }, [selectedProject, flyToSelected]);
 
+  // Support fitting all parcel bounds triggered externally
+  useEffect(() => {
+    if (!mapInstance.current || !fitAllTrigger) return;
+    const allBounds = L.latLngBounds([]);
+    projects.forEach((p) => {
+      p.bounds.forEach((b) => allBounds.extend(b as L.LatLngTuple));
+    });
+    if (allBounds.isValid()) {
+      mapInstance.current.flyToBounds(allBounds, {
+        padding: [60, 60],
+        duration: 0.6,
+      });
+    }
+  }, [fitAllTrigger, projects]);
+
   // Invalidate map size when detail panel state toggles
   useEffect(() => {
     if (mapInstance.current) {
@@ -282,26 +299,27 @@ export default function MapComponent({
 
       {/* Imagery Fallback Alert */}
       {tileError && (
-        <div className="absolute top-3 right-3 z-[400] px-3 py-1.5 rounded-lg bg-[var(--surface-raised)] border border-[var(--warning)]/40 text-[var(--warning)] text-xs flex items-center gap-2 shadow-md">
-          <span className="w-2 h-2 rounded-full bg-[var(--warning)] animate-ping" />
-          <span>Satellite imagery retrying with secondary basemap</span>
+        <div className="absolute top-4 right-4 z-[400] px-3.5 py-2 rounded-xl bg-[var(--surface-raised)] border border-[var(--warning)]/40 text-[var(--warning)] text-xs flex items-center gap-2 shadow-lg">
+          <span className="w-2.5 h-2.5 rounded-full bg-[var(--warning)] animate-ping" />
+          <span className="font-medium">Satellite imagery retrying with secondary basemap</span>
         </div>
       )}
 
       {/* Dynamic Map Legend based on active layer */}
-      <div className="absolute bottom-4 left-4 z-[400] bg-[var(--surface)]/90 backdrop-blur-md border border-[var(--border)] rounded-lg p-2.5 text-[11px] shadow-md pointer-events-auto max-w-[260px]">
+      <div className="absolute bottom-5 left-5 z-[400] bg-[#0c1611]/92 backdrop-blur-xl border border-[var(--border)] rounded-xl p-3.5 text-xs shadow-2xl pointer-events-auto min-w-[220px]">
         {activeLayer === "truecolor" && (
-          <div>
-            <div className="text-[var(--text-muted)] font-medium mb-1 text-[10px]">
-              Copernicus Sentinel-2 RGB (10m)
+          <div className="space-y-2">
+            <div className="text-[var(--text-muted)] font-medium text-xs flex items-center justify-between">
+              <span>Sentinel-2 RGB (10m)</span>
+              <span className="text-[var(--accent)] font-mono text-[11px]">Natural</span>
             </div>
-            <div className="flex items-center gap-3 text-[11px]">
+            <div className="flex items-center gap-4 text-xs font-medium">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
-                <span className="text-[var(--text)]">Verified</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] shadow-xs" />
+                <span className="text-[var(--text)]">Verified Forest</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[var(--danger)]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--danger)] shadow-xs" />
                 <span className="text-[var(--text)]">Revoked</span>
               </div>
             </div>
@@ -309,41 +327,41 @@ export default function MapComponent({
         )}
 
         {activeLayer === "ndvi" && (
-          <div>
-            <div className="flex justify-between items-center text-[10px] text-[var(--text-muted)] font-medium mb-1">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-xs text-[var(--text-muted)] font-medium">
               <span>NDVI Canopy Health</span>
-              <span className="font-mono text-[9px]">-0.2 → 1.0</span>
+              <span className="font-mono text-[11px] text-[var(--accent)] font-semibold">-0.2 → 1.0</span>
             </div>
             {/* Gradient bar */}
-            <div className="h-2 rounded w-full bg-gradient-to-r from-red-600 via-amber-400 via-emerald-400 to-emerald-700" />
-            <div className="flex justify-between text-[9px] font-mono text-[var(--text-muted)] mt-1">
+            <div className="h-2.5 rounded-full w-full bg-gradient-to-r from-red-600 via-amber-400 via-emerald-400 to-emerald-700 shadow-inner" />
+            <div className="flex justify-between text-[11px] font-mono text-[var(--text-muted)]">
               <span>Degraded (0.0)</span>
-              <span>Intact (0.8+)</span>
+              <span className="text-[var(--accent)]">Dense Canopy (0.8+)</span>
             </div>
           </div>
         )}
 
         {activeLayer === "nir" && (
-          <div>
-            <div className="text-[var(--text-muted)] font-medium mb-1 text-[10px]">
-              NIR Band 8 · False Colour Reflectance
+          <div className="space-y-2">
+            <div className="text-[var(--text-muted)] font-medium text-xs">
+              NIR Band 8 · False Colour
             </div>
-            <div className="flex items-center gap-2 text-[10px] text-[var(--text)]">
-              <span className="w-2.5 h-2.5 rounded bg-emerald-600 shrink-0" />
-              <span>Photosynthetic Biomass Density</span>
+            <div className="flex items-center gap-2 text-xs text-[var(--text)]">
+              <span className="w-3 h-3 rounded bg-emerald-600 shrink-0 shadow-xs" />
+              <span>Moisture & Photosynthetic Biomass</span>
             </div>
           </div>
         )}
 
         {activeLayer === "change" && (
-          <div>
-            <div className="flex justify-between items-center text-[10px] text-[var(--text-muted)] font-medium mb-1">
-              <span>Delta vs. Historical Baseline</span>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-xs text-[var(--text-muted)] font-medium">
+              <span>Delta vs Historical Baseline</span>
             </div>
-            <div className="h-2 rounded w-full bg-gradient-to-r from-rose-600 via-slate-500 to-emerald-500" />
-            <div className="flex justify-between text-[9px] font-mono text-[var(--text-muted)] mt-1">
-              <span>-15% Deforested</span>
-              <span>+15% Growth</span>
+            <div className="h-2.5 rounded-full w-full bg-gradient-to-r from-rose-600 via-slate-500 to-emerald-500 shadow-inner" />
+            <div className="flex justify-between text-[11px] font-mono text-[var(--text-muted)]">
+              <span className="text-rose-400">-15% Deforested</span>
+              <span className="text-emerald-400">+15% Growth</span>
             </div>
           </div>
         )}
