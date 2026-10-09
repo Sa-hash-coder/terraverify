@@ -236,12 +236,12 @@ export default function RetirePage() {
       {currentStep === 1 && (
         <div className="max-w-3xl mx-auto space-y-6">
           <Panel className="p-6 sm:p-8 space-y-6 text-left">
-            <div className="flex items-center justify-between pb-4 border-b border-[#162922] light:border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
               <div>
-                <h2 className="text-base font-bold text-[#f4f5ef] light:text-slate-900">
+                <h2 className="text-base font-bold text-slate-900">
                   Step 1: Quantify Organizational Emissions
                 </h2>
-                <p className="text-xs text-[#8e9f96] mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Input activity data to compute offset volume, or enter your audited total directly.
                 </p>
               </div>
@@ -260,8 +260,8 @@ export default function RetirePage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
-                    <label className="text-[#8e9f96] font-medium flex items-center gap-1.5 mb-1.5">
-                      <Zap className="w-3.5 h-3.5 text-[#38b87c]" />
+                    <label className="text-slate-600 font-medium flex items-center gap-1.5 mb-1.5">
+                      <Zap className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Electricity Consumption (MWh)</span>
                     </label>
                     <input
@@ -269,14 +269,14 @@ export default function RetirePage() {
                       placeholder="e.g. 1200"
                       value={electricityMwh}
                       onChange={(e) => setElectricityMwh(e.target.value)}
-                      className="w-full p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 font-mono focus:outline-none focus:border-[#38b87c]"
+                      className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                     />
-                    <span className="text-[10px] text-[#718078]">Factor: 0.40 tCO2e / MWh</span>
+                    <span className="text-[10px] text-slate-400">Factor: 0.40 tCO2e / MWh</span>
                   </div>
 
                   <div>
-                    <label className="text-[#8e9f96] font-medium flex items-center gap-1.5 mb-1.5">
-                      <Plane className="w-3.5 h-3.5 text-[#38b87c]" />
+                    <label className="text-slate-600 font-medium flex items-center gap-1.5 mb-1.5">
+                      <Plane className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Business Travel Flights (km)</span>
                     </label>
                     <input
@@ -284,14 +284,14 @@ export default function RetirePage() {
                       placeholder="e.g. 50000"
                       value={flightsKm}
                       onChange={(e) => setFlightsKm(e.target.value)}
-                      className="w-full p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 font-mono focus:outline-none focus:border-[#38b87c]"
+                      className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                     />
-                    <span className="text-[10px] text-[#718078]">Factor: 0.15 kg CO2e / km</span>
+                    <span className="text-[10px] text-slate-400">Factor: 0.15 kg CO2e / km</span>
                   </div>
 
                   <div>
-                    <label className="text-[#8e9f96] font-medium flex items-center gap-1.5 mb-1.5">
-                      <Server className="w-3.5 h-3.5 text-[#38b87c]" />
+                    <label className="text-slate-600 font-medium flex items-center gap-1.5 mb-1.5">
+                      <Server className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Annual Cloud Infrastructure ($ USD)</span>
                     </label>
                     <input
@@ -299,14 +299,14 @@ export default function RetirePage() {
                       placeholder="e.g. 25000"
                       value={cloudSpendUsd}
                       onChange={(e) => setCloudSpendUsd(e.target.value)}
-                      className="w-full p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 font-mono focus:outline-none focus:border-[#38b87c]"
+                      className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                     />
-                    <span className="text-[10px] text-[#718078]">Factor: ~0.02 tCO2e / $100</span>
+                    <span className="text-[10px] text-slate-400">Factor: ~0.02 tCO2e / $100</span>
                   </div>
 
                   <div>
-                    <label className="text-[#8e9f96] font-medium flex items-center gap-1.5 mb-1.5">
-                      <Flame className="w-3.5 h-3.5 text-[#38b87c]" />
+                    <label className="text-slate-600 font-medium flex items-center gap-1.5 mb-1.5">
+                      <Flame className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Fleet Fuel Combustion (Litres)</span>
                     </label>
                     <input
@@ -314,31 +314,31 @@ export default function RetirePage() {
                       placeholder="e.g. 8000"
                       value={fuelLitres}
                       onChange={(e) => setFuelLitres(e.target.value)}
-                      className="w-full p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 font-mono focus:outline-none focus:border-[#38b87c]"
+                      className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                     />
-                    <span className="text-[10px] text-[#718078]">Factor: 2.60 kg CO2e / L</span>
+                    <span className="text-[10px] text-slate-400">Factor: 2.60 kg CO2e / L</span>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="space-y-2 text-xs">
-                <label className="text-[#8e9f96] font-medium block">
+                <label className="text-slate-600 font-medium block">
                   Audited Total Emissions to Offset (tCO2e)
                 </label>
                 <input
                   type="number"
                   value={directTons}
                   onChange={(e) => setDirectTons(e.target.value)}
-                  className="w-full sm:w-64 p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 font-mono text-base focus:outline-none focus:border-[#38b87c]"
+                  className="w-full sm:w-64 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-mono text-base focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                 />
               </div>
             )}
 
             {/* Total Summary Banner */}
-            <div className="p-4 rounded-xl bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 flex items-center justify-between">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
               <div>
-                <span className="text-xs text-[#8e9f96]">Target Retirement Volume</span>
-                <div className="text-xl font-bold font-mono text-[#38b87c]">
+                <span className="text-xs text-slate-500">Target Retirement Volume</span>
+                <div className="text-xl font-bold font-mono text-emerald-700">
                   {calculatedEmissions.toLocaleString()} tCO2e
                 </div>
               </div>
@@ -348,7 +348,7 @@ export default function RetirePage() {
                   setRetireAmount(String(calculatedEmissions));
                   setCurrentStep(2);
                 }}
-                className="px-5 py-2.5 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <span>Continue to Select Credits</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -362,18 +362,18 @@ export default function RetirePage() {
       {currentStep === 2 && (
         <div className="max-w-3xl mx-auto space-y-6">
           <Panel className="p-6 sm:p-8 space-y-6 text-left">
-            <div className="pb-4 border-b border-[#162922] light:border-slate-200">
-              <h2 className="text-base font-bold text-[#f4f5ef] light:text-slate-900">
+            <div className="pb-4 border-b border-slate-100">
+              <h2 className="text-base font-bold text-slate-900">
                 Step 2: Assign Verified Project & Beneficiary
               </h2>
-              <p className="text-xs text-[#8e9f96] mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Choose an intact, oracle-verified ecological parcel to draw offsets from.
               </p>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="text-[#8e9f96] font-medium block mb-1.5">
+                <label className="text-slate-600 font-medium block mb-1.5">
                   Beneficiary Legal Name (Entity receiving certificate)
                 </label>
                 <input
@@ -381,13 +381,13 @@ export default function RetirePage() {
                   placeholder="e.g. Acme Corporation"
                   value={beneficiaryName}
                   onChange={(e) => setBeneficiaryName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 focus:outline-none focus:border-[#38b87c]"
+                  className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                 />
               </div>
 
               {/* Project Selection */}
               <div>
-                <label className="text-[#8e9f96] font-medium block mb-2">
+                <label className="text-slate-600 font-medium block mb-2">
                   Select Carbon Offset Project
                 </label>
                 <div className="space-y-2">
@@ -401,10 +401,10 @@ export default function RetirePage() {
                         onClick={() => !isBlocked && setSelectedProjectName(proj.name)}
                         className={`p-3.5 rounded-xl border transition-all flex items-center justify-between ${
                           isSelected
-                            ? "bg-[#10241b] border-[#38b87c] light:bg-emerald-50 light:border-emerald-300"
+                            ? "bg-emerald-50/70 border-emerald-500 ring-1 ring-emerald-500/20"
                             : isBlocked
-                            ? "bg-[#160d0d] border-[#381616] opacity-60 cursor-not-allowed"
-                            : "bg-[#07130f] light:bg-slate-50 border-[#162922] light:border-slate-200 hover:border-[#38b87c]/40 cursor-pointer"
+                            ? "bg-rose-50/40 border-rose-200 opacity-70 cursor-not-allowed"
+                            : "bg-white border-slate-200 hover:border-slate-300 cursor-pointer shadow-xs"
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -414,17 +414,17 @@ export default function RetirePage() {
                             checked={isSelected}
                             disabled={isBlocked}
                             onChange={() => setSelectedProjectName(proj.name)}
-                            className="accent-[#38b87c]"
+                            className="accent-emerald-600"
                           />
                           <div>
-                            <div className="font-bold text-[#f4f5ef] light:text-slate-900 leading-tight">
+                            <div className="font-bold text-slate-900 leading-tight">
                               {proj.name}
                             </div>
-                            <div className="text-[11px] text-[#8e9f96] light:text-slate-500">
+                            <div className="text-[11px] text-slate-500">
                               {proj.region} · {proj.available.toLocaleString()} tCO2e available
                             </div>
                             {isBlocked && (
-                              <div className="text-[11px] text-red-400 mt-1 flex items-center gap-1 font-mono">
+                              <div className="text-[11px] text-rose-700 mt-1 flex items-center gap-1 font-mono">
                                 <ShieldAlert className="w-3 h-3" />
                                 <span>{proj.reason}</span>
                               </div>
@@ -445,8 +445,8 @@ export default function RetirePage() {
               {/* Quantity to Retire */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-[#8e9f96] font-medium">Credits to Burn (tCO2e)</label>
-                  <span className="text-[11px] font-mono text-[#718078]">
+                  <label className="text-slate-600 font-medium">Credits to Burn (tCO2e)</label>
+                  <span className="text-[11px] font-mono text-slate-500">
                     Calculated target: {calculatedEmissions} t
                   </span>
                 </div>
@@ -456,21 +456,21 @@ export default function RetirePage() {
                   max={selectedProject.available}
                   value={retireAmount}
                   onChange={(e) => setRetireAmount(e.target.value)}
-                  className="w-full sm:w-64 p-2.5 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 font-mono focus:outline-none focus:border-[#38b87c]"
+                  className="w-full sm:w-64 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-mono focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                 />
               </div>
 
               {/* Coverage Progress Bar */}
-              <div className="p-3 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 space-y-1.5">
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
                 <div className="flex justify-between text-[11px] font-mono">
-                  <span className="text-[#8e9f96]">Emissions Coverage</span>
-                  <span className="text-[#38b87c] font-bold">
+                  <span className="text-slate-500">Emissions Coverage</span>
+                  <span className="text-emerald-700 font-bold">
                     {coveragePercent}% ({coveragePercent >= 100 ? "Full Offset" : "Partial Offset"})
                   </span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-[#162922] overflow-hidden">
+                <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
                   <div
-                    className="h-full bg-[#38b87c] transition-all duration-300"
+                    className="h-full bg-emerald-600 transition-all duration-300"
                     style={{ width: `${coveragePercent}%` }}
                   />
                 </div>
@@ -478,10 +478,10 @@ export default function RetirePage() {
             </div>
 
             {/* Stepper Buttons */}
-            <div className="pt-4 border-t border-[#162922] light:border-slate-200 flex justify-between">
+            <div className="pt-4 border-t border-slate-100 flex justify-between">
               <button
                 onClick={() => setCurrentStep(1)}
-                className="px-4 py-2 rounded-lg bg-[#07130f] border border-[#162922] text-xs text-[#8e9f96] hover:text-[#f4f5ef] transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-xs text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back</span>
@@ -490,7 +490,7 @@ export default function RetirePage() {
               <button
                 onClick={() => setCurrentStep(3)}
                 disabled={isProjectBlocked || amountToRetire <= 0}
-                className="px-5 py-2.5 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
               >
                 <span>Proceed to Confirmation</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -507,11 +507,11 @@ export default function RetirePage() {
             {/* Left Confirmation Form (5 Columns) */}
             <div className="lg:col-span-5 space-y-4 text-left">
               <Panel className="p-6 space-y-5">
-                <div className="pb-3 border-b border-[#162922] light:border-slate-200">
-                  <h3 className="text-sm font-bold text-[#f4f5ef] light:text-slate-900">
+                <div className="pb-3 border-b border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-900">
                     Step 3: Confirm Token Burn
                   </h3>
-                  <p className="text-xs text-[#8e9f96] mt-0.5">
+                  <p className="text-xs text-slate-500 mt-0.5">
                     This cryptographic burn action is irreversible on Solana.
                   </p>
                 </div>
@@ -525,13 +525,13 @@ export default function RetirePage() {
                 </div>
 
                 {/* Irreversible Confirmation Checkbox & Type check */}
-                <div className="space-y-3 pt-2 border-t border-[#162922] light:border-slate-200 text-xs">
-                  <label className="flex items-start gap-2.5 text-[#8e9f96] light:text-slate-600 cursor-pointer">
+                <div className="space-y-3 pt-2 border-t border-slate-100 text-xs">
+                  <label className="flex items-start gap-2.5 text-slate-600 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={confirmCheckbox}
                       onChange={(e) => setConfirmCheckbox(e.target.checked)}
-                      className="mt-0.5 rounded accent-[#38b87c] w-3.5 h-3.5"
+                      className="mt-0.5 rounded accent-emerald-600 w-3.5 h-3.5"
                     />
                     <span>
                       I understand that burning tokens permanently destroys them from circulating supply.
@@ -539,30 +539,30 @@ export default function RetirePage() {
                   </label>
 
                   <div>
-                    <label className="text-[11px] text-[#718078] block mb-1">
-                      Type <strong className="text-white">RETIRE</strong> to unlock action:
+                    <label className="text-[11px] text-slate-500 block mb-1">
+                      Type <strong className="text-slate-900 font-bold">RETIRE</strong> to unlock action:
                     </label>
                     <input
                       type="text"
                       placeholder="RETIRE"
                       value={confirmText}
                       onChange={(e) => setConfirmText(e.target.value.toUpperCase())}
-                      className="w-full p-2 rounded-lg bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200 text-[#f4f5ef] light:text-slate-900 font-mono uppercase focus:outline-none focus:border-[#38b87c]"
+                      className="w-full p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-mono uppercase focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
                     />
                   </div>
                 </div>
 
                 {burnError && (
-                  <div className="p-2.5 rounded bg-[#291313] border border-red-500/40 text-xs text-red-300">
+                  <div className="p-2.5 rounded bg-rose-50 border border-rose-200 text-xs text-rose-800">
                     {burnError}
                   </div>
                 )}
 
-                {/* Neutral/Primary Action Button (NO orange-red gradient!) */}
+                {/* Neutral/Primary Action Button */}
                 {!connected ? (
                   <button
                     onClick={() => setVisible(true)}
-                    className="w-full py-3 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors cursor-pointer shadow-sm"
+                    className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors cursor-pointer shadow-sm"
                   >
                     Connect Wallet to Execute Burn
                   </button>
@@ -570,7 +570,7 @@ export default function RetirePage() {
                   <button
                     onClick={handleExecuteBurn}
                     disabled={burning || !confirmCheckbox || confirmText !== "RETIRE"}
-                    className="w-full py-3 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {burning ? (
                       <span>Executing Token-2022 Burn...</span>
@@ -583,7 +583,7 @@ export default function RetirePage() {
                   </button>
                 )}
 
-                <div className="text-[11px] text-[#718078] text-center">
+                <div className="text-[11px] text-slate-400 text-center">
                   Retirement is an on-chain record of credits retired, not a corporate net-zero certification.
                 </div>
               </Panel>
@@ -698,7 +698,7 @@ export default function RetirePage() {
 
                   <button
                     onClick={() => window.print()}
-                    className="px-3.5 py-1.5 rounded bg-[#111c16] text-white hover:bg-[#23382c] transition-colors flex items-center gap-1.5 text-xs font-medium cursor-pointer print:hidden"
+                    className="px-3.5 py-1.5 rounded bg-[#111c16] text-white hover:bg-[#23382c] transition-colors flex items-center gap-1.5 text-xs font-medium cursor-pointer print:hidden shadow-xs"
                   >
                     <Printer className="w-3 h-3" />
                     <span>Print Certificate</span>
@@ -709,8 +709,8 @@ export default function RetirePage() {
           </div>
 
           {/* Past Retirements Section */}
-          <div className="space-y-4 pt-4 border-t border-[#162922] light:border-slate-200 text-left">
-            <h3 className="text-sm font-bold text-[#f4f5ef] light:text-slate-900">
+          <div className="space-y-4 pt-4 border-t border-slate-200 text-left">
+            <h3 className="text-sm font-bold text-slate-900">
               Past Retirement Certificates for Connected Wallet
             </h3>
 
@@ -718,20 +718,20 @@ export default function RetirePage() {
               {pastRetirements.map((ret) => (
                 <div
                   key={ret.id}
-                  className="p-3.5 rounded-xl bg-[#0d1714] light:bg-white border border-[#162922] light:border-slate-200 flex items-center justify-between"
+                  className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-between"
                 >
                   <div>
-                    <div className="font-bold text-[#f4f5ef] light:text-slate-900">
+                    <div className="font-bold text-slate-900">
                       {ret.amount.toLocaleString()} tCO2e · {ret.project}
                     </div>
-                    <div className="text-[11px] text-[#8e9f96] font-mono mt-0.5">
+                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">
                       {ret.beneficiary} · {ret.date}
                     </div>
                   </div>
 
                   <Link
                     href={`/verify/${ret.signature}`}
-                    className="px-2.5 py-1.5 rounded bg-[#162922] hover:bg-[#213a2f] text-[#38b87c] font-mono text-xs flex items-center gap-1 transition-colors"
+                    className="px-2.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-emerald-800 border border-slate-200 font-mono text-xs flex items-center gap-1 transition-colors"
                   >
                     <span>Verify</span>
                     <ExternalLink className="w-3 h-3" />

@@ -131,11 +131,11 @@ export default function AppHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#07130f]/90 light:bg-white/90 backdrop-blur-md border-b border-[#162922] light:border-slate-200 transition-colors">
+      <header className="sticky top-0 z-40 w-full bg-[#0a1410] backdrop-blur-md border-b border-[#182921] transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Left: Brand Wordmark */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-7 h-7 rounded border border-[#38b87c]/40 bg-[#0d1714] flex items-center justify-center text-[#38b87c] group-hover:border-[#38b87c] transition-colors">
+            <div className="w-7 h-7 rounded border border-[#38b87c]/40 bg-[#12221b] flex items-center justify-center text-[#38b87c] group-hover:border-[#38b87c] transition-colors">
               <svg
                 className="w-3.5 h-3.5"
                 viewBox="0 0 24 24"
@@ -150,13 +150,13 @@ export default function AppHeader() {
                 <path d="M12 22a10 10 0 0 0 7.07-17.07" />
               </svg>
             </div>
-            <span className="text-base font-semibold tracking-tight text-[#f4f5ef] light:text-slate-900">
-              Terra<span className="text-[#a8c7b5] light:text-[#1b7046]">Verify</span>
+            <span className="text-base font-semibold tracking-tight text-white">
+              Terra<span className="text-[#38b87c]">Verify</span>
             </span>
           </Link>
 
-          {/* Center: Desktop Navigation with Active Indicator */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#0d1714] light:bg-slate-100 p-1 rounded-lg border border-[#162922] light:border-slate-200">
+          {/* Center: Desktop Navigation with Lightened Buttons */}
+          <nav className="hidden md:flex items-center gap-1.5 bg-[#14261f] p-1.5 rounded-xl border border-[#274538] shadow-inner">
             {navItems.map((item) => {
               const isActive =
                 item.href === "/"
@@ -167,10 +167,10 @@ export default function AppHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-[#162922] light:bg-white text-[#f4f5ef] light:text-slate-900 shadow-sm"
-                      : "text-[#8e9f96] light:text-slate-500 hover:text-[#f4f5ef] light:hover:text-slate-900"
+                      ? "bg-emerald-500 text-white shadow-sm border border-emerald-400/50"
+                      : "bg-[#203a2e] hover:bg-[#2b4c3e] text-slate-100 hover:text-white border border-[#2e5242] shadow-xs"
                   }`}
                 >
                   {item.label}
@@ -185,7 +185,7 @@ export default function AppHeader() {
             <button
               onClick={toggleTheme}
               title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
-              className="p-2 rounded-lg bg-[#0d1714] hover:bg-[#162922] light:bg-slate-100 light:hover:bg-slate-200 border border-[#162922] light:border-slate-200 text-[#8e9f96] light:text-slate-600 hover:text-[#f4f5ef] light:hover:text-slate-900 transition-colors cursor-pointer"
+              className="p-2 rounded-lg bg-[#13231c] hover:bg-[#1a3026] border border-[#233c30] text-slate-200 hover:text-white transition-colors cursor-pointer"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
@@ -316,7 +316,7 @@ export default function AppHeader() {
             {/* Mobile Nav Toggle */}
             <button
               onClick={() => setMobileNavOpen(!mobileNavOpen)}
-              className="md:hidden p-2 rounded-lg bg-[#0d1714] border border-[#162922] text-[#8e9f96] hover:text-white"
+              className="md:hidden p-2 rounded-lg bg-[#13231c] border border-[#233c30] text-slate-200 hover:text-white"
               aria-label="Toggle navigation"
             >
               {mobileNavOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -326,21 +326,27 @@ export default function AppHeader() {
 
         {/* Mobile Navigation Drawer */}
         {mobileNavOpen && (
-          <div className="md:hidden border-t border-[#162922] light:border-slate-200 bg-[#07130f] light:bg-white px-4 py-3 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileNavOpen(false)}
-                className={`block px-3 py-2 rounded-md text-xs font-medium ${
-                  pathname === item.href
-                    ? "bg-[#162922] light:bg-slate-100 text-[#f4f5ef] light:text-slate-900"
-                    : "text-[#8e9f96] light:text-slate-500 hover:text-white"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <div className="md:hidden border-t border-[#182921] bg-[#0a1410] px-4 py-3 space-y-1.5">
+            {navItems.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileNavOpen(false)}
+                  className={`block px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
+                    isActive
+                      ? "bg-emerald-500 text-white shadow-sm border border-emerald-400/50"
+                      : "bg-[#1d352b] hover:bg-[#28483b] text-slate-100 hover:text-white border border-[#2b4c3e]"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
         )}
       </header>

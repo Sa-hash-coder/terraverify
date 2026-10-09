@@ -204,8 +204,8 @@ export default function MapComponent({
       <div ref={mapRef} className="w-full h-full bg-[#07130f]" />
 
       {/* Layer Color Legend */}
-      <div className="absolute bottom-4 left-4 z-[400] bg-[#07130f]/90 light:bg-white/95 backdrop-blur-sm border border-[#162922] light:border-slate-200 rounded-lg p-2.5 text-[11px] font-mono shadow-md pointer-events-auto">
-        <div className="text-[#8e9f96] light:text-slate-500 uppercase font-semibold mb-1.5 text-[10px]">
+      <div className="absolute bottom-4 left-4 z-[400] bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg p-2.5 text-[11px] font-mono shadow-md pointer-events-auto">
+        <div className="text-slate-500 uppercase font-semibold mb-1.5 text-[10px]">
           {activeLayer === "truecolor" && "Layer: Sentinel-2 RGB (10m)"}
           {activeLayer === "ndvi" && "Layer: NDVI Canopy Health"}
           {activeLayer === "nir" && "Layer: NIR Band 8 (False Color)"}
@@ -213,12 +213,12 @@ export default function MapComponent({
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm bg-[#38b87c]" />
-            <span className="text-[#f4f5ef] light:text-slate-800">Dense Canopy (AAA/AA)</span>
+            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+            <span className="text-slate-800 font-medium">Dense Canopy (AAA/AA)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm bg-[#ef4444]" />
-            <span className="text-[#f4f5ef] light:text-slate-800">Degraded/Revoked (C)</span>
+            <span className="w-2.5 h-2.5 rounded-sm bg-rose-500" />
+            <span className="text-slate-800 font-medium">Degraded/Revoked (C)</span>
           </div>
         </div>
       </div>
