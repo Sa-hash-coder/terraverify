@@ -317,27 +317,27 @@ export default function MarketplacePage() {
               <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
                 {/* Search */}
                 <div className="relative w-full sm:w-72">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search project or seller..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+                    className="w-full bg-[var(--surface-raised)] border border-[var(--border)] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[var(--text)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
                   />
                 </div>
 
                 {/* Grade Chips */}
                 <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-                  <span className="text-[11px] text-slate-500 mr-1 hidden sm:inline">Grade:</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mr-1 hidden sm:inline">Grade:</span>
                   {["all", "AAA", "AA", "A", "C"].map((grade) => (
                     <button
                       key={grade}
                       onClick={() => setGradeFilter(grade)}
                       className={`px-2 py-0.5 rounded text-xs font-mono transition-colors cursor-pointer ${
                         gradeFilter === grade
-                          ? "bg-slate-900 text-white font-bold"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                          ? "bg-[var(--accent-subtle)] text-[var(--accent)] font-bold border border-[var(--accent)]/30"
+                          : "text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-raised)]"
                       }`}
                     >
                       {grade}
@@ -347,23 +347,23 @@ export default function MarketplacePage() {
               </div>
 
               {/* Status and Sort Bar */}
-              <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
-                <label className="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900">
+              <div className="flex items-center justify-between text-xs pt-2 border-t border-[var(--border-subtle)]">
+                <label className="flex items-center gap-2 cursor-pointer text-[var(--text-muted)] hover:text-[var(--text)]">
                   <input
                     type="checkbox"
                     checked={showSuspended}
                     onChange={(e) => setShowSuspended(e.target.checked)}
-                    className="rounded accent-emerald-600 w-3.5 h-3.5"
+                    className="rounded accent-[var(--accent)] w-3.5 h-3.5"
                   />
                   <span>Show suspended projects (Oracle Hook)</span>
                 </label>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-500 text-[11px]">Sort:</span>
+                  <span className="text-[var(--text-muted)] text-[11px]">Sort:</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as "price-asc" | "price-desc" | "amount-desc")}
-                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
+                    className="bg-[var(--surface-raised)] border border-[var(--border)] rounded px-2 py-1 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--accent)]"
                   >
                     <option value="price-asc">Price: Low to High</option>
                     <option value="price-desc">Price: High to Low</option>
@@ -377,7 +377,7 @@ export default function MarketplacePage() {
             <Panel className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-mono text-[11px] uppercase tracking-wider">
+                  <thead className="bg-[var(--surface-raised)] border-b border-[var(--border)] text-[var(--text-muted)] font-mono text-[11px] uppercase tracking-wider">
                     <tr>
                       <th className="py-3 px-4">Project</th>
                       <th className="py-3 px-3">Grade</th>
@@ -388,10 +388,10 @@ export default function MarketplacePage() {
                       <th className="py-3 px-4 text-right">Seller</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-[var(--border-subtle)]">
                     {filteredListings.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="py-12 text-center text-slate-500">
+                        <td colSpan={7} className="py-12 text-center text-[var(--text-muted)]">
                           No carbon credit listings found matching the selected criteria.
                         </td>
                       </tr>
@@ -406,10 +406,10 @@ export default function MarketplacePage() {
                             onClick={() => setSelectedListingId(item.id)}
                             className={`transition-colors cursor-pointer ${
                               isSelected
-                                ? "bg-emerald-50/70"
+                                ? "bg-[var(--accent-subtle)]/50"
                                 : isRevoked
-                                ? "bg-rose-50/40 hover:bg-rose-50/70"
-                                : "hover:bg-slate-50"
+                                ? "bg-[var(--danger-subtle)]/40 hover:bg-[var(--danger-subtle)]/60"
+                                : "hover:bg-[var(--surface-raised)]/60"
                             }`}
                           >
                             <td className="py-3 px-4">
@@ -417,13 +417,13 @@ export default function MarketplacePage() {
                                 <img
                                   src={item.image}
                                   alt={item.project}
-                                  className="w-9 h-9 rounded object-cover border border-slate-200 shrink-0"
+                                  className="w-9 h-9 rounded object-cover border border-[var(--border)] shrink-0"
                                 />
                                 <div>
-                                  <div className="font-semibold text-slate-900 leading-tight">
+                                  <div className="font-semibold text-[var(--text)] leading-tight">
                                     {item.project}
                                   </div>
-                                  <div className="text-[11px] text-slate-500">
+                                  <div className="text-[11px] text-[var(--text-muted)]">
                                     {item.region}
                                   </div>
                                 </div>
@@ -432,16 +432,16 @@ export default function MarketplacePage() {
                             <td className="py-3 px-3">
                               <GradeBadge grade={item.grade} />
                             </td>
-                            <td className="py-3 px-3 font-mono text-slate-700">
+                            <td className="py-3 px-3 font-mono text-[var(--text)]">
                               {item.ndvi.toFixed(3)}
                             </td>
                             <td className="py-3 px-3">
                               <StatusBadge status={item.status} size="sm" />
                             </td>
-                            <td className="py-3 px-3 text-right font-mono font-bold text-slate-900">
+                            <td className="py-3 px-3 text-right font-mono font-bold text-[var(--text)]">
                               {item.priceNum.toFixed(2)} SOL
                             </td>
-                            <td className="py-3 px-3 text-right font-mono text-slate-600">
+                            <td className="py-3 px-3 text-right font-mono text-[var(--text-muted)]">
                               {item.amount.toLocaleString()} t
                             </td>
                             <td className="py-3 px-4 text-right">
@@ -460,11 +460,11 @@ export default function MarketplacePage() {
           {/* Right Sticky Trade Panel (4 Columns) */}
           <div className="lg:col-span-4 sticky top-24">
             <Panel className="p-6 space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <span className="text-xs font-mono uppercase tracking-wider text-slate-500 font-semibold">
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+                <span className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
                   Trade Execution
                 </span>
-                <span className="text-xs font-mono text-emerald-700 font-medium">
+                <span className="text-xs font-mono text-[var(--accent)] font-medium">
                   SPL Token-2022
                 </span>
               </div>
@@ -472,20 +472,20 @@ export default function MarketplacePage() {
               {selectedListing ? (
                 <>
                   {/* Selected Item Card */}
-                  <div className="flex gap-3 items-center p-3 rounded-lg bg-slate-50 border border-slate-200">
+                  <div className="flex gap-3 items-center p-3 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)]">
                     <img
                       src={selectedListing.image}
                       alt={selectedListing.project}
-                      className="w-12 h-12 rounded object-cover border border-slate-200"
+                      className="w-12 h-12 rounded object-cover border border-[var(--border)]"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <GradeBadge grade={selectedListing.grade} />
-                        <span className="text-xs font-bold text-slate-900 truncate">
+                        <span className="text-xs font-bold text-[var(--text)] truncate">
                           {selectedListing.project}
                         </span>
                       </div>
-                      <div className="text-[11px] text-slate-600 font-mono">
+                      <div className="text-[11px] text-[var(--text-muted)] font-mono">
                         {selectedListing.priceNum.toFixed(2)} SOL / tCO2e
                       </div>
                     </div>
@@ -493,12 +493,12 @@ export default function MarketplacePage() {
 
                   {/* Suspended Hook Warning Banner */}
                   {isSuspended && (
-                    <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1.5">
-                      <div className="flex items-center gap-1.5 font-bold text-rose-700">
+                    <div className="p-3.5 rounded-lg bg-[var(--danger-subtle)] border border-[var(--danger)]/30 text-xs text-[var(--danger)] space-y-1.5">
+                      <div className="flex items-center gap-1.5 font-bold">
                         <ShieldAlert className="w-4 h-4 shrink-0" />
                         <span>Trading Prohibited by Oracle</span>
                       </div>
-                      <p className="text-[11px] text-rose-800 leading-relaxed">
+                      <p className="text-[11px] text-[var(--text)] leading-relaxed">
                         {selectedListing.revocationReason ||
                           "This project has been suspended due to canopy telemetry loss. Token-2022 Transfer Hook refuses settlement."}
                       </p>
@@ -508,14 +508,14 @@ export default function MarketplacePage() {
                   {/* Quantity Input */}
                   <div className="space-y-1.5 text-left">
                     <div className="flex items-center justify-between text-xs">
-                      <label className="text-slate-600 font-medium">Quantity (tCO2e)</label>
-                      <span className="text-[11px] font-mono text-slate-500">
+                      <label className="text-[var(--text-muted)] font-medium">Quantity (tCO2e)</label>
+                      <span className="text-[11px] font-mono text-[var(--text-muted)]">
                         Avail: {selectedListing.amount} t
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50 px-3 py-2 flex-1 focus-within:border-emerald-500 focus-within:bg-white transition-colors">
+                      <div className="flex items-center border border-[var(--border)] rounded-lg bg-[var(--surface-raised)] px-3 py-2 flex-1 focus-within:border-[var(--accent)] transition-colors">
                         <input
                           type="number"
                           min="1"
@@ -523,13 +523,13 @@ export default function MarketplacePage() {
                           value={buyAmount}
                           onChange={(e) => setBuyAmount(e.target.value)}
                           disabled={isSuspended}
-                          className="w-full bg-transparent text-sm font-mono text-slate-900 focus:outline-none"
+                          className="w-full bg-transparent text-sm font-mono text-[var(--text)] focus:outline-none"
                         />
                         <button
                           type="button"
                           onClick={() => setBuyAmount(String(selectedListing.amount))}
                           disabled={isSuspended}
-                          className="text-[11px] font-mono font-bold text-emerald-700 hover:underline px-1 cursor-pointer"
+                          className="text-[11px] font-mono font-bold text-[var(--accent)] hover:underline px-1 cursor-pointer"
                         >
                           MAX
                         </button>
@@ -538,46 +538,46 @@ export default function MarketplacePage() {
                   </div>
 
                   {/* Cost Summary Breakdown */}
-                  <div className="space-y-2 pt-2 border-t border-slate-100 text-xs font-mono">
-                    <div className="flex justify-between text-slate-500">
+                  <div className="space-y-2 pt-2 border-t border-[var(--border-subtle)] text-xs font-mono">
+                    <div className="flex justify-between text-[var(--text-muted)]">
                       <span>Subtotal</span>
-                      <span className="text-slate-900 font-medium">{totalCost} SOL</span>
+                      <span className="text-[var(--text)] font-medium">{totalCost} SOL</span>
                     </div>
-                    <div className="flex justify-between text-slate-500">
+                    <div className="flex justify-between text-[var(--text-muted)]">
                       <span>Network Fee</span>
-                      <span className="text-slate-700">~0.00005 SOL</span>
+                      <span className="text-[var(--text-muted)]">~0.00005 SOL</span>
                     </div>
-                    <div className="flex justify-between text-slate-500">
+                    <div className="flex justify-between text-[var(--text-muted)]">
                       <span>Wallet Balance</span>
-                      <span className={hasInsufficientBalance ? "text-rose-600 font-bold" : "text-slate-900 font-medium"}>
+                      <span className={hasInsufficientBalance ? "text-[var(--danger)] font-bold" : "text-[var(--text)] font-medium"}>
                         {walletBalance !== null ? `${walletBalance.toFixed(3)} SOL` : "Not connected"}
                       </span>
                     </div>
-                    <div className="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-100">
+                    <div className="flex justify-between text-sm font-bold text-[var(--text)] pt-2 border-t border-[var(--border-subtle)]">
                       <span>Total</span>
-                      <span className="text-emerald-700">{totalCost} SOL</span>
+                      <span className="text-[var(--accent)]">{totalCost} SOL</span>
                     </div>
                   </div>
 
                   {/* Feedback Message */}
                   {errorMsg && (
-                    <div className="p-2.5 rounded bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                    <div className="p-2.5 rounded bg-[var(--danger-subtle)] border border-[var(--danger)]/30 text-xs text-[var(--danger)] flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                       <span>{errorMsg}</span>
                     </div>
                   )}
 
                   {txHash && (
-                    <div className="p-3 rounded bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 space-y-1">
+                    <div className="p-3 rounded bg-[var(--accent-subtle)] border border-[var(--accent)]/30 text-xs text-[var(--accent)] space-y-1">
                       <div className="font-bold flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <CheckCircle2 className="w-4 h-4 text-[var(--accent)]" />
                         <span>Trade Confirmed on Solana Devnet</span>
                       </div>
                       <a
                         href={`https://explorer.solana.com/tx/${txHash}?cluster=devnet`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] underline flex items-center gap-1 break-all text-emerald-700"
+                        className="text-[11px] underline flex items-center gap-1 break-all text-[var(--accent)]"
                       >
                         <span>View signature: {txHash.slice(0, 16)}...</span>
                         <ExternalLink className="w-3 h-3" />
@@ -589,7 +589,7 @@ export default function MarketplacePage() {
                   {!connected ? (
                     <button
                       onClick={() => setVisible(true)}
-                      className="w-full py-3 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors cursor-pointer shadow-sm"
+                      className="w-full py-3 px-4 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity cursor-pointer shadow-xs"
                     >
                       Connect Wallet to Trade
                     </button>
@@ -597,12 +597,12 @@ export default function MarketplacePage() {
                     <button
                       onClick={handleExecuteTrade}
                       disabled={trading || isSuspended || hasInsufficientBalance}
-                      className={`w-full py-3 px-4 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${
+                      className={`w-full py-3 px-4 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
                         isSuspended
-                          ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                          ? "bg-[var(--surface-raised)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--border)]"
                           : hasInsufficientBalance
-                          ? "bg-rose-100 text-rose-700 cursor-not-allowed border border-rose-200"
-                          : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                          ? "bg-[var(--danger-subtle)] text-[var(--danger)] cursor-not-allowed border border-[var(--danger)]/30"
+                          : "bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)]"
                       }`}
                     >
                       {trading ? (
@@ -638,23 +638,23 @@ export default function MarketplacePage() {
           </div>
 
           <Panel className="p-6">
-            <h3 className="text-sm font-bold text-slate-900 mb-4">
+            <h3 className="text-sm font-bold text-[var(--text)] mb-4">
               Active Ecological Token Balances
             </h3>
 
-            <div className="divide-y divide-slate-100 text-xs">
+            <div className="divide-y divide-[var(--border-subtle)] text-xs">
               <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <img
                     src="/amazon.png"
                     alt="Amazon Block 7"
-                    className="w-10 h-10 rounded object-cover border border-slate-200"
+                    className="w-10 h-10 rounded object-cover border border-[var(--border)]"
                   />
                   <div>
-                    <div className="font-bold text-slate-900">
+                    <div className="font-bold text-[var(--text)]">
                       Amazon Reforestation Block 7
                     </div>
-                    <div className="text-[11px] text-slate-500">
+                    <div className="text-[11px] text-[var(--text-muted)]">
                       Token ID: TCO2-AMZ7 · Grade AAA · 100% Intact
                     </div>
                   </div>
@@ -662,12 +662,12 @@ export default function MarketplacePage() {
 
                 <div className="flex items-center gap-4">
                   <div className="text-right font-mono">
-                    <div className="font-bold text-slate-900">250 tCO2e</div>
-                    <div className="text-[11px] text-emerald-700">~37.5 SOL value</div>
+                    <div className="font-bold text-[var(--text)]">250 tCO2e</div>
+                    <div className="text-[11px] text-[var(--accent)]">~37.5 SOL value</div>
                   </div>
                   <Link
                     href="/retire?project=Amazon%20Reforestation%20Block%207&amount=250"
-                    className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm"
+                    className="px-3.5 py-1.5 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity flex items-center gap-1.5 shadow-xs"
                   >
                     <Flame className="w-3.5 h-3.5" />
                     <span>Retire Credits</span>
@@ -680,13 +680,13 @@ export default function MarketplacePage() {
                   <img
                     src="/satellite_hero.jpg"
                     alt="Congo Basin"
-                    className="w-10 h-10 rounded object-cover border border-slate-200"
+                    className="w-10 h-10 rounded object-cover border border-[var(--border)]"
                   />
                   <div>
-                    <div className="font-bold text-slate-900">
+                    <div className="font-bold text-[var(--text)]">
                       Congo Basin Conservation
                     </div>
-                    <div className="text-[11px] text-slate-500">
+                    <div className="text-[11px] text-[var(--text-muted)]">
                       Token ID: TCO2-CGO2 · Grade AA · 100% Intact
                     </div>
                   </div>
@@ -694,12 +694,12 @@ export default function MarketplacePage() {
 
                 <div className="flex items-center gap-4">
                   <div className="text-right font-mono">
-                    <div className="font-bold text-slate-900">50 tCO2e</div>
-                    <div className="text-[11px] text-emerald-700">~6.0 SOL value</div>
+                    <div className="font-bold text-[var(--text)]">50 tCO2e</div>
+                    <div className="text-[11px] text-[var(--accent)]">~6.0 SOL value</div>
                   </div>
                   <Link
                     href="/retire?project=Congo%20Basin%20Conservation&amount=50"
-                    className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm"
+                    className="px-3.5 py-1.5 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity flex items-center gap-1.5 shadow-xs"
                   >
                     <Flame className="w-3.5 h-3.5" />
                     <span>Retire Credits</span>
@@ -716,68 +716,68 @@ export default function MarketplacePage() {
         <div className="max-w-2xl mx-auto">
           <Panel className="p-8 space-y-6">
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-[var(--text)]">
                 Create Carbon Credit Sell Order
               </h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-[var(--text-muted)] mt-1">
                 List verified credits from your wallet on the decentralized order book.
               </p>
             </div>
 
             {listSuccess && (
-              <div className="p-3 rounded bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="p-3 rounded bg-[var(--accent-subtle)] border border-[var(--accent)]/30 text-xs text-[var(--accent)] flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[var(--accent)]" />
                 <span>Order published! Redirecting to catalog...</span>
               </div>
             )}
 
             <form onSubmit={handleCreateListing} className="space-y-4 text-xs text-left">
               <div>
-                <label className="text-slate-600 block mb-1.5 font-medium">Select Monitored Project</label>
+                <label className="text-[var(--text-muted)] block mb-1.5 font-medium">Select Monitored Project</label>
                 <select
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500"
+                  className="w-full p-2.5 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)] text-[var(--text)] focus:outline-none focus:border-[var(--accent)]"
                 >
-                  <option value="Amazon Reforestation Block 7">Amazon Reforestation Block 7 (Grade AAA)</option>
-                  <option value="Congo Basin Conservation">Congo Basin Conservation (Grade AA)</option>
-                  <option value="Sumatra Tiger Reserve">Sumatra Tiger Reserve (Grade A)</option>
+                  <option value="Amazon Reforestation Block 7" className="bg-[var(--surface)]">Amazon Reforestation Block 7 (Grade AAA)</option>
+                  <option value="Congo Basin Conservation" className="bg-[var(--surface)]">Congo Basin Conservation (Grade AA)</option>
+                  <option value="Sumatra Tiger Reserve" className="bg-[var(--surface)]">Sumatra Tiger Reserve (Grade A)</option>
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-slate-600 block mb-1.5 font-medium">Quantity to Sell (tCO2e)</label>
+                  <label className="text-[var(--text-muted)] block mb-1.5 font-medium">Quantity to Sell (tCO2e)</label>
                   <input
                     type="number"
                     min="1"
                     value={newAmount}
                     onChange={(e) => setNewAmount(e.target.value)}
-                    className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-mono focus:outline-none focus:border-emerald-500"
+                    className="w-full p-2.5 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)] text-[var(--text)] font-mono focus:outline-none focus:border-[var(--accent)]"
                     placeholder="100"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-slate-600 block mb-1.5 font-medium">Asking Price per Ton (SOL)</label>
+                  <label className="text-[var(--text-muted)] block mb-1.5 font-medium">Asking Price per Ton (SOL)</label>
                   <input
                     type="number"
                     step="0.01"
                     min="0.01"
                     value={newPrice}
                     onChange={(e) => setNewPrice(e.target.value)}
-                    className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-mono focus:outline-none focus:border-emerald-500"
+                    className="w-full p-2.5 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)] text-[var(--text)] font-mono focus:outline-none focus:border-[var(--accent)]"
                     placeholder="0.15"
                     required
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100">
+              <div className="pt-4 border-t border-[var(--border-subtle)]">
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors cursor-pointer shadow-sm"
+                  className="w-full py-3 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity cursor-pointer shadow-xs"
                 >
                   Publish Sell Order to Solana Order Book
                 </button>

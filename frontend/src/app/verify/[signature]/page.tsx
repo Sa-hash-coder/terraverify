@@ -19,22 +19,22 @@ export default function VerifySignaturePage({
       <div className="max-w-3xl mx-auto space-y-6">
         <Link
           href="/retire"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900 font-mono transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)] font-mono transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Retirement Console</span>
         </Link>
 
         {/* Verification Status Header */}
-        <div className="p-6 rounded-2xl bg-white border border-emerald-200 text-left shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+        <div className="p-6 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border)] text-left shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[var(--accent-subtle)] text-[var(--accent)] flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-6 h-6 text-[var(--accent)]" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">
+            <h1 className="text-xl font-bold text-[var(--text)]">
               Verified Carbon Offset Certificate
             </h1>
-            <p className="text-xs text-emerald-700 font-mono">
+            <p className="text-xs text-[var(--accent)] font-mono">
               Solana Ledger Attestation · Token-2022 Burn Proof
             </p>
           </div>
@@ -124,7 +124,7 @@ export default function VerifySignaturePage({
 
             <button
               onClick={() => window.print()}
-              className="px-4 py-2 rounded-lg bg-[#111c16] text-white hover:bg-[#23382c] transition-colors flex items-center gap-1.5 font-medium cursor-pointer print:hidden"
+              className="px-4 py-2 rounded-lg bg-[var(--text)] text-[var(--bg-app)] hover:opacity-90 transition-opacity flex items-center gap-1.5 font-medium cursor-pointer print:hidden"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print Official Certificate</span>
@@ -134,12 +134,12 @@ export default function VerifySignaturePage({
 
         {/* Public Blockchain Proof Link */}
         <Panel className="p-4 flex items-center justify-between text-xs font-mono">
-          <span className="text-slate-600">Verify ledger proof directly on Solana Explorer:</span>
+          <span className="text-[var(--text-muted)]">Verify ledger proof directly on Solana Explorer:</span>
           <a
             href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 font-semibold"
+            className="text-[var(--accent)] hover:opacity-90 hover:underline flex items-center gap-1 font-semibold"
           >
             <span>Explorer Transaction Proof</span>
             <ExternalLink className="w-3.5 h-3.5" />
