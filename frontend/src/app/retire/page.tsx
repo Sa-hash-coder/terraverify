@@ -19,7 +19,8 @@ import {
   FileCheck, 
   QrCode,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  LogOut
 } from "lucide-react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -120,8 +121,46 @@ export default function RetirePage() {
   const [pastRetirements, setPastRetirements] = useState<PastRetirement[]>(DEFAULT_PAST_RETIREMENTS);
 
   const { connection } = useConnection();
-  const { publicKey, sendTransaction, connected } = useWallet();
+  const { publicKey, sendTransaction, connected, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
+  const [localWallet, setLocalWallet] = useState<{ publicKey: string; balance?: number } | null>(null);
+
+  // Sync saved local wallet from localStorage
+  const syncLocalWallet = () => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("terra_local_wallet");
+      if (saved) {
+        try {
+          setLocalWallet(JSON.parse(saved));
+          return;
+        } catch {}
+      }
+      setLocalWallet(null);
+    }
+  };
+
+  React.useEffect(() => {
+    syncLocalWallet();
+    const handleStorage = () => syncLocalWallet();
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const isWalletActive = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
+  const activePubkey = publicKey ? publicKey.toBase58() : localWallet?.publicKey || null;
+
+  const handleDisconnectWallet = () => {
+    if (connected) {
+      try {
+        disconnect();
+      } catch {}
+    }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("terra_local_wallet");
+    }
+    setLocalWallet(null);
+    window.dispatchEvent(new Event("storage"));
+  };
 
   // Calculated emissions in Step 1
   const calculatedEmissions = useMemo(() => {
@@ -559,7 +598,7 @@ export default function RetirePage() {
                 )}
 
                 {/* Neutral/Primary Action Button */}
-                {!connected ? (
+                {!isWalletActive ? (
                   <button
                     onClick={() => setVisible(true)}
                     className="w-full py-3 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity cursor-pointer shadow-xs"
@@ -567,20 +606,31 @@ export default function RetirePage() {
                     Connect Wallet to Execute Burn
                   </button>
                 ) : (
-                  <button
-                    onClick={handleExecuteBurn}
-                    disabled={burning || !confirmCheckbox || confirmText !== "RETIRE"}
-                    className="w-full py-3 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {burning ? (
-                      <span>Executing Token-2022 Burn...</span>
-                    ) : (
-                      <>
-                        <Flame className="w-3.5 h-3.5" />
-                        <span>Confirm Permanent Retirement</span>
-                      </>
-                    )}
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleExecuteBurn}
+                      disabled={burning || !confirmCheckbox || confirmText !== "RETIRE"}
+                      className="w-full py-3 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {burning ? (
+                        <span>Executing Token-2022 Burn...</span>
+                      ) : (
+                        <>
+                          <Flame className="w-3.5 h-3.5" />
+                          <span>Confirm Permanent Retirement</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDisconnectWallet}
+                      className="w-full py-2 px-3 rounded-lg border border-[var(--danger)]/30 hover:bg-[var(--danger-subtle)] text-[var(--danger)] font-medium text-[11px] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                      title="Disconnect connected wallet"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Disconnect Wallet {activePubkey ? `(${activePubkey.slice(0, 4)}...${activePubkey.slice(-4)})` : ""}</span>
+                    </button>
+                  </div>
                 )}
 
                 <div className="text-[11px] text-slate-400 text-center">

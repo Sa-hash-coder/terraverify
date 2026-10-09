@@ -160,13 +160,16 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
 
   const handleDisconnect = () => {
     if (connected) {
-      disconnect();
+      try {
+        disconnect();
+      } catch {}
     }
-    if (localWallet) {
+    if (typeof window !== "undefined") {
       localStorage.removeItem("terra_local_wallet");
-      setLocalWallet(null);
     }
+    setLocalWallet(null);
     setBalance(null);
+    window.dispatchEvent(new Event("storage"));
   };
 
   const navItems = [
@@ -208,10 +211,10 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          {!connected ? (
+          {!isWalletConnected ? (
             <button
-              onClick={() => setAdapterModalVisible(true)}
-              className="px-2.5 py-1.5 rounded-lg bg-[var(--accent)] text-[var(--bg-app)] font-semibold text-xs flex items-center gap-1.5"
+              onClick={() => setCreateWalletOpen(true)}
+              className="px-2.5 py-1.5 rounded-lg bg-[var(--accent)] text-[var(--bg-app)] font-semibold text-xs flex items-center gap-1.5 cursor-pointer"
             >
               <Wallet className="w-3.5 h-3.5" />
               <span>Connect</span>
@@ -219,7 +222,14 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
           ) : (
             <div className="flex items-center gap-1.5 text-xs font-mono text-[var(--text)] bg-[var(--surface-raised)] border border-[var(--border)] px-2 py-1 rounded-md">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-              <span>{publicKey?.toBase58().slice(0, 4)}...{publicKey?.toBase58().slice(-4)}</span>
+              <span>{activePubkey?.slice(0, 4)}...{activePubkey?.slice(-4)}</span>
+              <button
+                onClick={handleDisconnect}
+                className="ml-1 text-[11px] font-sans font-medium text-[var(--danger)] hover:underline cursor-pointer"
+                title="Disconnect wallet"
+              >
+                ✕
+              </button>
             </div>
           )}
         </div>
@@ -305,13 +315,13 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
             </button>
           </div>
 
-          {!connected ? (
+          {!isWalletConnected ? (
             <button
               onClick={() => {
                 setMobileOpen(false);
-                setAdapterModalVisible(true);
+                setCreateWalletOpen(true);
               }}
-              className="w-full py-2.5 px-3 rounded-lg bg-[var(--accent)] text-[var(--bg-app)] font-semibold text-xs flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-3 rounded-lg bg-[var(--accent)] text-[var(--bg-app)] font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer"
             >
               <Wallet className="w-4 h-4" />
               <span>Connect Wallet</span>
@@ -320,7 +330,7 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
             <div className="p-3 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-[var(--text-muted)]">Wallet</span>
-                <span className="text-[var(--text)]">{publicKey?.toBase58().slice(0, 4)}...{publicKey?.toBase58().slice(-4)}</span>
+                <span className="text-[var(--text)]">{activePubkey?.slice(0, 4)}...{activePubkey?.slice(-4)}</span>
               </div>
               {balance !== null && (
                 <div className="flex items-center justify-between text-xs font-mono">
@@ -329,8 +339,11 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
                 </div>
               )}
               <button
-                onClick={() => disconnect()}
-                className="w-full mt-2 py-1.5 rounded text-xs text-[var(--danger)] hover:bg-[var(--danger-subtle)] transition-colors flex items-center justify-center gap-1.5 font-medium"
+                onClick={() => {
+                  handleDisconnect();
+                  setMobileOpen(false);
+                }}
+                className="w-full mt-2 py-1.5 rounded text-xs text-[var(--danger)] hover:bg-[var(--danger-subtle)] transition-colors flex items-center justify-center gap-1.5 font-medium cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Disconnect</span>

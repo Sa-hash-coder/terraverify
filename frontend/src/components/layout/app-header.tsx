@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { PublicKey } from "@solana/web3.js";
 import { 
   Sun, 
   Moon, 
@@ -34,6 +35,46 @@ export default function AppHeader() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [createWalletOpen, setCreateWalletOpen] = useState(false);
+  const [localWallet, setLocalWallet] = useState<{ publicKey: string; balance?: number } | null>(null);
+
+  // Sync saved local wallet from localStorage
+  const syncLocalWallet = () => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("terra_local_wallet");
+      if (saved) {
+        try {
+          setLocalWallet(JSON.parse(saved));
+          return;
+        } catch {}
+      }
+      setLocalWallet(null);
+    }
+  };
+
+  useEffect(() => {
+    syncLocalWallet();
+    const handleStorage = () => syncLocalWallet();
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
+  const activePubkey = publicKey ? publicKey.toBase58() : localWallet?.publicKey || null;
+
+  const handleDisconnectWallet = () => {
+    if (connected) {
+      try {
+        disconnect();
+      } catch {}
+    }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("terra_local_wallet");
+    }
+    setLocalWallet(null);
+    setBalance(null);
+    setWalletMenuOpen(false);
+    window.dispatchEvent(new Event("storage"));
+  };
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -72,24 +113,32 @@ export default function AppHeader() {
 
   // Fetch balance
   useEffect(() => {
-    if (!connected || !publicKey) {
-      setBalance(null);
-      return;
-    }
+    if (connected && publicKey) {
+      const fetchBalance = async () => {
+        try {
+          const bal = await connection.getBalance(publicKey);
+          setBalance(bal / 1e9);
+        } catch {
+          // fail silently
+        }
+      };
 
-    const fetchBalance = async () => {
+      fetchBalance();
+      const interval = setInterval(fetchBalance, 6000);
+      return () => clearInterval(interval);
+    } else if (localWallet?.publicKey) {
       try {
-        const bal = await connection.getBalance(publicKey);
-        setBalance(bal / 1e9);
+        const pk = new PublicKey(localWallet.publicKey);
+        connection.getBalance(pk).then((bal) => setBalance(bal / 1e9)).catch(() => {
+          setBalance(localWallet.balance ?? 1.0);
+        });
       } catch {
-        // fail silently
+        setBalance(localWallet.balance ?? 1.0);
       }
-    };
-
-    fetchBalance();
-    const interval = setInterval(fetchBalance, 6000);
-    return () => clearInterval(interval);
-  }, [connected, publicKey, connection]);
+    } else {
+      setBalance(null);
+    }
+  }, [connected, publicKey, localWallet, connection]);
 
   // Handle Faucet
   const handleRequestFaucet = async () => {
@@ -122,8 +171,8 @@ export default function AppHeader() {
   ];
 
   const handleCopyAddress = () => {
-    if (publicKey) {
-      navigator.clipboard.writeText(publicKey.toBase58());
+    if (activePubkey) {
+      navigator.clipboard.writeText(activePubkey);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -196,10 +245,10 @@ export default function AppHeader() {
             </button>
 
             {/* Wallet Integration Widget */}
-            {!connected || !publicKey ? (
+            {!isWalletConnected || !activePubkey ? (
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setAdapterModalVisible(true)}
+                  onClick={() => setCreateWalletOpen(true)}
                   disabled={connecting}
                   className="px-3.5 py-1.5 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
                 >
@@ -223,7 +272,7 @@ export default function AppHeader() {
                 >
                   <span className="w-2 h-2 rounded-full bg-[#38b87c]" />
                   <span className="text-xs font-mono font-medium text-[#f4f5ef] light:text-slate-900">
-                    {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
+                    {activePubkey.slice(0, 4)}...{activePubkey.slice(-4)}
                   </span>
                   {balance !== null && (
                     <span className="text-xs font-mono text-[#8e9f96] light:text-slate-500 hidden sm:inline">
@@ -244,7 +293,7 @@ export default function AppHeader() {
                         {balance !== null ? `${balance.toFixed(3)} SOL` : "Loading..."}
                       </div>
                       <div className="text-[11px] font-mono text-[#718078] light:text-slate-500 truncate select-all mt-1 p-1.5 rounded bg-[#07130f] light:bg-slate-50 border border-[#162922] light:border-slate-200">
-                        {publicKey.toBase58()}
+                        {activePubkey}
                       </div>
                     </div>
 
@@ -262,7 +311,7 @@ export default function AppHeader() {
                       </button>
 
                       <a
-                        href={`https://explorer.solana.com/address/${publicKey.toBase58()}?cluster=devnet`}
+                        href={`https://explorer.solana.com/address/${activePubkey}?cluster=devnet`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full flex items-center gap-2 p-1.5 rounded hover:bg-[#162922] light:hover:bg-slate-100 text-[#f4f5ef] light:text-slate-700 transition-colors text-left"
@@ -298,11 +347,9 @@ export default function AppHeader() {
                         Keypair Tools
                       </button>
                       <button
-                        onClick={() => {
-                          disconnect();
-                          setWalletMenuOpen(false);
-                        }}
+                        onClick={handleDisconnectWallet}
                         className="flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                        title="Disconnect connected wallet"
                       >
                         <LogOut className="w-3 h-3" />
                         <span>Disconnect</span>

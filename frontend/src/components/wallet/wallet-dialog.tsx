@@ -90,6 +90,20 @@ export default function WalletDialog({ isOpen, onClose, onSuccess }: WalletDialo
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Disconnect / Forget any active wallet
+  const handleDisconnectAll = async () => {
+    if (connected) {
+      try {
+        await disconnect();
+      } catch {}
+    }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("terra_local_wallet");
+    }
+    setCreatedWallet(null);
+    window.dispatchEvent(new Event("storage"));
+  };
+
   // Generate wallet
   const handleGenerateWallet = async () => {
     setIsGenerating(true);
@@ -374,16 +388,23 @@ export default function WalletDialog({ isOpen, onClose, onSuccess }: WalletDialo
                     </a>
                   </div>
 
-                  {/* Continue / Log In Button */}
-                  <div className="pt-2">
+                  {/* Continue / Log In & Disconnect Buttons */}
+                  <div className="pt-2 flex gap-2">
                     <button
                       onClick={() => {
                         if (onSuccess) onSuccess(createdWallet.publicKey);
                         else onClose();
                       }}
-                      className="w-full py-2.5 px-4 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                      className="flex-1 py-2.5 px-4 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
                     >
                       <span>Continue to Explorer →</span>
+                    </button>
+                    <button
+                      onClick={handleDisconnectAll}
+                      className="py-2.5 px-3 rounded-lg bg-[#201818] hover:bg-[#2c1e1e] border border-[#3a2222] text-xs text-[#fca5a5] hover:text-[#f87171] transition-colors cursor-pointer"
+                      title="Disconnect and remove this wallet"
+                    >
+                      Disconnect
                     </button>
                   </div>
 
@@ -423,8 +444,8 @@ export default function WalletDialog({ isOpen, onClose, onSuccess }: WalletDialo
                       {copiedKey === "public" ? "Copied" : "Copy Address"}
                     </button>
                     <button
-                      onClick={() => disconnect()}
-                      className="py-1.5 px-3 rounded bg-[#201818] hover:bg-[#2c1e1e] border border-[#3a2222] text-xs text-[#fca5a5] transition-colors cursor-pointer"
+                      onClick={handleDisconnectAll}
+                      className="py-1.5 px-3 rounded bg-[#201818] hover:bg-[#2c1e1e] border border-[#3a2222] text-xs text-[#fca5a5] hover:text-[#f87171] transition-colors cursor-pointer"
                     >
                       Disconnect
                     </button>

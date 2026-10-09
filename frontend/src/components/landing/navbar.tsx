@@ -11,7 +11,23 @@ export default function LandingNavbar() {
   const [walletDialogOpen, setWalletDialogOpen] = useState(false);
   const [localWalletPubkey, setLocalWalletPubkey] = useState<string | null>(null);
 
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, disconnect } = useWallet();
+
+  const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWalletPubkey);
+
+  const handleDisconnectWallet = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (connected) {
+      try {
+        disconnect();
+      } catch {}
+    }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("terra_local_wallet");
+    }
+    setLocalWalletPubkey(null);
+    window.dispatchEvent(new Event("storage"));
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,7 +38,7 @@ export default function LandingNavbar() {
   }, []);
 
   // Check if a local wallet was generated and saved
-  useEffect(() => {
+  const syncLocalWallet = () => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("terra_local_wallet");
       if (saved) {
@@ -30,12 +46,19 @@ export default function LandingNavbar() {
           const parsed = JSON.parse(saved);
           if (parsed?.publicKey) {
             setLocalWalletPubkey(parsed.publicKey);
+            return;
           }
-        } catch {
-          // ignore
-        }
+        } catch {}
       }
+      setLocalWalletPubkey(null);
     }
+  };
+
+  useEffect(() => {
+    syncLocalWallet();
+    const handleStorage = () => syncLocalWallet();
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, [walletDialogOpen]);
 
   return (
@@ -114,46 +137,51 @@ export default function LandingNavbar() {
             </a>
           </nav>
 
-          {/* Rightmost Option: Add or Create a Solana Wallet */}
-          <div className="hidden md:flex items-center gap-3">
-            <button
-              onClick={() => setWalletDialogOpen(true)}
-              className={`px-3.5 py-2 text-xs font-mono font-medium rounded-lg border transition-all flex items-center gap-2 ${
-                connected && publicKey
-                  ? "bg-[#0d1f18] text-[#38b87c] border-[#38b87c]/40 hover:bg-[#122b22]"
-                  : localWalletPubkey
-                  ? "bg-[#0d1f18] text-[#a8c7b5] border-[#38b87c]/30 hover:border-[#38b87c]"
-                  : "bg-[#0d1714] text-[#f4f5ef] border-[#1b352a] hover:border-[#38b87c] hover:bg-[#11231d] shadow-[0_2px_10px_rgba(56,184,124,0.12)]"
-              }`}
-              title="Add or create a Solana wallet"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#38b87c] animate-pulse" />
-              {connected && publicKey ? (
-                <span>
-                  {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
-                </span>
-              ) : localWalletPubkey ? (
-                <span>
-                  {localWalletPubkey.slice(0, 4)}...{localWalletPubkey.slice(-4)}
-                </span>
-              ) : (
-                <>
-                  <svg
-                    className="w-3.5 h-3.5 text-[#38b87c]"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
-                    <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
-                  </svg>
-                  <span>+ Create Wallet</span>
-                </>
-              )}
-            </button>
+          {/* Rightmost Option: Add or Create a Solana Wallet & Disconnect */}
+          <div className="hidden md:flex items-center gap-2">
+            {isWalletConnected ? (
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0d1714] border border-[#1b352a]">
+                <button
+                  onClick={() => setWalletDialogOpen(true)}
+                  className="px-3 py-1.5 text-xs font-mono font-medium rounded-lg text-[#38b87c] hover:bg-[#122b22] transition-colors flex items-center gap-2 cursor-pointer"
+                  title="Manage Solana Wallet"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[#38b87c] animate-pulse" />
+                  <span>
+                    {connected && publicKey
+                      ? `${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
+                      : `${localWalletPubkey?.slice(0, 4)}...${localWalletPubkey?.slice(-4)}`}
+                  </span>
+                </button>
+                <button
+                  onClick={handleDisconnectWallet}
+                  className="px-2.5 py-1.5 text-[11px] font-sans font-medium text-[#fca5a5] hover:text-[#f87171] hover:bg-[#201818] rounded-md transition-colors cursor-pointer border-l border-[#1b352a] flex items-center gap-1"
+                  title="Disconnect any connected wallet"
+                >
+                  <span>Disconnect</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setWalletDialogOpen(true)}
+                className="px-3.5 py-2 text-xs font-mono font-medium rounded-lg border transition-all flex items-center gap-2 bg-[#0d1714] text-[#f4f5ef] border-[#1b352a] hover:border-[#38b87c] hover:bg-[#11231d] shadow-[0_2px_10px_rgba(56,184,124,0.12)] cursor-pointer"
+                title="Add or create a Solana wallet"
+              >
+                <svg
+                  className="w-3.5 h-3.5 text-[#38b87c]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+                  <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+                </svg>
+                <span>+ Create Wallet</span>
+              </button>
+            )}
           </div>
 
           {/* Mobile Buttons */}
@@ -252,6 +280,18 @@ export default function LandingNavbar() {
                   : "+ Create / Connect Wallet"}
               </span>
             </button>
+
+            {isWalletConnected && (
+              <button
+                onClick={(e) => {
+                  setMobileMenuOpen(false);
+                  handleDisconnectWallet(e);
+                }}
+                className="w-full text-center py-2 text-xs font-medium text-[#fca5a5] hover:text-[#f87171] bg-[#201818] border border-[#3a2222] rounded flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>Disconnect Wallet</span>
+              </button>
+            )}
           </div>
         </div>
       )}

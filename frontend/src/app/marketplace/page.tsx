@@ -18,7 +18,8 @@ import {
   Plus,
   Minus,
   Sparkles,
-  Flame
+  Flame,
+  LogOut
 } from "lucide-react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -145,11 +146,50 @@ export default function MarketplacePage() {
   const [listSuccess, setListSuccess] = useState(false);
 
   const { connection } = useConnection();
-  const { publicKey, sendTransaction, connected } = useWallet();
+  const { publicKey, sendTransaction, connected, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [localWallet, setLocalWallet] = useState<{ publicKey: string; balance?: number } | null>(null);
 
-  // Fetch wallet SOL balance
+  // Sync saved local wallet from localStorage
+  const syncLocalWallet = () => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("terra_local_wallet");
+      if (saved) {
+        try {
+          setLocalWallet(JSON.parse(saved));
+          return;
+        } catch {}
+      }
+      setLocalWallet(null);
+    }
+  };
+
+  useEffect(() => {
+    syncLocalWallet();
+    const handleStorage = () => syncLocalWallet();
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const isWalletActive = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
+  const activePubkey = publicKey ? publicKey.toBase58() : localWallet?.publicKey || null;
+
+  const handleDisconnectWallet = () => {
+    if (connected) {
+      try {
+        disconnect();
+      } catch {}
+    }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("terra_local_wallet");
+    }
+    setLocalWallet(null);
+    setWalletBalance(null);
+    window.dispatchEvent(new Event("storage"));
+  };
+
+  // Fetch wallet SOL balance (from adapter or local wallet)
   useEffect(() => {
     if (connected && publicKey) {
       connection.getBalance(publicKey).then((lamports) => {
@@ -157,10 +197,21 @@ export default function MarketplacePage() {
       }).catch(() => {
         setWalletBalance(null);
       });
+    } else if (localWallet?.publicKey) {
+      try {
+        const pk = new PublicKey(localWallet.publicKey);
+        connection.getBalance(pk).then((lamports) => {
+          setWalletBalance(lamports / 1e9);
+        }).catch(() => {
+          setWalletBalance(localWallet.balance ?? 1.0);
+        });
+      } catch {
+        setWalletBalance(localWallet.balance ?? 1.0);
+      }
     } else {
       setWalletBalance(null);
     }
-  }, [connected, publicKey, connection, txHash]);
+  }, [connected, publicKey, localWallet, connection, txHash]);
 
   const selectedListing = useMemo(
     () => listings.find((l) => l.id === selectedListingId) || listings[0],
@@ -549,9 +600,21 @@ export default function MarketplacePage() {
                     </div>
                     <div className="flex justify-between text-[var(--text-muted)]">
                       <span>Wallet Balance</span>
-                      <span className={hasInsufficientBalance ? "text-[var(--danger)] font-bold" : "text-[var(--text)] font-medium"}>
-                        {walletBalance !== null ? `${walletBalance.toFixed(3)} SOL` : "Not connected"}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={hasInsufficientBalance ? "text-[var(--danger)] font-bold" : "text-[var(--text)] font-medium"}>
+                          {walletBalance !== null ? `${walletBalance.toFixed(3)} SOL` : "Not connected"}
+                        </span>
+                        {isWalletActive && (
+                          <button
+                            type="button"
+                            onClick={handleDisconnectWallet}
+                            className="text-[10px] text-[var(--danger)] hover:underline cursor-pointer"
+                            title="Disconnect connected wallet"
+                          >
+                            [Disconnect]
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex justify-between text-sm font-bold text-[var(--text)] pt-2 border-t border-[var(--border-subtle)]">
                       <span>Total</span>
@@ -586,7 +649,7 @@ export default function MarketplacePage() {
                   )}
 
                   {/* Action Button */}
-                  {!connected ? (
+                  {!isWalletActive ? (
                     <button
                       onClick={() => setVisible(true)}
                       className="w-full py-3 px-4 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity cursor-pointer shadow-xs"
@@ -594,27 +657,38 @@ export default function MarketplacePage() {
                       Connect Wallet to Trade
                     </button>
                   ) : (
-                    <button
-                      onClick={handleExecuteTrade}
-                      disabled={trading || isSuspended || hasInsufficientBalance}
-                      className={`w-full py-3 px-4 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
-                        isSuspended
-                          ? "bg-[var(--surface-raised)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--border)]"
-                          : hasInsufficientBalance
-                          ? "bg-[var(--danger-subtle)] text-[var(--danger)] cursor-not-allowed border border-[var(--danger)]/30"
-                          : "bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)]"
-                      }`}
-                    >
-                      {trading ? (
-                        <span>Submitting to Solana...</span>
-                      ) : isSuspended ? (
-                        <span>Trading Blocked by Hook</span>
-                      ) : hasInsufficientBalance ? (
-                        <span>Insufficient SOL Balance</span>
-                      ) : (
-                        <span>Execute Buy Order ({totalCost} SOL)</span>
-                      )}
-                    </button>
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleExecuteTrade}
+                        disabled={trading || isSuspended || hasInsufficientBalance}
+                        className={`w-full py-3 px-4 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
+                          isSuspended
+                            ? "bg-[var(--surface-raised)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--border)]"
+                            : hasInsufficientBalance
+                            ? "bg-[var(--danger-subtle)] text-[var(--danger)] cursor-not-allowed border border-[var(--danger)]/30"
+                            : "bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)]"
+                        }`}
+                      >
+                        {trading ? (
+                          <span>Submitting to Solana...</span>
+                        ) : isSuspended ? (
+                          <span>Trading Blocked by Hook</span>
+                        ) : hasInsufficientBalance ? (
+                          <span>Insufficient SOL Balance</span>
+                        ) : (
+                          <span>Execute Buy Order ({totalCost} SOL)</span>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDisconnectWallet}
+                        className="w-full py-2 px-3 rounded-lg border border-[var(--danger)]/30 hover:bg-[var(--danger-subtle)] text-[var(--danger)] font-medium text-[11px] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                        title="Disconnect current wallet"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>Disconnect Wallet {activePubkey ? `(${activePubkey.slice(0, 4)}...${activePubkey.slice(-4)})` : ""}</span>
+                      </button>
+                    </div>
                   )}
                 </>
               ) : (
