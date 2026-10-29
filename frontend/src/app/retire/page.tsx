@@ -275,12 +275,12 @@ export default function RetirePage() {
       {currentStep === 1 && (
         <div className="max-w-3xl mx-auto space-y-6">
           <Panel className="p-6 sm:p-8 space-y-6 text-left">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)]">
               <div>
-                <h2 className="text-base font-bold text-slate-900">
+                <h2 className="text-base font-bold text-[var(--text)]">
                   Step 1: Quantify Organizational Emissions
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">
                   Input activity data to compute offset volume, or enter your audited total directly.
                 </p>
               </div>
@@ -387,7 +387,7 @@ export default function RetirePage() {
                   setRetireAmount(String(calculatedEmissions));
                   setCurrentStep(2);
                 }}
-                className="px-5 py-2.5 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="px-5 py-2.5 rounded-lg bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <span>Continue to Select Credits</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -401,11 +401,11 @@ export default function RetirePage() {
       {currentStep === 2 && (
         <div className="max-w-3xl mx-auto space-y-6">
           <Panel className="p-6 sm:p-8 space-y-6 text-left">
-            <div className="pb-4 border-b border-slate-100">
-              <h2 className="text-base font-bold text-slate-900">
+            <div className="pb-4 border-b border-[var(--border-subtle)]">
+              <h2 className="text-base font-bold text-[var(--text)]">
                 Step 2: Assign Verified Project & Beneficiary
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
                 Choose an intact, oracle-verified ecological parcel to draw offsets from.
               </p>
             </div>
@@ -517,10 +517,10 @@ export default function RetirePage() {
             </div>
 
             {/* Stepper Buttons */}
-            <div className="pt-4 border-t border-slate-100 flex justify-between">
+            <div className="pt-4 border-t border-[var(--border-subtle)] flex justify-between">
               <button
                 onClick={() => setCurrentStep(1)}
-                className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-xs text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="px-4 py-2 rounded-xl bg-white border border-[#d6ded2] text-xs font-semibold text-[#5c7366] hover:text-[#111e16] hover:bg-[#f0f4ee] transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back</span>
@@ -529,7 +529,7 @@ export default function RetirePage() {
               <button
                 onClick={() => setCurrentStep(3)}
                 disabled={isProjectBlocked || amountToRetire <= 0}
-                className="px-5 py-2.5 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
               >
                 <span>Proceed to Confirmation</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -570,7 +570,7 @@ export default function RetirePage() {
                       type="checkbox"
                       checked={confirmCheckbox}
                       onChange={(e) => setConfirmCheckbox(e.target.checked)}
-                      className="mt-0.5 rounded accent-[var(--accent)] w-3.5 h-3.5"
+                      className="mt-0.5 rounded accent-[#2d6a4f] w-3.5 h-3.5"
                     />
                     <span>
                       I understand that burning tokens permanently destroys them from circulating supply.
@@ -586,7 +586,7 @@ export default function RetirePage() {
                       placeholder="RETIRE"
                       value={confirmText}
                       onChange={(e) => setConfirmText(e.target.value.toUpperCase())}
-                      className="w-full p-2 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)] text-[var(--text)] font-mono uppercase focus:outline-none focus:border-[var(--accent)] transition-colors"
+                      className="w-full p-2.5 rounded-xl bg-[#f0f4ee] border border-[#e1e8de] text-[var(--text)] font-mono uppercase focus:outline-none focus:border-[#2d6a4f] transition-colors"
                     />
                   </div>
                 </div>
@@ -601,7 +601,7 @@ export default function RetirePage() {
                 {!isWalletActive ? (
                   <button
                     onClick={() => setVisible(true)}
-                    className="w-full py-3 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity cursor-pointer shadow-xs"
+                    className="w-full py-3 rounded-xl bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
                   >
                     Connect Wallet to Execute Burn
                   </button>
@@ -610,7 +610,7 @@ export default function RetirePage() {
                     <button
                       onClick={handleExecuteBurn}
                       disabled={burning || !confirmCheckbox || confirmText !== "RETIRE"}
-                      className="w-full py-3 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full py-3 rounded-xl bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {burning ? (
                         <span>Executing Token-2022 Burn...</span>
@@ -624,7 +624,7 @@ export default function RetirePage() {
                     <button
                       type="button"
                       onClick={handleDisconnectWallet}
-                      className="w-full py-2 px-3 rounded-lg border border-[var(--danger)]/30 hover:bg-[var(--danger-subtle)] text-[var(--danger)] font-medium text-[11px] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                      className="w-full py-2 px-3 rounded-xl border border-[var(--danger)]/30 hover:bg-[var(--danger-subtle)] text-[var(--danger)] font-medium text-[11px] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                       title="Disconnect connected wallet"
                     >
                       <LogOut className="w-3.5 h-3.5" />
@@ -633,7 +633,7 @@ export default function RetirePage() {
                   </div>
                 )}
 
-                <div className="text-[11px] text-slate-400 text-center">
+                <div className="text-[11px] text-[var(--text-muted)] text-center">
                   Retirement is an on-chain record of credits retired, not a corporate net-zero certification.
                 </div>
               </Panel>

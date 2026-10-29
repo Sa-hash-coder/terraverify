@@ -21,6 +21,37 @@ import {
 } from "lucide-react";
 import WalletDialog from "../wallet/wallet-dialog";
 
+// Module-level persistent cache across route changes in SPA session
+let cachedLocalWallet: { publicKey: string; balance?: number } | null = null;
+let cachedBalance: number | null = null;
+
+const getInitialLocalWallet = (): { publicKey: string; balance?: number } | null => {
+  if (cachedLocalWallet) return cachedLocalWallet;
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem("terra_local_wallet");
+      if (saved) {
+        cachedLocalWallet = JSON.parse(saved);
+        if (typeof cachedLocalWallet?.balance === "number") {
+          cachedBalance = cachedLocalWallet.balance;
+        }
+        return cachedLocalWallet;
+      }
+    } catch {}
+  }
+  return null;
+};
+
+const getInitialBalance = (): number | null => {
+  if (cachedBalance !== null) return cachedBalance;
+  const lw = getInitialLocalWallet();
+  if (typeof lw?.balance === "number") {
+    cachedBalance = lw.balance;
+    return lw.balance;
+  }
+  return 1.0;
+};
+
 export default function AppHeader() {
   const pathname = usePathname();
   const router = useRouter();
@@ -28,15 +59,39 @@ export default function AppHeader() {
   const { publicKey, connected, disconnect, connecting } = useWallet();
   const { setVisible: setAdapterModalVisible } = useWalletModal();
 
-  const [balance, setBalance] = useState<number | null>(null);
+  const [balance, setBalanceState] = useState<number | null>(getInitialBalance);
   const [walletMenuOpen, setWalletMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [requestingFaucet, setRequestingFaucet] = useState(false);
   const [faucetSuccess, setFaucetSuccess] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [createWalletOpen, setCreateWalletOpen] = useState(false);
-  const [localWallet, setLocalWallet] = useState<{ publicKey: string; balance?: number } | null>(null);
+  const [localWallet, setLocalWalletState] = useState<{ publicKey: string; balance?: number } | null>(getInitialLocalWallet);
+
+  const setBalance = (bal: number | null) => {
+    cachedBalance = bal;
+    setBalanceState(bal);
+    if (typeof window !== "undefined" && bal !== null) {
+      try {
+        const saved = localStorage.getItem("terra_local_wallet");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          parsed.balance = bal;
+          localStorage.setItem("terra_local_wallet", JSON.stringify(parsed));
+        }
+      } catch {}
+    }
+  };
+
+  const setLocalWallet = (wallet: { publicKey: string; balance?: number } | null) => {
+    cachedLocalWallet = wallet;
+    setLocalWalletState(wallet);
+    if (wallet && typeof wallet.balance === "number") {
+      cachedBalance = wallet.balance;
+      setBalanceState(wallet.balance);
+    }
+  };
 
   // Sync saved local wallet from localStorage
   const syncLocalWallet = () => {
@@ -44,7 +99,8 @@ export default function AppHeader() {
       const saved = localStorage.getItem("terra_local_wallet");
       if (saved) {
         try {
-          setLocalWallet(JSON.parse(saved));
+          const parsed = JSON.parse(saved);
+          setLocalWallet(parsed);
           return;
         } catch {}
       }
@@ -87,7 +143,7 @@ export default function AppHeader() {
 
   // Theme synchronization
   useEffect(() => {
-    const saved = (localStorage.getItem("terra_theme") as "dark" | "light") || "dark";
+    const saved = (localStorage.getItem("terra_theme") as "dark" | "light") || "light";
     setTheme(saved);
     if (saved === "light") {
       document.body.classList.add("light");
@@ -216,7 +272,7 @@ export default function AppHeader() {
           </Link>
 
           {/* Center: Desktop Navigation with deep forest green container */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#091f14]/90 p-1 rounded-xl border border-[#143d28] shadow-inner">
+          <nav className="hidden md:flex items-center gap-1 bg-[#091f14]/90 p-1 rounded-xl border border-[#143d28] shadow-inner shrink-0">
             {navItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
 
@@ -224,7 +280,7 @@ export default function AppHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold ${
                     isActive
                       ? "bg-[#2d6a4f] text-white font-bold shadow-[0_2px_8px_rgba(45,106,79,0.4)]"
                       : "text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d]"
@@ -237,7 +293,7 @@ export default function AppHeader() {
           </nav>
 
           {/* Right: Theme Toggle, Logout & Wallet */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 shrink-0">
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -256,7 +312,7 @@ export default function AppHeader() {
             <button
               onClick={handleLogout}
               title="Logout and return to Home"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0a1e16] hover:bg-[#1b2b22] border border-[#173d2b] hover:border-rose-500/30 text-[#9ab5a6] hover:text-rose-400 text-xs font-semibold transition-all cursor-pointer shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0a1e16] hover:bg-[#1b2b22] border border-[#173d2b] hover:border-rose-500/30 text-[#9ab5a6] hover:text-rose-400 text-xs font-semibold transition-colors cursor-pointer shadow-xs"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -264,40 +320,42 @@ export default function AppHeader() {
 
             {/* Wallet Integration Widget matching Image 2 */}
             {!isWalletConnected || !activePubkey ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => setCreateWalletOpen(true)}
                   disabled={connecting}
-                  className="px-3.5 py-1.5 rounded-lg bg-[#0a2618] hover:bg-[#103824] border border-emerald-600/50 text-emerald-300 font-semibold text-xs font-mono transition-all flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+                  className="h-9 px-3.5 rounded-lg bg-[#0a2618] hover:bg-[#103824] border border-emerald-600/50 text-emerald-300 font-semibold text-xs font-mono flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
                 >
                   <Wallet className="w-3.5 h-3.5 text-emerald-400" />
                   <span>{connecting ? "Connecting..." : "+ Create Wallet"}</span>
                 </button>
                 <button
                   onClick={() => setAdapterModalVisible(true)}
-                  className="hidden sm:flex px-2.5 py-1.5 rounded-lg bg-[#091f14] hover:bg-[#0e2d1d] border border-[#143d28] text-xs font-mono text-[#9ab5a6] hover:text-white transition-colors cursor-pointer"
+                  className="h-9 hidden sm:flex items-center px-2.5 rounded-lg bg-[#091f14] hover:bg-[#0e2d1d] border border-[#143d28] text-xs font-mono text-[#9ab5a6] hover:text-white transition-colors cursor-pointer"
                   title="Connect browser wallet (Phantom/Solflare)"
                 >
                   Connect
                 </button>
               </div>
             ) : (
-              <div className="relative" ref={menuRef}>
+              <div className="relative shrink-0" ref={menuRef}>
                 <button
                   onClick={() => setWalletMenuOpen(!walletMenuOpen)}
-                  className="px-3 py-1.5 rounded-lg bg-[#0a2618] hover:bg-[#103824] border border-emerald-600/50 text-emerald-300 flex items-center gap-2 transition-all cursor-pointer font-mono shadow-sm"
+                  className="h-9 px-3 rounded-lg bg-[#0a2618] hover:bg-[#103824] border border-emerald-600/50 text-emerald-300 flex items-center justify-between gap-2.5 cursor-pointer font-mono shadow-sm w-[215px] select-none"
                   aria-expanded={walletMenuOpen}
                 >
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs font-medium text-emerald-200">
-                    {activePubkey.slice(0, 4)}....{activePubkey.slice(-4)}
-                  </span>
-                  {balance !== null && (
-                    <span className="text-xs text-emerald-400/90 hidden sm:inline">
-                      {balance.toFixed(2)} SOL
+                  <div className="flex items-center gap-1.5 shrink-0 min-w-0">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <span className="text-xs font-medium text-emerald-200 truncate">
+                      {activePubkey.slice(0, 4)}....{activePubkey.slice(-4)}
                     </span>
-                  )}
-                  <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className="text-xs text-emerald-400/90 font-medium">
+                      {(balance ?? 1.0).toFixed(2)} SOL
+                    </span>
+                    <ChevronDown className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  </div>
                 </button>
 
                 {/* Wallet Dropdown Menu */}

@@ -41,22 +41,22 @@ interface PanelProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Panel({ children, className = "", variant = "default", title, ...props }: PanelProps) {
   const bgClass =
     variant === "raised"
-      ? "bg-[var(--surface-raised)]"
+      ? "bg-[var(--surface-raised)] border-[var(--border-subtle)]"
       : variant === "subtle"
-      ? "bg-[var(--surface-raised)]/60"
-      : "bg-[var(--surface)]";
+      ? "bg-[var(--surface-raised)]/70 border-[var(--border-subtle)]"
+      : "bg-white border-[var(--border)] shadow-xs";
 
   return (
     <div
-      className={`rounded-xl border border-[var(--border)] ${bgClass} text-[var(--text)] transition-colors ${className}`}
+      className={`rounded-2xl border ${bgClass} text-[var(--text)] transition-colors ${className}`}
       {...props}
     >
       {title && (
-        <div className="px-4 py-3 border-b border-[var(--border-subtle)] font-semibold text-xs tracking-wide text-[var(--text)]">
+        <div className="px-5 py-3.5 border-b border-[var(--border-subtle)] font-bold text-xs tracking-wider uppercase text-[var(--text)]">
           {title}
         </div>
       )}
-      <div className={title ? "p-4" : ""}>
+      <div className={title ? "p-5" : ""}>
         {children}
       </div>
     </div>
@@ -75,12 +75,12 @@ interface DataRowProps {
 
 export function DataRow({ label, value, hint, className = "" }: DataRowProps) {
   return (
-    <div className={`flex items-center justify-between py-2 border-b border-[var(--border-subtle)] last:border-b-0 text-xs ${className}`}>
+    <div className={`flex items-center justify-between py-2.5 border-b border-[var(--border-subtle)] last:border-b-0 text-xs ${className}`}>
       <div className="flex flex-col">
-        <span className="text-[var(--text-muted)] font-normal">{label}</span>
-        {hint && <span className="text-[10px] text-[var(--text-muted)]/70">{hint}</span>}
+        <span className="text-[var(--text-muted)] font-medium">{label}</span>
+        {hint && <span className="text-[10px] text-[var(--text-muted)]/80 mt-0.5">{hint}</span>}
       </div>
-      <div className="text-right text-[var(--text)] font-medium">
+      <div className="text-right text-[var(--text)] font-semibold">
         {value}
       </div>
     </div>
@@ -100,15 +100,15 @@ interface StatProps {
 
 export function Stat({ label, value, subtext, trend, isNegative }: StatProps) {
   return (
-    <div className="p-3.5 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
-      <div className="text-xs text-[var(--text-muted)] font-normal">{label}</div>
-      <div className="text-lg sm:text-xl font-bold font-mono text-[var(--text)] mt-1">
+    <div className="p-4 rounded-2xl bg-white border border-[var(--border)] shadow-xs">
+      <div className="text-xs text-[var(--text-muted)] font-medium">{label}</div>
+      <div className="text-xl sm:text-2xl font-bold font-mono text-[var(--text)] mt-1.5">
         {value}
       </div>
       {(subtext || trend) && (
-        <div className="flex items-center gap-1.5 mt-1 text-[11px]">
+        <div className="flex items-center gap-1.5 mt-1.5 text-[11px]">
           {trend && (
-            <span className={`font-mono font-medium ${isNegative ? "text-[var(--danger)]" : "text-[var(--accent)]"}`}>
+            <span className={`font-mono font-bold ${isNegative ? "text-[#c92a2a]" : "text-[#1e6b3b]"}`}>
               {trend}
             </span>
           )}
@@ -132,29 +132,29 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, size = "sm" }: StatusBadgeProps) {
   const norm = status.toLowerCase();
 
-  let styles = "bg-[var(--surface-raised)] text-[var(--text-muted)] border-[var(--border)]";
+  let styles = "bg-[#f0f4ee] text-[#5c7366] border-[#dbe3d8]";
   let label = status;
-  let dotColor = "bg-[var(--text-muted)]";
+  let dotColor = "bg-[#5c7366]";
 
   if (norm === "verified" || norm === "active") {
-    styles = "bg-[var(--accent-subtle)] text-[var(--accent)] border-[var(--accent)]/30 font-medium";
+    styles = "bg-[#e6f4ea] text-[#1e6b3b] border-[#cbe4d2] font-semibold";
     label = norm === "active" ? "Active" : "Verified";
-    dotColor = "bg-[var(--accent)]";
+    dotColor = "bg-[#2d6a4f]";
   } else if (norm === "warning") {
-    styles = "bg-[var(--warning-subtle)] text-[var(--warning)] border-[var(--warning)]/30 font-medium";
+    styles = "bg-[#fef3c7] text-[#92400e] border-[#fde68a] font-semibold";
     label = "Warning";
-    dotColor = "bg-[var(--warning)]";
+    dotColor = "bg-[#b45309]";
   } else if (norm === "blocked" || norm === "revoked" || norm === "suspended") {
-    styles = "bg-[var(--danger-subtle)] text-[var(--danger)] border-[var(--danger)]/30 font-medium";
+    styles = "bg-[#fce8e8] text-[#c92a2a] border-[#f5c2c2] font-semibold";
     label = norm === "blocked" ? "Transfer Blocked" : norm === "suspended" ? "Suspended" : "Revoked";
-    dotColor = "bg-[var(--danger)]";
+    dotColor = "bg-[#c92a2a]";
   } else if (norm === "pending") {
-    styles = "bg-[var(--surface-overlay)] text-[var(--text-muted)] border-[var(--border)] font-medium";
+    styles = "bg-[#f0f4ee] text-[#5c7366] border-[#dbe3d8] font-medium";
     label = "Pending Audit";
-    dotColor = "bg-[var(--text-muted)]";
+    dotColor = "bg-[#5c7366]";
   }
 
-  const padding = size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs";
+  const padding = size === "sm" ? "px-2.5 py-0.5 text-[11px]" : "px-3 py-1 text-xs";
 
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-md font-mono border ${padding} ${styles}`}>
@@ -173,20 +173,20 @@ interface GradeBadgeProps {
 }
 
 export function GradeBadge({ grade, score }: GradeBadgeProps) {
-  let color = "bg-[var(--surface-raised)] text-[var(--text)] border-[var(--border)]";
+  let color = "bg-[#f0f4ee] text-[#111e16] border-[#dbe3d8]";
   if (grade === "AAA" || grade === "AA") {
-    color = "bg-[var(--accent-subtle)] text-[var(--accent)] border-[var(--accent)]/30";
+    color = "bg-[#e6f4ea] text-[#1e6b3b] border-[#cbe4d2]";
   } else if (grade === "A") {
-    color = "bg-[var(--accent-subtle)]/70 text-[var(--accent)] border-[var(--accent)]/20";
+    color = "bg-[#e6f4ea]/80 text-[#1e6b3b] border-[#cbe4d2]";
   } else if (grade === "B") {
-    color = "bg-[var(--warning-subtle)] text-[var(--warning)] border-[var(--warning)]/30";
+    color = "bg-[#fef3c7] text-[#92400e] border-[#fde68a]";
   } else if (grade === "C") {
-    color = "bg-[var(--danger-subtle)] text-[var(--danger)] border-[var(--danger)]/30";
+    color = "bg-[#fce8e8] text-[#c92a2a] border-[#f5c2c2]";
   }
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-mono font-bold border ${color}`}
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-bold border ${color}`}
       title={score ? `Score: ${score}/100` : undefined}
     >
       <span>{grade}</span>
@@ -223,23 +223,23 @@ export function AddressChip({ address, cluster = "devnet", truncateLen = 4, clas
   const explorerUrl = `https://explorer.solana.com/address/${address}?cluster=${cluster}`;
 
   return (
-    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--surface-raised)] border border-[var(--border)] text-xs font-mono text-[var(--text)] hover:border-[var(--border-hover)] transition-colors ${className}`}>
-      <span title={address} className="select-all">
+    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#f0f4ee] border border-[#e1e8de] text-xs font-mono text-[#111e16] hover:border-[#2d6a4f] transition-colors ${className}`}>
+      <span title={address} className="select-all font-medium">
         {display}
       </span>
       <button
         onClick={handleCopy}
-        className="p-0.5 text-[var(--text-muted)] hover:text-[var(--text)] transition-colors cursor-pointer"
+        className="p-0.5 text-[#5c7366] hover:text-[#111e16] transition-colors cursor-pointer"
         title="Copy address"
         aria-label="Copy address"
       >
-        {copied ? <Check className="w-3 h-3 text-[var(--accent)]" /> : <Copy className="w-3 h-3" />}
+        {copied ? <Check className="w-3 h-3 text-[#2d6a4f]" /> : <Copy className="w-3 h-3" />}
       </button>
       <a
         href={explorerUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-0.5 text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+        className="p-0.5 text-[#5c7366] hover:text-[#2d6a4f] transition-colors"
         title="View on Solana Explorer"
         aria-label="View on Solana Explorer"
       >
@@ -255,7 +255,7 @@ export function AddressChip({ address, cluster = "devnet", truncateLen = 4, clas
 export function Skeleton({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse bg-[var(--surface-raised)] rounded-md ${className}`}
+      className={`animate-pulse bg-[#f0f4ee] rounded-md ${className}`}
       aria-hidden="true"
     />
   );
@@ -273,10 +273,10 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
-    <div className="p-8 text-center flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] text-[var(--text)]">
-      {icon && <div className="text-[var(--text-muted)] mb-2.5">{icon}</div>}
-      <h3 className="text-sm font-semibold text-[var(--text)] mb-1">{title}</h3>
-      <p className="text-xs text-[var(--text-muted)] max-w-xs leading-relaxed mb-3">{description}</p>
+    <div className="p-8 text-center flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#dbe3d8] bg-white text-[#111e16]">
+      {icon && <div className="text-[#5c7366] mb-2.5">{icon}</div>}
+      <h3 className="text-sm font-bold text-[#111e16] mb-1">{title}</h3>
+      <p className="text-xs text-[#5c7366] max-w-xs leading-relaxed mb-4">{description}</p>
       {action && <div>{action}</div>}
     </div>
   );
@@ -308,34 +308,34 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
               }`}
             >
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all ${
                   isDone
-                    ? "bg-[var(--accent)] text-[var(--bg-app)]"
+                    ? "bg-[#2d6a4f] text-white shadow-xs"
                     : isCurrent
-                    ? "bg-[var(--accent-subtle)] text-[var(--accent)] border border-[var(--accent)]"
-                    : "bg-[var(--surface-raised)] text-[var(--text-muted)] border border-[var(--border)]"
+                    ? "bg-[#e6f4ea] text-[#1e6b3b] border-2 border-[#2d6a4f] shadow-xs"
+                    : "bg-[#f0f4ee] text-[#5c7366] border border-[#dbe3d8]"
                 }`}
               >
-                {isDone ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : step.id}
+                {isDone ? <Check className="w-4 h-4 stroke-[2.5]" /> : step.id}
               </div>
               <div className="hidden sm:flex flex-col">
                 <span
-                  className={`text-xs font-medium ${
-                    isCurrent ? "text-[var(--text)] font-semibold" : isDone ? "text-[var(--text)]" : "text-[var(--text-muted)]"
+                  className={`text-xs font-semibold ${
+                    isCurrent ? "text-[#111e16] font-bold" : isDone ? "text-[#111e16]" : "text-[#5c7366]"
                   }`}
                 >
                   {step.title}
                 </span>
                 {step.subtitle && (
-                  <span className="text-[10px] text-[var(--text-muted)]">{step.subtitle}</span>
+                  <span className="text-[10px] text-[#5c7366]">{step.subtitle}</span>
                 )}
               </div>
             </button>
 
             {idx < steps.length - 1 && (
               <div
-                className={`flex-1 h-[1px] mx-2 transition-colors ${
-                  currentStep > step.id ? "bg-[var(--accent)]" : "bg-[var(--border)]"
+                className={`flex-1 h-[2px] mx-2 transition-colors ${
+                  currentStep > step.id ? "bg-[#2d6a4f]" : "bg-[#dbe3d8]"
                 }`}
               />
             )}
@@ -364,7 +364,7 @@ export function SegmentedControl<T extends string>({
 }: SegmentedControlProps<T>) {
   return (
     <div
-      className={`inline-flex p-1 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)] ${className}`}
+      className={`inline-flex p-1 rounded-xl bg-[#e6ebe3] border border-[#d6ded2] shadow-2xs ${className}`}
     >
       {options.map((opt) => {
         const active = opt.value === value;
@@ -372,10 +372,10 @@ export function SegmentedControl<T extends string>({
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               active
-                ? "bg-[var(--surface-overlay)] text-[var(--text)] shadow-xs font-semibold border border-[var(--border)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                ? "bg-[#2d6a4f] text-white shadow-xs font-bold"
+                : "text-[#5c7366] hover:text-[#111e16] hover:bg-white/60"
             }`}
           >
             {opt.icon && <span className="w-3.5 h-3.5">{opt.icon}</span>}

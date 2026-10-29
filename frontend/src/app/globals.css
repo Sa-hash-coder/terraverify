@@ -1,6 +1,90 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
+  --bg-app: #f4f6f3;
+  --surface: #ffffff;
+  --surface-raised: #f0f4ee;
+  --surface-overlay: #e6ebe3;
+  --border: #dbe3d8;
+  --border-subtle: #e1e8de;
+  --border-hover: rgba(45, 106, 79, 0.4);
+  --text: #111e16;
+  --text-muted: #5c7366;
+  --accent: #2d6a4f;
+  --accent-subtle: #e6f4ea;
+  --accent-hover: #23563f;
+  --success: #1e6b3b;
+  --success-subtle: #e6f4ea;
+  --warning: #b45309;
+  --warning-subtle: #fef3c7;
+  --danger: #c92a2a;
+  --danger-subtle: #fce8e8;
+
+  /* Legacy & semantic tokens */
+  --color-bg-dark: var(--bg-app);
+  --color-secondary: var(--surface-raised);
+  --color-accent-green: var(--accent);
+  --color-accent-earth: #7a9484;
+  --color-text-dark: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-light: var(--text);
+  --color-surface-dark: var(--surface);
+  --color-surface-card: var(--surface);
+  --color-surface-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-hover: var(--border-hover);
+  --foreground: var(--text);
+  --muted: var(--text-muted);
+  --brand: var(--accent);
+  --brand-foreground: #ffffff;
+
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+html.light,
+body.light {
+  color-scheme: light;
+  --bg-app: #f4f6f3;
+  --surface: #ffffff;
+  --surface-raised: #f0f4ee;
+  --surface-overlay: #e6ebe3;
+  --border: #dbe3d8;
+  --border-subtle: #e1e8de;
+  --border-hover: rgba(45, 106, 79, 0.4);
+  --text: #111e16;
+  --text-muted: #5c7366;
+  --accent: #2d6a4f;
+  --accent-subtle: #e6f4ea;
+  --accent-hover: #23563f;
+  --success: #1e6b3b;
+  --success-subtle: #e6f4ea;
+  --warning: #b45309;
+  --warning-subtle: #fef3c7;
+  --danger: #c92a2a;
+  --danger-subtle: #fce8e8;
+
+  --color-bg-dark: var(--bg-app);
+  --color-secondary: var(--surface-raised);
+  --color-accent-green: var(--accent);
+  --color-accent-earth: #7a9484;
+  --color-text-dark: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-light: var(--text);
+  --color-surface-dark: var(--surface);
+  --color-surface-card: var(--surface);
+  --color-surface-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-hover: var(--border-hover);
+  --foreground: var(--text);
+  --muted: var(--text-muted);
+  --brand: var(--accent);
+  --brand-foreground: #ffffff;
+}
+
+html.dark,
+body.dark {
   color-scheme: dark;
   --bg-app: #080c10;
   --surface: #0e141b;
@@ -8,12 +92,12 @@
   --surface-overlay: #1a2533;
   --border: rgba(255, 255, 255, 0.09);
   --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-hover: rgba(16, 185, 129, 0.4);
+  --border-hover: rgba(45, 106, 79, 0.5);
   --text: #f8fafc;
   --text-muted: #94a3b8;
-  --accent: #10b981;
-  --accent-subtle: rgba(16, 185, 129, 0.15);
-  --accent-hover: #34d399;
+  --accent: #2d6a4f;
+  --accent-subtle: rgba(45, 106, 79, 0.2);
+  --accent-hover: #388a66;
   --success: #10b981;
   --success-subtle: rgba(16, 185, 129, 0.15);
   --warning: #f59e0b;
@@ -21,7 +105,6 @@
   --danger: #ef4444;
   --danger-subtle: rgba(239, 68, 68, 0.15);
 
-  /* Legacy & semantic tokens */
   --color-bg-dark: var(--bg-app);
   --color-secondary: var(--surface-raised);
   --color-accent-green: var(--accent);
@@ -38,49 +121,6 @@
   --muted: var(--text-muted);
   --brand: var(--accent);
   --brand-foreground: #07130f;
-
-  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-html.light,
-body.light {
-  color-scheme: light;
-  --bg-app: #f4f6f0;
-  --surface: #eaede5;
-  --surface-raised: #e1e6dc;
-  --surface-overlay: #d7ded2;
-  --border: rgba(20, 36, 28, 0.08);
-  --border-subtle: rgba(20, 36, 28, 0.04);
-  --border-hover: rgba(31, 138, 86, 0.3);
-  --text: #142019;
-  --text-muted: #5a6e62;
-  --accent: #1f8a56;
-  --accent-subtle: rgba(31, 138, 86, 0.12);
-  --accent-hover: #166e43;
-  --success: #1f8a56;
-  --success-subtle: rgba(31, 138, 86, 0.12);
-  --warning: #d97706;
-  --warning-subtle: rgba(217, 119, 6, 0.12);
-  --danger: #dc2626;
-  --danger-subtle: rgba(220, 38, 38, 0.12);
-
-  --color-bg-dark: var(--bg-app);
-  --color-secondary: var(--surface-raised);
-  --color-accent-green: var(--accent);
-  --color-accent-earth: #7a9484;
-  --color-text-dark: var(--text);
-  --color-text-muted: var(--text-muted);
-  --color-text-light: var(--text);
-  --color-surface-dark: var(--surface);
-  --color-surface-card: var(--surface-raised);
-  --color-surface-border: var(--border);
-  --color-border-subtle: var(--border-subtle);
-  --color-border-hover: var(--border-hover);
-  --foreground: var(--text);
-  --muted: var(--text-muted);
-  --brand: var(--accent);
-  --brand-foreground: #ffffff;
 }
 
 html {

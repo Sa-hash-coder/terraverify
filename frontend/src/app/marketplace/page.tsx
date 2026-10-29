@@ -379,16 +379,16 @@ export default function MarketplacePage() {
                 </div>
 
                 {/* Grade Chips */}
-                <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-                  <span className="text-[11px] text-[var(--text-muted)] mr-1 hidden sm:inline">Grade:</span>
+                <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+                  <span className="text-[11px] text-[#5c7366] mr-1 hidden sm:inline font-semibold">Grade:</span>
                   {["all", "AAA", "AA", "A", "C"].map((grade) => (
                     <button
                       key={grade}
                       onClick={() => setGradeFilter(grade)}
-                      className={`px-2 py-0.5 rounded text-xs font-mono transition-colors cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                         gradeFilter === grade
-                          ? "bg-[var(--accent-subtle)] text-[var(--accent)] font-bold border border-[var(--accent)]/30"
-                          : "text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-raised)]"
+                          ? "bg-[#2d6a4f] text-white shadow-xs"
+                          : "bg-white text-[#5c7366] hover:text-[#111e16] border border-[#d6ded2] hover:bg-[#f0f4ee]"
                       }`}
                     >
                       {grade}
@@ -399,22 +399,22 @@ export default function MarketplacePage() {
 
               {/* Status and Sort Bar */}
               <div className="flex items-center justify-between text-xs pt-2 border-t border-[var(--border-subtle)]">
-                <label className="flex items-center gap-2 cursor-pointer text-[var(--text-muted)] hover:text-[var(--text)]">
+                <label className="flex items-center gap-2 cursor-pointer text-[#5c7366] hover:text-[#111e16]">
                   <input
                     type="checkbox"
                     checked={showSuspended}
                     onChange={(e) => setShowSuspended(e.target.checked)}
-                    className="rounded accent-[var(--accent)] w-3.5 h-3.5"
+                    className="rounded accent-[#2d6a4f] w-3.5 h-3.5"
                   />
-                  <span>Show suspended projects (Oracle Hook)</span>
+                  <span className="font-medium">Show suspended projects (Oracle Hook)</span>
                 </label>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[var(--text-muted)] text-[11px]">Sort:</span>
+                  <span className="text-[#5c7366] text-[11px] font-medium">Sort:</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as "price-asc" | "price-desc" | "amount-desc")}
-                    className="bg-[var(--surface-raised)] border border-[var(--border)] rounded px-2 py-1 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--accent)]"
+                    className="bg-[#f0f4ee] border border-[#e1e8de] rounded-lg px-2.5 py-1 text-xs text-[#111e16] font-medium focus:outline-none focus:border-[#2d6a4f]"
                   >
                     <option value="price-asc">Price: Low to High</option>
                     <option value="price-desc">Price: High to Low</option>
@@ -428,7 +428,7 @@ export default function MarketplacePage() {
             <Panel className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[var(--surface-raised)] border-b border-[var(--border)] text-[var(--text-muted)] font-mono text-[11px] uppercase tracking-wider">
+                  <thead className="bg-[#f0f4ee] border-b border-[#dbe3d8] text-[#5c7366] font-mono text-[11px] uppercase tracking-wider font-semibold">
                     <tr>
                       <th className="py-3 px-4">Project</th>
                       <th className="py-3 px-3">Grade</th>
@@ -442,7 +442,7 @@ export default function MarketplacePage() {
                   <tbody className="divide-y divide-[var(--border-subtle)]">
                     {filteredListings.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="py-12 text-center text-[var(--text-muted)]">
+                        <td colSpan={7} className="py-12 text-center text-[#5c7366]">
                           No carbon credit listings found matching the selected criteria.
                         </td>
                       </tr>
@@ -457,10 +457,10 @@ export default function MarketplacePage() {
                             onClick={() => setSelectedListingId(item.id)}
                             className={`transition-colors cursor-pointer ${
                               isSelected
-                                ? "bg-[var(--accent-subtle)]/50"
+                                ? "bg-[#e6f4ea]/70 border-l-4 border-l-[#2d6a4f]"
                                 : isRevoked
-                                ? "bg-[var(--danger-subtle)]/40 hover:bg-[var(--danger-subtle)]/60"
-                                : "hover:bg-[var(--surface-raised)]/60"
+                                ? "bg-[#fce8e8]/50 hover:bg-[#fce8e8]/70"
+                                : "hover:bg-[#f4f6f3]"
                             }`}
                           >
                             <td className="py-3 px-4">
@@ -652,7 +652,7 @@ export default function MarketplacePage() {
                   {!isWalletActive ? (
                     <button
                       onClick={() => setVisible(true)}
-                      className="w-full py-3 px-4 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity cursor-pointer shadow-xs"
+                      className="w-full py-3 px-4 rounded-xl bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
                     >
                       Connect Wallet to Trade
                     </button>
@@ -661,12 +661,12 @@ export default function MarketplacePage() {
                       <button
                         onClick={handleExecuteTrade}
                         disabled={trading || isSuspended || hasInsufficientBalance}
-                        className={`w-full py-3 px-4 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
+                        className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
                           isSuspended
-                            ? "bg-[var(--surface-raised)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--border)]"
+                            ? "bg-[#f0f4ee] text-[#5c7366] cursor-not-allowed border border-[#dbe3d8]"
                             : hasInsufficientBalance
-                            ? "bg-[var(--danger-subtle)] text-[var(--danger)] cursor-not-allowed border border-[var(--danger)]/30"
-                            : "bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)]"
+                            ? "bg-[#fce8e8] text-[#c92a2a] cursor-not-allowed border border-[#f5c2c2]"
+                            : "bg-[#2d6a4f] hover:bg-[#23563f] text-white"
                         }`}
                       >
                         {trading ? (
@@ -682,7 +682,7 @@ export default function MarketplacePage() {
                       <button
                         type="button"
                         onClick={handleDisconnectWallet}
-                        className="w-full py-2 px-3 rounded-lg border border-[var(--danger)]/30 hover:bg-[var(--danger-subtle)] text-[var(--danger)] font-medium text-[11px] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                        className="w-full py-2 px-3 rounded-xl border border-[var(--danger)]/30 hover:bg-[var(--danger-subtle)] text-[var(--danger)] font-medium text-[11px] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                         title="Disconnect current wallet"
                       >
                         <LogOut className="w-3.5 h-3.5" />
@@ -741,7 +741,7 @@ export default function MarketplacePage() {
                   </div>
                   <Link
                     href="/retire?project=Amazon%20Reforestation%20Block%207&amount=250"
-                    className="px-3.5 py-1.5 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity flex items-center gap-1.5 shadow-xs"
+                    className="px-3.5 py-1.5 rounded-lg bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-xs"
                   >
                     <Flame className="w-3.5 h-3.5" />
                     <span>Retire Credits</span>
@@ -773,7 +773,7 @@ export default function MarketplacePage() {
                   </div>
                   <Link
                     href="/retire?project=Congo%20Basin%20Conservation&amount=50"
-                    className="px-3.5 py-1.5 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity flex items-center gap-1.5 shadow-xs"
+                    className="px-3.5 py-1.5 rounded-lg bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-xs"
                   >
                     <Flame className="w-3.5 h-3.5" />
                     <span>Retire Credits</span>
@@ -851,7 +851,7 @@ export default function MarketplacePage() {
               <div className="pt-4 border-t border-[var(--border-subtle)]">
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-lg bg-[var(--accent)] hover:opacity-90 text-[var(--bg-app)] font-semibold text-xs transition-opacity cursor-pointer shadow-xs"
+                  className="w-full py-3 rounded-xl bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
                 >
                   Publish Sell Order to Solana Order Book
                 </button>
