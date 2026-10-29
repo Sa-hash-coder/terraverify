@@ -51,13 +51,13 @@ def push_update(project_id, forest_cover, cqs, cqs_score, status, trend="-2.1%")
     )
     
     try:
-        print(f"\n[📡 SATELLITE AI PIPELINE] Connecting to Sentinel-2 Telemetry Bridge...")
-        print(f"[🛰️  PROCESSING] Analyzing NDVI satellite imagery for project: {project_id}")
-        print(f"[🚀 PUSHING] Sending payload to target: {TARGET_URL}")
+        print(f"\n[SATELLITE AI PIPELINE] Connecting to Sentinel-2 Telemetry Bridge...")
+        print(f"[PROCESSING] Analyzing NDVI satellite imagery for project: {project_id}")
+        print(f"[PUSHING] Sending payload to target: {TARGET_URL}")
         
         with urllib.request.urlopen(req) as response:
             res_body = response.read().decode('utf-8')
-            print(f"\n[✅ SUCCESS] Server response: 200 OK")
+            print(f"\n[SUCCESS] Server response: 200 OK")
             print(f"===========================================================")
             print(f" Updated Project: {project_id}")
             print(f" Forest Cover:    {forest_cover}%")
@@ -65,9 +65,9 @@ def push_update(project_id, forest_cover, cqs, cqs_score, status, trend="-2.1%")
             print(f" Status:          {status}")
             print(f"===========================================================")
             is_local = "localhost" in TARGET_URL
-            print(f"👉 Open {'http://localhost:3000/explorer' if is_local else 'https://terraverify-gold.vercel.app/explorer'} to view real-time changes!")
+            print(f">> Open {'http://localhost:3000/explorer' if is_local else 'https://terraverify-gold.vercel.app/explorer'} to view real-time changes!")
     except Exception as e:
-        print(f"[❌ ERROR] Failed to push telemetry: {e}")
+        print(f"[ERROR] Failed to push telemetry: {e}")
 
 def main():
     print("===========================================================")

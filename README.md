@@ -6,7 +6,7 @@ TerraVerify is a decentralized carbon offset protocol built on **Solana** that b
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 * **Continuous AI Audits:** Our Python pipeline analyzes near-infrared and red bands from Copernicus Sentinel-2 satellite scans to calculate forest canopy index (NDVI) in real-time.
 * **On-Chain Oracle Accounts:** Every registered project has its own public, queryable Solana account containing the latest ecological ratings and validation stamps.
@@ -17,7 +17,7 @@ TerraVerify is a decentralized carbon offset protocol built on **Solana** that b
 
 ---
 
-## 📦 Repository Structure
+## Repository Structure
 
 ```bash
 terraverify/
@@ -34,7 +34,7 @@ terraverify/
 
 ---
 
-## 🛠️ Setup & Running
+## Setup & Running
 
 ### 1. Web Application (Frontend)
 
@@ -71,7 +71,7 @@ python push_telemetry.py
 
 ---
 
-## 📡 The Demonstration Flow (For Pitching/Testing)
+## The Demonstration Flow (For Pitching/Testing)
 
 Follow this 3-step script to showcase the live Web3 + AI functionality:
 
@@ -82,6 +82,6 @@ Follow this 3-step script to showcase the live Web3 + AI functionality:
 
 ---
 
-## 🛡️ License
+## License
 
 TerraVerify is licensed under the MIT License.

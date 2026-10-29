@@ -225,10 +225,10 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
               <span>{activePubkey?.slice(0, 4)}...{activePubkey?.slice(-4)}</span>
               <button
                 onClick={handleDisconnect}
-                className="ml-1 text-[11px] font-sans font-medium text-[var(--danger)] hover:underline cursor-pointer"
+                className="ml-1 p-0.5 text-[var(--danger)] hover:bg-[var(--danger)]/15 rounded cursor-pointer transition-colors"
                 title="Disconnect wallet"
               >
-                ✕
+                <X className="w-3 h-3" />
               </button>
             </div>
           )}

@@ -786,8 +786,9 @@ export default function RegisterPage() {
                           className="block w-full text-xs text-[var(--muted)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[var(--brand)] file:text-[var(--brand-foreground)] hover:file:opacity-90"
                         />
                         {boundaryFileName && (
-                          <div className="text-xs text-[var(--brand)] font-medium">
-                            ✓ Parsed boundary file: {boundaryFileName} (Rendered on map above)
+                          <div className="text-xs text-[var(--brand)] font-medium flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 shrink-0" />
+                            <span>Parsed boundary file: {boundaryFileName} (Rendered on map above)</span>
                           </div>
                         )}
                       </div>

@@ -338,14 +338,17 @@ export default function AppHeader() {
                         disabled={requestingFaucet}
                         className="w-full flex items-center gap-2 p-1.5 rounded hover:bg-[#162922] light:hover:bg-slate-100 text-[#38b87c] transition-colors text-left cursor-pointer disabled:opacity-50"
                       >
-                        <Droplet className="w-3.5 h-3.5" />
-                        <span>
-                          {requestingFaucet
-                            ? "Requesting 1 SOL..."
-                            : faucetSuccess
-                            ? "✓ Funded 1 SOL"
-                            : "Request 1 Devnet SOL"}
-                        </span>
+                        {faucetSuccess ? (
+                          <span className="flex items-center gap-1.5 text-emerald-400">
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Funded 1 SOL</span>
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1.5">
+                            <Droplet className="w-3.5 h-3.5" />
+                            <span>{requestingFaucet ? "Requesting 1 SOL..." : "Request 1 Devnet SOL"}</span>
+                          </span>
+                        )}
                       </button>
                     </div>
 
