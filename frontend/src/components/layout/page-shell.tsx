@@ -17,14 +17,18 @@ export default function PageShell({
   noScroll = false,
 }: PageShellProps) {
   return (
-    <div className="min-h-dvh w-full flex flex-col bg-[var(--bg-app)] text-[var(--text)] antialiased">
+    <div
+      className={`w-full flex flex-col bg-[var(--bg-app)] text-[var(--text)] antialiased ${
+        noScroll ? "h-screen max-h-screen overflow-hidden" : "min-h-dvh"
+      }`}
+    >
       {/* Top Navigation Header */}
       <AppHeader />
 
       {/* Main Content Viewport */}
       <main
-        className={`flex-1 min-w-0 flex flex-col ${
-          noScroll ? "h-[calc(100dvh-4rem)] overflow-hidden" : "overflow-y-auto"
+        className={`flex-1 min-w-0 min-h-0 flex flex-col ${
+          noScroll ? "h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] overflow-hidden" : "overflow-y-auto"
         } ${
           fullWidth
             ? "p-0"

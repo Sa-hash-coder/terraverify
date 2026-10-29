@@ -295,17 +295,23 @@ export default function MapComponent({
     }
   }, [fitAllTrigger, projects]);
 
-  // Invalidate map size when detail panel state toggles
+  // Invalidate map size smoothly when detail panel state toggles
   useEffect(() => {
     if (mapInstance.current) {
-      setTimeout(() => {
-        mapInstance.current?.invalidateSize();
-      }, 100);
+      const map = mapInstance.current;
+      const t1 = setTimeout(() => map.invalidateSize(), 50);
+      const t2 = setTimeout(() => map.invalidateSize(), 150);
+      const t3 = setTimeout(() => map.invalidateSize(), 300);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
     }
   }, [detailOpen]);
 
   return (
-    <div className="w-full h-full relative z-0 select-none min-h-[350px]">
+    <div className="w-full h-full relative z-0 select-none">
       {/* Map DOM Canvas */}
       <div
         ref={mapRef}

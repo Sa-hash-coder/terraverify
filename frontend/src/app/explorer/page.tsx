@@ -16,6 +16,7 @@ import {
   Clock,
   Layers,
   ChevronRight,
+  ChevronLeft,
   Sliders,
   CheckCircle2,
   AlertTriangle,
@@ -168,7 +169,7 @@ export default function ExplorerPage() {
   const [activeLayer, setActiveLayer] = useState<MapLayerType>("truecolor");
   const [layerOpacity, setLayerOpacity] = useState<number>(100);
   const [scanDate, setScanDate] = useState<string>("latest");
-  const [detailOpen, setDetailOpen] = useState(true);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [consoleOpen, setConsoleOpen] = useState(true);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [fitAllTrigger, setFitAllTrigger] = useState(0);
@@ -584,9 +585,9 @@ export default function ExplorerPage() {
         )}
 
         {/* ================================================================= */}
-        {/* 2. MAIN MAP CANVAS (Expansive, Full Viewport, Satellite View)       */}
+        {/* 2. MAIN MAP CANVAS (Full Viewport, Expansive Satellite Map)        */}
         {/* ================================================================= */}
-        <div className="flex-1 min-w-0 h-full relative overflow-hidden bg-[#d9e2d5]">
+        <div className="flex-1 min-w-0 h-full max-h-full relative overflow-hidden bg-[#080c10]">
           <MapComponent
             projects={projects}
             selectedProject={selectedProjectId}
@@ -600,37 +601,6 @@ export default function ExplorerPage() {
             fitAllTrigger={fitAllTrigger}
           />
 
-          {/* Floating Quick Layer Switcher Bar (White Pill Bar matching Image 1) */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[400] flex items-center gap-1.5 p-1 rounded-2xl bg-white/95 backdrop-blur-md border border-[#d6ded2] shadow-lg max-w-[95vw] overflow-x-auto">
-            {layerOptions.map((l) => {
-              const isSelected = activeLayer === l.id;
-              return (
-                <button
-                  key={l.id}
-                  onClick={() => setActiveLayer(l.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    isSelected
-                      ? "bg-[#2d6a4f] text-white font-bold shadow-xs"
-                      : "text-[#4a5f53] hover:text-[#111e16] hover:bg-[#edf2ea]"
-                  }`}
-                >
-                  {l.name.split(" ")[0]}
-                </button>
-              );
-            })}
-
-            <div className="w-[1px] h-4 bg-[#d6ded2] mx-1 shrink-0" />
-
-            {/* Reset Map View Button */}
-            <button
-              onClick={() => setFitAllTrigger((t) => t + 1)}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#4a5f53] hover:text-[#2d6a4f] hover:bg-[#edf2ea] transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-              title="Fit all forest parcels into view"
-            >
-              <span>Fit All</span>
-            </button>
-          </div>
-
           {/* Floating Verified Legend Pill (Bottom-Left on Map, matching Image 1) */}
           {activeLayer === "truecolor" && (
             <div className="absolute bottom-6 left-6 z-[400] flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#0e2418]/90 text-white backdrop-blur-md border border-[#1b4332] text-xs font-semibold shadow-lg">
@@ -639,25 +609,29 @@ export default function ExplorerPage() {
             </div>
           )}
 
-          {/* Floating Inspect Button if detail panel is closed */}
-          {!detailOpen && selectedProject && (
+          {/* Floating Pull Arrow Button on right edge (pulls open inspector from the right) */}
+          {!detailOpen && (
             <button
               onClick={() => setDetailOpen(true)}
-              className="absolute top-4 right-4 z-[400] px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#d6ded2] text-xs text-[#111e16] hover:border-[#2d6a4f] shadow-lg flex items-center gap-2 cursor-pointer font-bold transition-all"
+              className="absolute top-1/2 -translate-y-1/2 right-0 z-[400] pl-2.5 pr-2 py-4 rounded-l-2xl bg-white/95 backdrop-blur-md border-y border-l border-[#d6ded2] shadow-xl text-[#111e16] hover:text-[#2d6a4f] hover:bg-[#f4f6f3] flex flex-col items-center gap-2 cursor-pointer font-bold transition-all group"
+              title="Pull to inspect telemetry from right"
+              aria-label="Open telemetry inspector"
             >
-              <Eye className="w-4 h-4 text-[#2d6a4f]" />
-              <span>Inspect {selectedProject.name.split(" ")[0]} Data</span>
+              <ChevronLeft className="w-5 h-5 text-[#2d6a4f] group-hover:-translate-x-1 transition-transform" />
+              <span className="text-[10px] font-mono tracking-widest [writing-mode:vertical-rl] rotate-180 uppercase text-[#5c7366] group-hover:text-[#111e16]">
+                Telemetry
+              </span>
             </button>
           )}
         </div>
 
         {/* ================================================================= */}
-        {/* 3. RIGHT DETAIL INSPECTOR (Clean Eco-Light Theme matching Image 1)  */}
+        {/* 3. RIGHT DETAIL INSPECTOR (Closed by default, pulled from right)   */}
         {/* ================================================================= */}
         {detailOpen && selectedProject && (
-          <aside className="w-full md:w-[380px] md:min-w-[380px] md:max-w-[380px] h-auto md:h-full flex flex-col shrink-0 bg-white border-l border-[#dbe3d8] z-20 shadow-xl transition-all duration-200">
-            {/* Header: Title, Region, Badges & Close Button */}
-            <div className="p-5 border-b border-[#dbe3d8] bg-[#f8faf7] flex items-start justify-between gap-3">
+          <aside className="w-full md:w-[380px] md:min-w-[380px] md:max-w-[380px] h-full max-h-full flex flex-col shrink-0 bg-white border-l border-[#dbe3d8] z-20 shadow-2xl overflow-hidden transition-all duration-200">
+            {/* Header: Title, Region, Badges, Collapse Arrow & Close Button */}
+            <div className="shrink-0 p-5 border-b border-[#dbe3d8] bg-[#f8faf7] flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-2">
                   <span
@@ -689,18 +663,28 @@ export default function ExplorerPage() {
                 </p>
               </div>
 
-              <button
-                onClick={() => setDetailOpen(false)}
-                className="p-1.5 rounded-xl border border-[#dbe3d8] bg-white text-[#5c7366] hover:text-[#111e16] hover:bg-[#ebf0e9] transition-colors cursor-pointer shadow-2xs"
-                title="Close telemetry inspector"
-                aria-label="Close telemetry inspector"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => setDetailOpen(false)}
+                  className="p-1.5 rounded-xl border border-[#dbe3d8] bg-white text-[#5c7366] hover:text-[#111e16] hover:bg-[#ebf0e9] transition-colors cursor-pointer shadow-2xs"
+                  title="Close to right"
+                  aria-label="Collapse inspector to the right"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setDetailOpen(false)}
+                  className="p-1.5 rounded-xl border border-[#dbe3d8] bg-white text-[#5c7366] hover:text-[#111e16] hover:bg-[#ebf0e9] transition-colors cursor-pointer shadow-2xs"
+                  title="Close inspector"
+                  aria-label="Close telemetry inspector"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Scrollable Content Body with 2x2 Grid and Stats */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-white">
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4 bg-white">
               {/* PRIMARY STAT GRID (2x2 matching Image 1) */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-4 rounded-2xl bg-[#f0f4ee] border border-[#e1e8de]">
