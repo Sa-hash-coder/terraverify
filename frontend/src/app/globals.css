@@ -122,6 +122,41 @@ body {
   top: 0;
 }
 
+/* Leaflet Zoom Control matching Image 1 */
+.leaflet-top.leaflet-right {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  right: 14px !important;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid #d6ded2 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  color: #111e16 !important;
+  border-bottom: 1px solid #e1e8de !important;
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 30px !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  transition: all 0.15s ease !important;
+}
+
+.leaflet-control-zoom a:last-child {
+  border-bottom: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #f0f4ee !important;
+  color: #2d6a4f !important;
+}
+
 /* Custom Scrollbar styled thinly with token colours */
 ::-webkit-scrollbar {
   width: 6px;

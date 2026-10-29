@@ -186,11 +186,11 @@ export default function AppHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#080d12]/95 backdrop-blur-md border-b border-slate-800 transition-colors">
+      <header className="sticky top-0 z-40 w-full bg-[#06140d] border-b border-[#0f291e] transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Left: Brand Wordmark (links to /) */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg border border-emerald-500/30 bg-slate-900 flex items-center justify-center text-emerald-400 group-hover:border-emerald-500 transition-colors">
+          {/* Left: Brand Wordmark (links to /) matching Image 2 */}
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-8 h-8 rounded-lg border border-[#143d28] bg-[#091f14] flex items-center justify-center text-emerald-400 group-hover:border-emerald-400 transition-colors shadow-[0_0_12px_rgba(16,185,129,0.15)]">
               <svg
                 className="w-4 h-4"
                 viewBox="0 0 24 24"
@@ -205,13 +205,18 @@ export default function AppHeader() {
                 <path d="M12 22a10 10 0 0 0 7.07-17.07" />
               </svg>
             </div>
-            <span className="text-base font-bold tracking-tight text-white">
-              Terra<span className="text-emerald-400">Verify</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="text-base font-bold tracking-tight text-white leading-tight">
+                Terra<span className="text-emerald-400">Verify</span>
+              </span>
+              <span className="text-[8.5px] font-mono tracking-[0.24em] text-emerald-400/80 uppercase font-semibold leading-none mt-0.5">
+                EARTH OBSERVATION PROTOCOL
+              </span>
+            </div>
           </Link>
 
-          {/* Center: Desktop Navigation with No Home Button */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 shadow-inner">
+          {/* Center: Desktop Navigation with deep forest green container */}
+          <nav className="hidden md:flex items-center gap-1 bg-[#091f14]/90 p-1 rounded-xl border border-[#143d28] shadow-inner">
             {navItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
 
@@ -221,8 +226,8 @@ export default function AppHeader() {
                   href={item.href}
                   className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-emerald-500 text-slate-950 font-bold shadow-[0_2px_8px_rgba(16,185,129,0.3)]"
-                      : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                      ? "bg-[#2d6a4f] text-white font-bold shadow-[0_2px_8px_rgba(45,106,79,0.4)]"
+                      : "text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d]"
                   }`}
                 >
                   {item.label}
@@ -231,19 +236,19 @@ export default function AppHeader() {
             })}
           </nav>
 
-          {/* Right: Theme Toggle & Unified Wallet Component */}
+          {/* Right: Theme Toggle, Logout & Wallet */}
           <div className="flex items-center gap-2.5">
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
               title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
-              className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-lg bg-[#0a1e16] hover:bg-[#102b20] border border-[#173d2b] text-[#9ab5a6] hover:text-white transition-colors cursor-pointer"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
                 <Sun className="w-4 h-4 text-amber-400" />
               ) : (
-                <Moon className="w-4 h-4 text-slate-700" />
+                <Moon className="w-4 h-4 text-slate-300" />
               )}
             </button>
 
@@ -251,53 +256,53 @@ export default function AppHeader() {
             <button
               onClick={handleLogout}
               title="Logout and return to Home"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/30 text-slate-300 hover:text-rose-400 text-xs font-semibold transition-all cursor-pointer shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0a1e16] hover:bg-[#1b2b22] border border-[#173d2b] hover:border-rose-500/30 text-[#9ab5a6] hover:text-rose-400 text-xs font-semibold transition-all cursor-pointer shadow-xs"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
             </button>
 
-            {/* Wallet Integration Widget */}
+            {/* Wallet Integration Widget matching Image 2 */}
             {!isWalletConnected || !activePubkey ? (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCreateWalletOpen(true)}
                   disabled={connecting}
-                  className="px-3.5 py-1.5 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+                  className="px-3.5 py-1.5 rounded-lg bg-[#0a2618] hover:bg-[#103824] border border-emerald-600/50 text-emerald-300 font-semibold text-xs font-mono transition-all flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
                 >
-                  <Wallet className="w-3.5 h-3.5" />
-                  <span>{connecting ? "Connecting..." : "Connect Wallet"}</span>
+                  <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{connecting ? "Connecting..." : "+ Create Wallet"}</span>
                 </button>
                 <button
-                  onClick={() => setCreateWalletOpen(true)}
-                  className="hidden sm:flex px-2.5 py-1.5 rounded-lg bg-[#0d1714] hover:bg-[#162922] light:bg-slate-100 light:hover:bg-slate-200 border border-[#162922] light:border-slate-200 text-xs font-mono text-[#a8c7b5] light:text-slate-700 transition-colors cursor-pointer"
-                  title="Generate Devnet Wallet"
+                  onClick={() => setAdapterModalVisible(true)}
+                  className="hidden sm:flex px-2.5 py-1.5 rounded-lg bg-[#091f14] hover:bg-[#0e2d1d] border border-[#143d28] text-xs font-mono text-[#9ab5a6] hover:text-white transition-colors cursor-pointer"
+                  title="Connect browser wallet (Phantom/Solflare)"
                 >
-                  + New
+                  Connect
                 </button>
               </div>
             ) : (
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setWalletMenuOpen(!walletMenuOpen)}
-                  className="px-3 py-1.5 rounded-lg bg-[#0d1714] hover:bg-[#162922] light:bg-slate-100 light:hover:bg-slate-200 border border-[#162922] light:border-slate-200 flex items-center gap-2 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-[#0a2618] hover:bg-[#103824] border border-emerald-600/50 text-emerald-300 flex items-center gap-2 transition-all cursor-pointer font-mono shadow-sm"
                   aria-expanded={walletMenuOpen}
                 >
-                  <span className="w-2 h-2 rounded-full bg-[#38b87c]" />
-                  <span className="text-xs font-mono font-medium text-[#f4f5ef] light:text-slate-900">
-                    {activePubkey.slice(0, 4)}...{activePubkey.slice(-4)}
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs font-medium text-emerald-200">
+                    {activePubkey.slice(0, 4)}....{activePubkey.slice(-4)}
                   </span>
                   {balance !== null && (
-                    <span className="text-xs font-mono text-[#8e9f96] light:text-slate-500 hidden sm:inline">
+                    <span className="text-xs text-emerald-400/90 hidden sm:inline">
                       {balance.toFixed(2)} SOL
                     </span>
                   )}
-                  <ChevronDown className="w-3.5 h-3.5 text-[#8e9f96]" />
+                  <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
                 </button>
 
                 {/* Wallet Dropdown Menu */}
                 {walletMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0d1714] light:bg-white border border-[#162922] light:border-slate-200 shadow-xl p-3 z-50 text-xs space-y-3">
+                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#081710] border border-[#153b27] shadow-2xl p-3 z-50 text-xs space-y-3">
                     <div>
                       <div className="text-[11px] text-[#8e9f96] light:text-slate-400 font-mono uppercase">
                         Solana Devnet

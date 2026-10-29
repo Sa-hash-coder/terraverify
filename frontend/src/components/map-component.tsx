@@ -81,8 +81,8 @@ export default function MapComponent({
     });
     mapInstance.current = map;
 
-    // Zoom control at bottomright (out of the way of controls and legend)
-    L.control.zoom({ position: "bottomright" }).addTo(map);
+    // Zoom control at topright (centered vertically on right edge matching Image 1)
+    L.control.zoom({ position: "topright" }).addTo(map);
 
     // 0. Permanent Dark Basemap: Renders immediately so map canvas is never black
     const baseDarkLayer = L.tileLayer(
@@ -321,26 +321,9 @@ export default function MapComponent({
         </div>
       )}
 
-      {/* Dynamic Map Legend based on active layer */}
-      <div className="absolute bottom-5 left-5 z-[400] bg-[#0c1611]/92 backdrop-blur-xl border border-[var(--border)] rounded-xl p-3.5 text-xs shadow-2xl pointer-events-auto min-w-[220px]">
-        {activeLayer === "truecolor" && (
-          <div className="space-y-2">
-            <div className="text-[var(--text-muted)] font-medium text-xs flex items-center justify-between">
-              <span>Sentinel-2 RGB (10m)</span>
-              <span className="text-[var(--accent)] font-mono text-[11px]">Natural</span>
-            </div>
-            <div className="flex items-center gap-4 text-xs font-medium">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] shadow-xs" />
-                <span className="text-[var(--text)]">Verified Forest</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[var(--danger)] shadow-xs" />
-                <span className="text-[var(--text)]">Revoked</span>
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Dynamic Map Legend for specialized analysis bands (NDVI / NIR / Change) */}
+      {activeLayer !== "truecolor" && (
+        <div className="absolute bottom-6 left-6 z-[400] bg-[#0c1611]/95 backdrop-blur-xl border border-[#244f37] rounded-xl p-3.5 text-xs shadow-2xl pointer-events-auto min-w-[220px]">
 
         {activeLayer === "ndvi" && (
           <div className="space-y-2">
@@ -382,6 +365,7 @@ export default function MapComponent({
           </div>
         )}
       </div>
-    </div>
-  );
+    )}
+  </div>
+);
 }
