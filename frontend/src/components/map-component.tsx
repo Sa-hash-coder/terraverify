@@ -84,33 +84,39 @@ export default function MapComponent({
     // Zoom control at bottomright (out of the way of controls and legend)
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
-    // Preload all tile layers to allow instant opacity-based switching without flicker
+    // 0. Permanent Dark Basemap: Renders immediately so map canvas is never black
+    const baseDarkLayer = L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      { maxZoom: 19, subdomains: "abcd", zIndex: 1 }
+    ).addTo(map);
+
     // 1. True Color: Esri World Imagery (High-res Sentinel satellite)
     const trueColorLayer = L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      { maxZoom: 18, opacity: activeLayer === "truecolor" ? layerOpacity / 100 : 0 }
+      { maxZoom: 18, opacity: activeLayer === "truecolor" ? layerOpacity / 100 : 0, zIndex: 2 }
     ).addTo(map);
 
     // 2. NDVI Health: Sentinel False-Color vegetation index simulation
     const ndviLayer = L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-      { maxZoom: 18, opacity: activeLayer === "ndvi" ? layerOpacity / 100 : 0 }
+      { maxZoom: 18, subdomains: "abcd", opacity: activeLayer === "ndvi" ? layerOpacity / 100 : 0, zIndex: 3 }
     ).addTo(map);
 
     // 3. NIR Band 8: Deep infrared reflectance simulation
     const nirLayer = L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 18, opacity: activeLayer === "nir" ? layerOpacity / 100 : 0 }
+      { maxZoom: 18, subdomains: "abcd", opacity: activeLayer === "nir" ? layerOpacity / 100 : 0, zIndex: 3 }
     ).addTo(map);
 
     // 4. Change Delta Layer
     const changeLayer = L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 18, opacity: activeLayer === "change" ? layerOpacity / 100 : 0 }
+      { maxZoom: 18, subdomains: "abcd", opacity: activeLayer === "change" ? layerOpacity / 100 : 0, zIndex: 3 }
     ).addTo(map);
 
     trueColorLayer.on("tileerror", () => {
       setTileError(true);
+      baseDarkLayer.setOpacity(1);
     });
 
     layersMapRef.current.set("truecolor", trueColorLayer);
@@ -118,11 +124,13 @@ export default function MapComponent({
     layersMapRef.current.set("nir", nirLayer);
     layersMapRef.current.set("change", changeLayer);
 
-    // Initial resize invalidation
-    const timer = setTimeout(() => {
+    // Staggered resize invalidation to guarantee layout after dynamic import & CSS load
+    const t1 = setTimeout(() => map.invalidateSize(), 50);
+    const t2 = setTimeout(() => {
       map.invalidateSize();
       setMapReady(true);
-    }, 150);
+    }, 200);
+    const t3 = setTimeout(() => map.invalidateSize(), 600);
 
     // ResizeObserver on map container
     const resizeObserver = new ResizeObserver(() => {
@@ -132,7 +140,7 @@ export default function MapComponent({
     });
     resizeObserver.observe(mapRef.current);
 
-    // Global listener for sidebar toggle
+    // Global listener for sidebar toggle & window resize
     const handleSidebarResize = () => {
       setTimeout(() => {
         if (mapInstance.current) {
@@ -141,11 +149,15 @@ export default function MapComponent({
       }, 50);
     };
     window.addEventListener("terra_sidebar_resize", handleSidebarResize);
+    window.addEventListener("resize", handleSidebarResize);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       resizeObserver.disconnect();
       window.removeEventListener("terra_sidebar_resize", handleSidebarResize);
+      window.removeEventListener("resize", handleSidebarResize);
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
@@ -293,9 +305,13 @@ export default function MapComponent({
   }, [detailOpen]);
 
   return (
-    <div className="w-full h-full relative z-0 select-none">
+    <div className="w-full h-full relative z-0 select-none min-h-[350px]">
       {/* Map DOM Canvas */}
-      <div ref={mapRef} className="w-full h-full bg-[var(--surface)]" />
+      <div
+        ref={mapRef}
+        className="absolute inset-0 w-full h-full bg-[#080c10]"
+        style={{ width: "100%", height: "100%" }}
+      />
 
       {/* Imagery Fallback Alert */}
       {tileError && (

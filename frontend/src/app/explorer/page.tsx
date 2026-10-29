@@ -179,19 +179,29 @@ export default function ExplorerPage() {
   useEffect(() => {
     const fetchTelemetry = async () => {
       try {
-        const res = await fetch("/api/telemetry?parcel=amazon-block-7");
+        const res = await fetch("/api/telemetry");
         if (res.ok) {
           const data = await res.json();
-          if (data && data.ndvi) {
+          if (data && Array.isArray(data.projects)) {
             setProjects((prev) =>
               prev.map((p) => {
-                if (p.id === 1) {
+                const match = data.projects.find((tp: any) =>
+                  tp.id === `PRJ-00${p.id}` ||
+                  tp.id === String(p.id) ||
+                  p.name.toLowerCase().includes(tp.name?.toLowerCase() || "") ||
+                  (p.id === 1 && tp.id === "PRJ-001") ||
+                  (p.id === 3 && tp.id === "PRJ-003")
+                );
+                if (match) {
+                  const isRevoked = match.status === "Suspended" || match.status === "Revoked";
                   return {
                     ...p,
-                    ndvi: data.ndvi ?? p.ndvi,
-                    cqsScore: data.cqsScore ?? p.cqsScore,
-                    forestCover: data.forestCover ? `${data.forestCover}%` : p.forestCover,
-                    lastScan: "Just now",
+                    status: isRevoked ? "Revoked" : "Verified",
+                    grade: match.cqs || p.grade,
+                    cqsScore: match.cqsScore ?? p.cqsScore,
+                    forestCover: match.forestCover || p.forestCover,
+                    trend: match.trend || p.trend,
+                    lastScan: match.lastScan || "Just now",
                   };
                 }
                 return p;
@@ -204,7 +214,7 @@ export default function ExplorerPage() {
     };
 
     fetchTelemetry();
-    const interval = setInterval(fetchTelemetry, 8000);
+    const interval = setInterval(fetchTelemetry, 3000);
     return () => clearInterval(interval);
   }, []);
 

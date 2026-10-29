@@ -98,9 +98,28 @@ body {
 
 /* Leaflet Container Styling */
 .leaflet-container {
-  background: var(--surface) !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  background: #080c10 !important;
   font-family: inherit;
   outline: none;
+  z-index: 10;
+}
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 /* Custom Scrollbar styled thinly with token colours */

@@ -1,9 +1,33 @@
+import os
 import sys
 import json
 import urllib.request
 
-# Default Vercel live production URL
-VERCEL_URL = "https://terraverify-gold.vercel.app/api/telemetry"
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+# Detect target URL: Supports --local, --prod, environment variable, or auto-detect
+def get_target_url():
+    if "--prod" in sys.argv:
+        return "https://terraverify-gold.vercel.app/api/telemetry"
+    if "--local" in sys.argv:
+        return "http://localhost:3000/api/telemetry"
+    if os.environ.get("TELEMETRY_API_URL"):
+        return os.environ.get("TELEMETRY_API_URL")
+    
+    # Auto-detect if local dev server on port 3000 is reachable
+    try:
+        req = urllib.request.Request("http://localhost:3000/api/telemetry", method="HEAD")
+        with urllib.request.urlopen(req, timeout=1):
+            return "http://localhost:3000/api/telemetry"
+    except Exception:
+        pass
+    
+    return "https://terraverify-gold.vercel.app/api/telemetry"
+
+TARGET_URL = get_target_url()
 
 def push_update(project_id, forest_cover, cqs, cqs_score, status, trend="-2.1%"):
     payload = {
@@ -18,7 +42,7 @@ def push_update(project_id, forest_cover, cqs, cqs_score, status, trend="-2.1%")
     
     data = json.dumps(payload).encode('utf-8')
     req = urllib.request.Request(
-        VERCEL_URL,
+        TARGET_URL,
         data=data,
         headers={
             'Content-Type': 'application/json',
@@ -29,7 +53,7 @@ def push_update(project_id, forest_cover, cqs, cqs_score, status, trend="-2.1%")
     try:
         print(f"\n[📡 SATELLITE AI PIPELINE] Connecting to Sentinel-2 Telemetry Bridge...")
         print(f"[🛰️  PROCESSING] Analyzing NDVI satellite imagery for project: {project_id}")
-        print(f"[🚀 PUSHING] Sending payload to live server: {VERCEL_URL}")
+        print(f"[🚀 PUSHING] Sending payload to target: {TARGET_URL}")
         
         with urllib.request.urlopen(req) as response:
             res_body = response.read().decode('utf-8')
@@ -40,7 +64,8 @@ def push_update(project_id, forest_cover, cqs, cqs_score, status, trend="-2.1%")
             print(f" CQS Rating:      {cqs} ({cqs_score}/100)")
             print(f" Status:          {status}")
             print(f"===========================================================")
-            print(f"👉 Open https://terraverify-gold.vercel.app/ in your browser now!")
+            is_local = "localhost" in TARGET_URL
+            print(f"👉 Open {'http://localhost:3000/explorer' if is_local else 'https://terraverify-gold.vercel.app/explorer'} to view real-time changes!")
     except Exception as e:
         print(f"[❌ ERROR] Failed to push telemetry: {e}")
 

@@ -49,24 +49,22 @@ export default function BoundaryMap({
     });
     mapInstance.current = map;
 
-    // Basemap: Esri World Imagery
+    // Basemap: Dark Carto underneath to prevent blank or black canvas
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      maxZoom: 19,
+      subdomains: "abcd",
+      zIndex: 1,
+    }).addTo(map);
+
+    // Satellite layer
     const baseLayer = L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       {
         maxZoom: 18,
         attribution: "Esri World Imagery",
+        zIndex: 2,
       }
-    );
-
-    baseLayer.on("tileerror", () => {
-      if (mapInstance.current) {
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-          maxZoom: 18,
-        }).addTo(mapInstance.current);
-      }
-    });
-
-    baseLayer.addTo(map);
+    ).addTo(map);
 
     const layerGroup = L.layerGroup().addTo(map);
     layerGroupRef.current = layerGroup;

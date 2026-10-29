@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { PublicKey } from "@solana/web3.js";
@@ -23,6 +23,7 @@ import WalletDialog from "../wallet/wallet-dialog";
 
 export default function AppHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const { connection } = useConnection();
   const { publicKey, connected, disconnect, connecting } = useWallet();
   const { setVisible: setAdapterModalVisible } = useWalletModal();
@@ -74,6 +75,12 @@ export default function AppHeader() {
     setBalance(null);
     setWalletMenuOpen(false);
     window.dispatchEvent(new Event("storage"));
+  };
+
+  const handleLogout = () => {
+    handleDisconnectWallet();
+    setMobileNavOpen(false);
+    router.push("/");
   };
 
   const menuRef = useRef<HTMLDivElement>(null);
@@ -240,6 +247,16 @@ export default function AppHeader() {
               )}
             </button>
 
+            {/* Logout / Return to Home Button */}
+            <button
+              onClick={handleLogout}
+              title="Logout and return to Home"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/30 text-slate-300 hover:text-rose-400 text-xs font-semibold transition-all cursor-pointer shadow-xs"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+
             {/* Wallet Integration Widget */}
             {!isWalletConnected || !activePubkey ? (
               <div className="flex items-center gap-2">
@@ -343,12 +360,12 @@ export default function AppHeader() {
                         Keypair Tools
                       </button>
                       <button
-                        onClick={handleDisconnectWallet}
-                        className="flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300 transition-colors cursor-pointer"
-                        title="Disconnect connected wallet"
+                        onClick={handleLogout}
+                        className="flex items-center gap-1 text-[11px] text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
+                        title="Disconnect connected wallet and return Home"
                       >
                         <LogOut className="w-3 h-3" />
-                        <span>Disconnect</span>
+                        <span>Disconnect & Logout</span>
                       </button>
                     </div>
                   </div>
@@ -387,6 +404,14 @@ export default function AppHeader() {
                 </Link>
               );
             })}
+
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30 transition-all cursor-pointer mt-2"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout & Return Home</span>
+            </button>
           </div>
         )}
       </header>
