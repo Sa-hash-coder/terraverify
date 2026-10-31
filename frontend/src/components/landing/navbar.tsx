@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import WalletDialog from "../wallet/wallet-dialog";
 import { smoothScrollTo } from "../../lib/scroll";
 
@@ -13,6 +14,7 @@ export default function LandingNavbar() {
   const [localWalletPubkey, setLocalWalletPubkey] = useState<string | null>(null);
 
   const { connected, publicKey, disconnect } = useWallet();
+  const { setVisible: setAdapterModalVisible } = useWalletModal();
 
   const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWalletPubkey);
 
@@ -175,7 +177,7 @@ export default function LandingNavbar() {
                 <button
                   onClick={() => setWalletDialogOpen(true)}
                   className="px-3.5 py-2 text-xs font-mono font-medium rounded-lg border transition-all flex items-center gap-2 bg-[#0d1714] text-[#f4f5ef] border-[#1b352a] hover:border-[#38b87c] hover:bg-[#11231d] shadow-[0_2px_10px_rgba(56,184,124,0.12)] cursor-pointer"
-                  title="Connect or create a Solana wallet"
+                  title="Create a Solana keypair"
                 >
                   <svg
                     className="w-3.5 h-3.5 text-[#38b87c]"
@@ -189,15 +191,14 @@ export default function LandingNavbar() {
                     <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
                     <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
                   </svg>
-                  <span>+ Connect Wallet</span>
+                  <span>+ Create Wallet</span>
                 </button>
                 <button
-                  onClick={() => setWalletDialogOpen(true)}
-                  className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#143d28] hover:bg-[#1b5034] text-[#a8c7b5] hover:text-white border border-[#1b5034] transition-colors flex items-center gap-1.5 cursor-pointer"
-                  title="Connect wallet to launch application"
+                  onClick={() => setAdapterModalVisible(true)}
+                  className="px-3.5 py-2 text-xs font-mono font-medium rounded-lg bg-[#091f14] hover:bg-[#0e2d1d] border border-[#143d28] text-[#9ab5a6] hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Connect browser extension (Phantom/Solflare)"
                 >
-                  <span>Launch App</span>
-                  <span>→</span>
+                  <span>Connect</span>
                 </button>
               </div>
             )}
@@ -341,6 +342,8 @@ export default function LandingNavbar() {
     <WalletDialog
       isOpen={walletDialogOpen}
       onClose={() => setWalletDialogOpen(false)}
+      hideTabs={!isWalletConnected}
+      initialTab="create"
     />
   </>
   );

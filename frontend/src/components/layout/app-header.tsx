@@ -486,6 +486,8 @@ export default function AppHeader() {
       <WalletDialog
         isOpen={createWalletOpen}
         onClose={() => setCreateWalletOpen(false)}
+        hideTabs={true}
+        initialTab="create"
       />
     </>
   );
