@@ -110,7 +110,7 @@ export default function VerifySignaturePage({
   }, [signature]);
 
   return (
-    <PageShell>
+    <PageShell requireAuth={false}>
       <div className="max-w-3xl mx-auto space-y-6">
         <Link
           href="/retire"

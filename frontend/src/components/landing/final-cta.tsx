@@ -1,10 +1,39 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { smoothScrollTo } from "../../lib/scroll";
+import WalletDialog from "../wallet/wallet-dialog";
 
 export default function FinalCtaSection() {
+  const router = useRouter();
+  const { connected, publicKey } = useWallet();
+  const [walletDialogOpen, setWalletDialogOpen] = useState(false);
+
+  const checkHasWallet = () => {
+    if (connected && publicKey) return true;
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("terra_local_wallet");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed?.publicKey) return true;
+        } catch {}
+      }
+    }
+    return false;
+  };
+
+  const handleExplore = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (checkHasWallet()) {
+      router.push("/explorer");
+    } else {
+      setWalletDialogOpen(true);
+    }
+  };
+
   return (
     <section className="py-24 md:py-36 border-b border-[#d6dfd9] bg-[#f4f5ef] text-[#101814] relative overflow-hidden transition-colors">
       {/* Subtle topographic / radial atmospheric light */}
@@ -33,9 +62,9 @@ export default function FinalCtaSection() {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href="/explorer"
-            className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-[#ffffff] bg-[#1b7046] hover:bg-[#155836] rounded-lg transition-all flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(27,112,70,0.25)] hover:shadow-[0_6px_20px_rgba(27,112,70,0.35)]"
+          <button
+            onClick={handleExplore}
+            className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-[#ffffff] bg-[#1b7046] hover:bg-[#155836] rounded-lg transition-all flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(27,112,70,0.25)] hover:shadow-[0_6px_20px_rgba(27,112,70,0.35)] cursor-pointer"
           >
             <span>Explore TerraVerify</span>
             <svg
@@ -50,7 +79,7 @@ export default function FinalCtaSection() {
               <path d="M5 12h14" />
               <path d="m12 5 7 7-7 7" />
             </svg>
-          </Link>
+          </button>
 
           <a
             href="#how-it-works"
@@ -61,6 +90,15 @@ export default function FinalCtaSection() {
           </a>
         </div>
       </div>
+
+      <WalletDialog
+        isOpen={walletDialogOpen}
+        onClose={() => setWalletDialogOpen(false)}
+        onSuccess={() => {
+          setWalletDialogOpen(false);
+          router.push("/explorer");
+        }}
+      />
     </section>
   );
 }

@@ -107,76 +107,99 @@ export default function LandingNavbar() {
             className="hidden md:flex items-center gap-1 bg-[#091f14]/90 p-1 rounded-xl border border-[#143d28] shadow-inner shrink-0"
             aria-label="Main Navigation"
           >
-            <Link
-              href="/explorer"
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors"
+            <a
+              href="#how-it-works"
+              onClick={(e) => smoothScrollTo("how-it-works", e)}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors cursor-pointer"
             >
-              Explorer
-            </Link>
-            <Link
-              href="/marketplace"
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors"
+              How It Works
+            </a>
+            <a
+              href="#verification"
+              onClick={(e) => smoothScrollTo("verification", e)}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors cursor-pointer"
             >
-              Marketplace
-            </Link>
-            <Link
-              href="/retire"
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors"
+              Verification
+            </a>
+            <a
+              href="#technology"
+              onClick={(e) => smoothScrollTo("technology", e)}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors cursor-pointer"
             >
-              Retire
-            </Link>
-            <Link
-              href="/register"
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors"
+              Technology
+            </a>
+            <a
+              href="#about"
+              onClick={(e) => smoothScrollTo("about", e)}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors cursor-pointer"
             >
-              Register
-            </Link>
+              About
+            </a>
           </nav>
 
           {/* Rightmost Option: Add or Create a Solana Wallet & Disconnect */}
           <div className="hidden md:flex items-center gap-2">
             {isWalletConnected ? (
-              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0d1714] border border-[#1b352a]">
-                <button
-                  onClick={() => setWalletDialogOpen(true)}
-                  className="px-3 py-1.5 text-xs font-mono font-medium rounded-lg text-[#38b87c] hover:bg-[#122b22] transition-colors flex items-center gap-2 cursor-pointer"
-                  title="Manage Solana Wallet"
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0d1714] border border-[#1b352a]">
+                  <button
+                    onClick={() => setWalletDialogOpen(true)}
+                    className="px-3 py-1.5 text-xs font-mono font-medium rounded-lg text-[#38b87c] hover:bg-[#122b22] transition-colors flex items-center gap-2 cursor-pointer"
+                    title="Manage Solana Wallet"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-[#38b87c] animate-pulse motion-reduce:animate-none" />
+                    <span>
+                      {connected && publicKey
+                        ? `${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
+                        : `${localWalletPubkey?.slice(0, 4)}...${localWalletPubkey?.slice(-4)}`}
+                    </span>
+                  </button>
+                  <button
+                    onClick={handleDisconnectWallet}
+                    className="px-2.5 py-1.5 text-[11px] font-sans font-medium text-[#fca5a5] hover:text-[#f87171] hover:bg-[#201818] rounded-md transition-colors cursor-pointer border-l border-[#1b352a] flex items-center gap-1"
+                    title="Disconnect any connected wallet"
+                  >
+                    <span>Disconnect</span>
+                  </button>
+                </div>
+                <Link
+                  href="/explorer"
+                  className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#38b87c] hover:bg-[#2fa36c] text-[#06140d] transition-colors flex items-center gap-1.5 shadow-[0_2px_10px_rgba(56,184,124,0.25)]"
                 >
-                  <span className="w-2 h-2 rounded-full bg-[#38b87c] animate-pulse" />
-                  <span>
-                    {connected && publicKey
-                      ? `${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
-                      : `${localWalletPubkey?.slice(0, 4)}...${localWalletPubkey?.slice(-4)}`}
-                  </span>
-                </button>
-                <button
-                  onClick={handleDisconnectWallet}
-                  className="px-2.5 py-1.5 text-[11px] font-sans font-medium text-[#fca5a5] hover:text-[#f87171] hover:bg-[#201818] rounded-md transition-colors cursor-pointer border-l border-[#1b352a] flex items-center gap-1"
-                  title="Disconnect any connected wallet"
-                >
-                  <span>Disconnect</span>
-                </button>
+                  <span>Launch App</span>
+                  <span>→</span>
+                </Link>
               </div>
             ) : (
-              <button
-                onClick={() => setWalletDialogOpen(true)}
-                className="px-3.5 py-2 text-xs font-mono font-medium rounded-lg border transition-all flex items-center gap-2 bg-[#0d1714] text-[#f4f5ef] border-[#1b352a] hover:border-[#38b87c] hover:bg-[#11231d] shadow-[0_2px_10px_rgba(56,184,124,0.12)] cursor-pointer"
-                title="Add or create a Solana wallet"
-              >
-                <svg
-                  className="w-3.5 h-3.5 text-[#38b87c]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setWalletDialogOpen(true)}
+                  className="px-3.5 py-2 text-xs font-mono font-medium rounded-lg border transition-all flex items-center gap-2 bg-[#0d1714] text-[#f4f5ef] border-[#1b352a] hover:border-[#38b87c] hover:bg-[#11231d] shadow-[0_2px_10px_rgba(56,184,124,0.12)] cursor-pointer"
+                  title="Connect or create a Solana wallet"
                 >
-                  <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
-                  <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
-                </svg>
-                <span>+ Create Wallet</span>
-              </button>
+                  <svg
+                    className="w-3.5 h-3.5 text-[#38b87c]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+                    <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+                  </svg>
+                  <span>+ Connect Wallet</span>
+                </button>
+                <button
+                  onClick={() => setWalletDialogOpen(true)}
+                  className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#143d28] hover:bg-[#1b5034] text-[#a8c7b5] hover:text-white border border-[#1b5034] transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Connect wallet to launch application"
+                >
+                  <span>Launch App</span>
+                  <span>→</span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -189,12 +212,21 @@ export default function LandingNavbar() {
               <span className="w-1.5 h-1.5 rounded-full bg-[#38b87c]" />
               <span>Wallet</span>
             </button>
-            <Link
-              href="/explorer"
-              className="px-3 py-1.5 text-xs font-semibold text-[#07130f] bg-[#38b87c] rounded"
-            >
-              App
-            </Link>
+            {isWalletConnected ? (
+              <Link
+                href="/explorer"
+                className="px-3 py-1.5 text-xs font-semibold text-[#07130f] bg-[#38b87c] rounded"
+              >
+                App
+              </Link>
+            ) : (
+              <button
+                onClick={() => setWalletDialogOpen(true)}
+                className="px-3 py-1.5 text-xs font-semibold text-[#07130f] bg-[#38b87c] rounded cursor-pointer"
+              >
+                App
+              </button>
+            )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-[#a8c7b5] hover:text-[#f4f5ef] rounded border border-[#162922] focus:outline-none"

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useWallet } from "@solana/wallet-adapter-react";
+import WalletDialog from "../wallet/wallet-dialog";
 
 interface ParcelData {
   id: string;
@@ -59,8 +61,34 @@ const PARCELS: ParcelData[] = [
 ];
 
 export default function VerificationVisualSection() {
+  const router = useRouter();
+  const { connected, publicKey } = useWallet();
+  const [walletDialogOpen, setWalletDialogOpen] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [filterMode, setFilterMode] = useState<"natural" | "infrared">("natural");
+
+  const checkHasWallet = () => {
+    if (connected && publicKey) return true;
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("terra_local_wallet");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed?.publicKey) return true;
+        } catch {}
+      }
+    }
+    return false;
+  };
+
+  const handleOpenExplorer = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (checkHasWallet()) {
+      router.push("/explorer");
+    } else {
+      setWalletDialogOpen(true);
+    }
+  };
 
   const current = PARCELS[selectedIdx];
 
@@ -367,18 +395,27 @@ export default function VerificationVisualSection() {
 
               {/* Action Link to Full Explorer */}
               <div className="pt-6 border-t border-[#162922] mt-6">
-                <Link
-                  href="/explorer"
-                  className="w-full py-2.5 px-4 rounded bg-[#0d1714] hover:bg-[#13221d] border border-[#162922] hover:border-[#a8c7b5]/30 text-xs font-semibold text-[#f4f5ef] transition-colors flex items-center justify-center gap-2"
+                <button
+                  onClick={handleOpenExplorer}
+                  className="w-full py-2.5 px-4 rounded bg-[#0d1714] hover:bg-[#13221d] border border-[#162922] hover:border-[#a8c7b5]/30 text-xs font-semibold text-[#f4f5ef] transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>Open Full Satellite Explorer</span>
                   <span>→</span>
-                </Link>
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <WalletDialog
+        isOpen={walletDialogOpen}
+        onClose={() => setWalletDialogOpen(false)}
+        onSuccess={() => {
+          setWalletDialogOpen(false);
+          router.push("/explorer");
+        }}
+      />
     </section>
   );
 }
