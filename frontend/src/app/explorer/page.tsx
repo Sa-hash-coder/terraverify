@@ -318,13 +318,13 @@ export default function ExplorerPage() {
 
             {/* Navigation Tabs: Forests vs Layers */}
             <div className="p-3 border-b border-[#dbe3d8] bg-[#f4f6f3]">
-              <div className="grid grid-cols-2 p-1 rounded-xl bg-[#e6ebe3] border border-[#d6ded2]">
+              <div className="grid grid-cols-2 p-1 rounded-full bg-[#0a1813] border border-[#163024] shadow-[0_2px_10px_rgba(0,0,0,0.25)]">
                 <button
                   onClick={() => setActiveTab("projects")}
-                  className={`py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`py-2 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     activeTab === "projects"
-                      ? "bg-[#2d6a4f] text-white font-bold shadow-xs"
-                      : "text-[#5c7366] hover:text-[#111e16]"
+                      ? "bg-[#2ecc71] text-[#07130f] font-bold shadow-xs scale-[1.01]"
+                      : "text-[#8e9f96] hover:text-white"
                   }`}
                 >
                   <MapPin className="w-3.5 h-3.5" />
@@ -333,10 +333,10 @@ export default function ExplorerPage() {
 
                 <button
                   onClick={() => setActiveTab("layers")}
-                  className={`py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`py-2 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     activeTab === "layers"
-                      ? "bg-[#2d6a4f] text-white font-bold shadow-xs"
-                      : "text-[#5c7366] hover:text-[#111e16]"
+                      ? "bg-[#2ecc71] text-[#07130f] font-bold shadow-xs scale-[1.01]"
+                      : "text-[#8e9f96] hover:text-white"
                   }`}
                 >
                   <Layers className="w-3.5 h-3.5" />

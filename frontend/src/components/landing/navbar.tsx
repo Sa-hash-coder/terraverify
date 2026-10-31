@@ -11,7 +11,9 @@ export default function LandingNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [walletDialogOpen, setWalletDialogOpen] = useState(false);
+  const [walletDialogInitialTab, setWalletDialogInitialTab] = useState<"create" | "connect">("create");
   const [localWalletPubkey, setLocalWalletPubkey] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string>("verification");
 
   const { connected, publicKey, disconnect } = useWallet();
   const { setVisible: setAdapterModalVisible } = useWalletModal();
@@ -34,8 +36,25 @@ export default function LandingNavbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 24);
+      setScrolled(window.scrollY > 16);
+
+      // Scroll spy for active section highlight
+      const sections = ["about", "technology", "how-it-works", "verification"];
+      const scrollPos = window.scrollY + 200;
+
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(id);
+            return;
+          }
+        }
+      }
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -67,89 +86,166 @@ export default function LandingNavbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 w-full transition-colors duration-200 bg-[#06140d] border-b border-[#0f291e] ${
-          scrolled ? "shadow-[0_4px_20px_rgba(0,0,0,0.4)]" : ""
+        className={`sticky top-0 z-50 w-full transition-colors duration-200 bg-[#06120d]/95 backdrop-blur-md border-b border-[#0f241a] ${
+          scrolled ? "shadow-[0_4px_24px_rgba(0,0,0,0.5)]" : ""
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Brand Logo & Wordmark */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+          {/* Brand Logo & Wordmark matching Image Theme */}
           <Link
             href="/"
-            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            className="flex items-center gap-3.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2ecc71] rounded-lg"
             aria-label="TerraVerify Home"
           >
-            <div className="w-8 h-8 rounded-lg border border-[#143d28] bg-[#091f14] flex items-center justify-center text-emerald-400 group-hover:border-emerald-400 transition-colors shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+            {/* Viewfinder Reticle Icon with Target Center Dot */}
+            <div className="w-8 h-8 flex items-center justify-center text-[#2ecc71] shrink-0 group-hover:scale-105 transition-transform duration-200">
               <svg
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
+                className="w-7 h-7"
+                viewBox="0 0 28 28"
                 fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
-                <circle cx="12" cy="12" r="3" />
-                <path d="M12 2a10 10 0 0 0-7.07 17.07" />
-                <path d="M12 22a10 10 0 0 0 7.07-17.07" />
+                {/* Top-Left Reticle Corner */}
+                <path
+                  d="M4 10V7a3 3 0 0 1 3-3h3"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Top-Right Reticle Corner */}
+                <path
+                  d="M18 4h3a3 3 0 0 1 3 3v3"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Bottom-Right Reticle Corner */}
+                <path
+                  d="M24 18v3a3 3 0 0 1-3 3h-3"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Bottom-Left Reticle Corner */}
+                <path
+                  d="M10 24H7a3 3 0 0 1-3-3v-3"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Center Sensor / Target Dot */}
+                <circle cx="14" cy="14" r="2.25" fill="currentColor" />
               </svg>
             </div>
-            <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight text-white leading-tight">
-                Terra<span className="text-emerald-400">Verify</span>
+
+            <div className="flex flex-col text-left">
+              <span className="text-[17px] font-bold text-white tracking-tight leading-tight">
+                TerraVerify
               </span>
-              <span className="text-[8.5px] font-mono tracking-[0.24em] text-emerald-400/80 uppercase font-semibold leading-none mt-0.5">
-                EARTH OBSERVATION PROTOCOL
+              <span className="text-[12px] text-[#8e9f96] font-normal leading-tight mt-0.5">
+                Earth observation protocol
               </span>
             </div>
           </Link>
 
-          {/* Desktop Navigation Links */}
+          {/* Center Navigation Pill Container */}
           <nav
-            className="hidden md:flex items-center gap-1 bg-[#091f14]/90 p-1 rounded-xl border border-[#143d28] shadow-inner shrink-0"
+            className="hidden md:flex items-center gap-7 bg-[#0a1813]/90 px-8 py-2.5 rounded-full border border-[#163024] shadow-[0_2px_14px_rgba(0,0,0,0.3)] backdrop-blur-md"
             aria-label="Main Navigation"
           >
             <a
               href="#how-it-works"
-              onClick={(e) => smoothScrollTo("how-it-works", e)}
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors cursor-pointer"
+              onClick={(e) => {
+                setActiveSection("how-it-works");
+                smoothScrollTo("how-it-works", e);
+              }}
+              className={`text-sm transition-colors cursor-pointer ${
+                activeSection === "how-it-works"
+                  ? "font-semibold text-white"
+                  : "font-medium text-[#8e9f96] hover:text-white"
+              }`}
             >
               How It Works
             </a>
             <a
               href="#verification"
-              onClick={(e) => smoothScrollTo("verification", e)}
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors cursor-pointer"
+              onClick={(e) => {
+                setActiveSection("verification");
+                smoothScrollTo("verification", e);
+              }}
+              className={`text-sm transition-colors cursor-pointer ${
+                activeSection === "verification"
+                  ? "font-semibold text-white"
+                  : "font-medium text-[#8e9f96] hover:text-white"
+              }`}
             >
               Verification
             </a>
             <a
               href="#technology"
-              onClick={(e) => smoothScrollTo("technology", e)}
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors cursor-pointer"
+              onClick={(e) => {
+                setActiveSection("technology");
+                smoothScrollTo("technology", e);
+              }}
+              className={`text-sm transition-colors cursor-pointer ${
+                activeSection === "technology"
+                  ? "font-semibold text-white"
+                  : "font-medium text-[#8e9f96] hover:text-white"
+              }`}
             >
               Technology
             </a>
             <a
               href="#about"
-              onClick={(e) => smoothScrollTo("about", e)}
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors cursor-pointer"
+              onClick={(e) => {
+                setActiveSection("about");
+                smoothScrollTo("about", e);
+              }}
+              className={`text-sm transition-colors cursor-pointer ${
+                activeSection === "about"
+                  ? "font-semibold text-white"
+                  : "font-medium text-[#8e9f96] hover:text-white"
+              }`}
             >
               About
             </a>
           </nav>
 
-          {/* Rightmost Option: Add or Create a Solana Wallet & Disconnect */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Rightmost Actions matching Screenshot Theme */}
+          <div className="hidden md:flex items-center gap-5">
             {isWalletConnected ? (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0d1714] border border-[#1b352a]">
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/explorer"
+                  className="text-sm font-medium text-[#f4f5ef] hover:text-white transition-colors"
+                >
+                  Explorer
+                </Link>
+
+                <div className="flex items-center gap-1.5 p-1 rounded-full bg-[#0a1813] border border-[#163024]">
                   <button
-                    onClick={() => setWalletDialogOpen(true)}
-                    className="px-3 py-1.5 text-xs font-mono font-medium rounded-lg text-[#38b87c] hover:bg-[#122b22] transition-colors flex items-center gap-2 cursor-pointer"
-                    title="Manage Solana Wallet"
+                    onClick={() => {
+                      setWalletDialogInitialTab("connect");
+                      setWalletDialogOpen(true);
+                    }}
+                    className="px-4 py-2 text-xs font-semibold rounded-full bg-[#2ecc71] hover:bg-[#34d399] text-[#07130f] transition-all flex items-center gap-2 shadow-[0_2px_10px_rgba(46,204,113,0.3)] cursor-pointer"
+                    title="Solana Wallet Active"
                   >
-                    <span className="w-2 h-2 rounded-full bg-[#38b87c] animate-pulse motion-reduce:animate-none" />
+                    <svg
+                      className="w-3.5 h-3.5 fill-none stroke-current"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+                      <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+                    </svg>
                     <span>
                       {connected && publicKey
                         ? `${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
@@ -158,79 +254,77 @@ export default function LandingNavbar() {
                   </button>
                   <button
                     onClick={handleDisconnectWallet}
-                    className="px-2.5 py-1.5 text-[11px] font-sans font-medium text-[#fca5a5] hover:text-[#f87171] hover:bg-[#201818] rounded-md transition-colors cursor-pointer border-l border-[#1b352a] flex items-center gap-1"
-                    title="Disconnect any connected wallet"
+                    className="px-2.5 py-1.5 text-xs text-[#fca5a5] hover:text-[#f87171] hover:bg-[#201818] rounded-full transition-colors cursor-pointer mr-1"
+                    title="Disconnect wallet"
                   >
-                    <span>Disconnect</span>
+                    Disconnect
                   </button>
                 </div>
-                <Link
-                  href="/explorer"
-                  className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#38b87c] hover:bg-[#2fa36c] text-[#06140d] transition-colors flex items-center gap-1.5 shadow-[0_2px_10px_rgba(56,184,124,0.25)]"
-                >
-                  <span>Launch App</span>
-                  <span>→</span>
-                </Link>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-5">
+                {/* 1. Create wallet (Text action) */}
                 <button
-                  onClick={() => setWalletDialogOpen(true)}
-                  className="px-3.5 py-2 text-xs font-mono font-medium rounded-lg border transition-all flex items-center gap-2 bg-[#0d1714] text-[#f4f5ef] border-[#1b352a] hover:border-[#38b87c] hover:bg-[#11231d] shadow-[0_2px_10px_rgba(56,184,124,0.12)] cursor-pointer"
-                  title="Create a Solana keypair"
+                  onClick={() => {
+                    setWalletDialogInitialTab("create");
+                    setWalletDialogOpen(true);
+                  }}
+                  className="text-sm font-medium text-[#f4f5ef] hover:text-white transition-colors cursor-pointer px-1 py-1"
+                >
+                  Create wallet
+                </button>
+
+                {/* 2. Connect wallet (Emerald Pill Button with Wallet Icon) */}
+                <button
+                  onClick={() => setAdapterModalVisible(true)}
+                  className="px-5 py-2.5 rounded-full bg-[#2ecc71] hover:bg-[#34d399] text-[#07130f] font-semibold text-sm transition-all duration-200 flex items-center gap-2.5 shadow-[0_2px_14px_rgba(46,204,113,0.35)] hover:shadow-[0_4px_18px_rgba(46,204,113,0.45)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <svg
-                    className="w-3.5 h-3.5 text-[#38b87c]"
+                    className="w-4 h-4 fill-none stroke-current"
                     viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="2.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    aria-hidden="true"
                   >
                     <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
                     <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
                   </svg>
-                  <span>+ Create Wallet</span>
-                </button>
-                <button
-                  onClick={() => setAdapterModalVisible(true)}
-                  className="px-3.5 py-2 text-xs font-mono font-medium rounded-lg bg-[#091f14] hover:bg-[#0e2d1d] border border-[#143d28] text-[#9ab5a6] hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
-                  title="Connect browser extension (Phantom/Solflare)"
-                >
-                  <span>Connect</span>
+                  <span>Connect wallet</span>
                 </button>
               </div>
             )}
           </div>
 
           {/* Mobile Buttons */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden items-center gap-3">
             <button
-              onClick={() => setWalletDialogOpen(true)}
-              className="px-2.5 py-1.5 text-xs font-mono rounded bg-[#0d1714] border border-[#1b352a] text-[#38b87c] flex items-center gap-1.5"
+              onClick={() => {
+                if (isWalletConnected) {
+                  setWalletDialogInitialTab("connect");
+                } else {
+                  setWalletDialogInitialTab("create");
+                }
+                setWalletDialogOpen(true);
+              }}
+              className="px-3 py-1.5 rounded-full bg-[#2ecc71] text-[#07130f] font-semibold text-xs flex items-center gap-1.5"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#38b87c]" />
-              <span>Wallet</span>
+              <svg
+                className="w-3.5 h-3.5 fill-none stroke-current"
+                viewBox="0 0 24 24"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+                <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+              </svg>
+              <span>{isWalletConnected ? "Wallet" : "Connect"}</span>
             </button>
-            {isWalletConnected ? (
-              <Link
-                href="/explorer"
-                className="px-3 py-1.5 text-xs font-semibold text-[#07130f] bg-[#38b87c] rounded"
-              >
-                App
-              </Link>
-            ) : (
-              <button
-                onClick={() => setWalletDialogOpen(true)}
-                className="px-3 py-1.5 text-xs font-semibold text-[#07130f] bg-[#38b87c] rounded cursor-pointer"
-              >
-                App
-              </button>
-            )}
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#a8c7b5] hover:text-[#f4f5ef] rounded border border-[#162922] focus:outline-none"
+              className="p-2 text-[#a8c7b5] hover:text-[#f4f5ef] rounded-lg border border-[#162922] focus:outline-none"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -259,92 +353,97 @@ export default function LandingNavbar() {
           </div>
         </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0a1813] border-b border-[#162922] px-6 py-6 space-y-4">
-          <nav className="flex flex-col space-y-3 text-sm font-medium text-[#a8c7b5]">
-            <a
-              href="#how-it-works"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                smoothScrollTo("how-it-works", e);
-              }}
-              className="py-1 hover:text-[#f4f5ef] cursor-pointer"
-            >
-              How It Works
-            </a>
-            <a
-              href="#verification"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                smoothScrollTo("verification", e);
-              }}
-              className="py-1 hover:text-[#f4f5ef] cursor-pointer"
-            >
-              Verification
-            </a>
-            <a
-              href="#technology"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                smoothScrollTo("technology", e);
-              }}
-              className="py-1 hover:text-[#f4f5ef] cursor-pointer"
-            >
-              Technology
-            </a>
-            <a
-              href="#about"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                smoothScrollTo("about", e);
-              }}
-              className="py-1 hover:text-[#f4f5ef] cursor-pointer"
-            >
-              About
-            </a>
-          </nav>
-          <div className="pt-4 border-t border-[#162922] flex flex-col gap-3">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setWalletDialogOpen(true);
-              }}
-              className="w-full text-center py-2.5 text-xs font-mono font-medium text-[#38b87c] bg-[#0d1714] border border-[#38b87c]/30 rounded flex items-center justify-center gap-2"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#38b87c]" />
-              <span>
-                {connected && publicKey
-                  ? `Wallet: ${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
-                  : localWalletPubkey
-                  ? `Wallet: ${localWalletPubkey.slice(0, 4)}...${localWalletPubkey.slice(-4)}`
-                  : "+ Create / Connect Wallet"}
-              </span>
-            </button>
-
-            {isWalletConnected && (
-              <button
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-[#06120d] border-b border-[#0f241a] px-6 py-6 space-y-4">
+            <nav className="flex flex-col space-y-3 text-sm font-medium text-[#8e9f96]">
+              <a
+                href="#how-it-works"
                 onClick={(e) => {
                   setMobileMenuOpen(false);
-                  handleDisconnectWallet(e);
+                  setActiveSection("how-it-works");
+                  smoothScrollTo("how-it-works", e);
                 }}
-                className="w-full text-center py-2 text-xs font-medium text-[#fca5a5] hover:text-[#f87171] bg-[#201818] border border-[#3a2222] rounded flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="py-1 hover:text-white cursor-pointer"
               >
-                <span>Disconnect Wallet</span>
+                How It Works
+              </a>
+              <a
+                href="#verification"
+                onClick={(e) => {
+                  setMobileMenuOpen(false);
+                  setActiveSection("verification");
+                  smoothScrollTo("verification", e);
+                }}
+                className="py-1 text-white font-semibold cursor-pointer"
+              >
+                Verification
+              </a>
+              <a
+                href="#technology"
+                onClick={(e) => {
+                  setMobileMenuOpen(false);
+                  setActiveSection("technology");
+                  smoothScrollTo("technology", e);
+                }}
+                className="py-1 hover:text-white cursor-pointer"
+              >
+                Technology
+              </a>
+              <a
+                href="#about"
+                onClick={(e) => {
+                  setMobileMenuOpen(false);
+                  setActiveSection("about");
+                  smoothScrollTo("about", e);
+                }}
+                className="py-1 hover:text-white cursor-pointer"
+              >
+                About
+              </a>
+            </nav>
+            <div className="pt-4 border-t border-[#0f241a] flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setWalletDialogInitialTab("create");
+                  setWalletDialogOpen(true);
+                }}
+                className="w-full text-center py-2.5 text-xs font-semibold text-white bg-[#0a1813] border border-[#163024] rounded-full"
+              >
+                Create wallet
               </button>
-            )}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setAdapterModalVisible(true);
+                }}
+                className="w-full text-center py-2.5 text-xs font-semibold text-[#07130f] bg-[#2ecc71] hover:bg-[#34d399] rounded-full flex items-center justify-center gap-2 shadow-[0_2px_10px_rgba(46,204,113,0.3)]"
+              >
+                <svg
+                  className="w-3.5 h-3.5 fill-none stroke-current"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+                  <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+                </svg>
+                <span>Connect wallet</span>
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </header>
+        )}
+      </header>
 
-    {/* Wallet Creation & Connection Dialog Modal */}
-    <WalletDialog
-      isOpen={walletDialogOpen}
-      onClose={() => setWalletDialogOpen(false)}
-      hideTabs={!isWalletConnected}
-      initialTab="create"
-    />
-  </>
+      {/* Wallet Creation & Connection Dialog Modal */}
+      <WalletDialog
+        isOpen={walletDialogOpen}
+        onClose={() => setWalletDialogOpen(false)}
+        hideTabs={!isWalletConnected}
+        initialTab={walletDialogInitialTab}
+      />
+    </>
   );
 }
