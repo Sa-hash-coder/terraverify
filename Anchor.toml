@@ -1,0 +1,32 @@
+[toolchain]
+anchor_version = "0.30.1"
+solana_version = "1.18.26"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+carbon_credit = "Token111111111111111111111111111111111111111"
+marketplace = "Mark111111111111111111111111111111111111111"
+project_registry = "Reg1111111111111111111111111111111111111111"
+transfer_hook = "Hook1111111111111111111111111111111111111111"
+verification_oracle = "Orac1111111111111111111111111111111111111111"
+
+[programs.devnet]
+carbon_credit = "Token111111111111111111111111111111111111111"
+marketplace = "Mark111111111111111111111111111111111111111"
+project_registry = "Reg1111111111111111111111111111111111111111"
+transfer_hook = "Hook1111111111111111111111111111111111111111"
+verification_oracle = "Orac1111111111111111111111111111111111111111"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test-sbf"
+

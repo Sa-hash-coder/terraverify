@@ -12,13 +12,13 @@ export default function LandingFooter() {
           {/* Brand & Mission Statement */}
           <div className="md:col-span-5 space-y-4 text-left">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-7 h-7 rounded border border-[#38b87c]/40 bg-[#0d1714] flex items-center justify-center text-[#38b87c]">
+              <div className="w-8 h-8 rounded-lg border border-[#143d28] bg-[#091f14] flex items-center justify-center text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
                 <svg
-                  className="w-3.5 h-3.5"
+                  className="w-4 h-4"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
@@ -27,9 +27,14 @@ export default function LandingFooter() {
                   <path d="M12 22a10 10 0 0 0 7.07-17.07" />
                 </svg>
               </div>
-              <span className="text-base font-semibold tracking-tight text-[#f4f5ef]">
-                Terra<span className="text-[#a8c7b5]">Verify</span>
-              </span>
+              <div className="flex flex-col">
+                <span className="text-base font-bold tracking-tight text-white leading-tight">
+                  Terra<span className="text-emerald-400">Verify</span>
+                </span>
+                <span className="text-[8.5px] font-mono tracking-[0.24em] text-emerald-400/80 uppercase font-semibold leading-none mt-0.5">
+                  EARTH OBSERVATION PROTOCOL
+                </span>
+              </div>
             </Link>
 
             <p className="text-sm font-medium text-[#f4f5ef]">

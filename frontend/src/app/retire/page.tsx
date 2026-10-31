@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey, TransactionInstruction } from "@solana/web3.js";
 import QRCode from "qrcode.react";
 
 import PageShell from "../../components/layout/page-shell";
@@ -194,7 +194,8 @@ export default function RetirePage() {
   const handleExecuteBurn = async () => {
     setBurnError(null);
 
-    if (!connected || !publicKey) {
+    const hasActiveWallet = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
+    if (!hasActiveWallet) {
       setVisible(true);
       return;
     }
@@ -212,21 +213,61 @@ export default function RetirePage() {
     try {
       setBurning(true);
 
-      // On-chain burn simulation via Solana Devnet transaction
-      const burnRecipient = new PublicKey("11111111111111111111111111111111");
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: publicKey,
-          toPubkey: burnRecipient,
-          lamports: Math.round(0.0005 * LAMPORTS_PER_SOL), // Nominal burn execution fee
-        })
-      );
+      const burnRecipient = new PublicKey("1nc1nerator11111111111111111111111111111111");
+      const memoProgram = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+      const memoText = `TerraVerify Burn: ${amountToRetire} | ${beneficiaryName || "Acme Corporation"} | ${selectedProject.name}`;
 
-      const { blockhash } = await connection.getLatestBlockhash();
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = publicKey;
+      let signature: string;
 
-      const signature = await sendTransaction(transaction, connection);
+      if (connected && publicKey) {
+        const transaction = new Transaction().add(
+          SystemProgram.transfer({
+            fromPubkey: publicKey,
+            toPubkey: burnRecipient,
+            lamports: Math.round(0.0005 * LAMPORTS_PER_SOL), // Nominal burn execution fee
+          }),
+          new TransactionInstruction({
+            keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
+            programId: memoProgram,
+            data: Buffer.from(memoText, "utf-8"),
+          })
+        );
+
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = publicKey;
+
+        signature = await sendTransaction(transaction, connection);
+      } else if (localWallet?.publicKey) {
+        // Transact using local in-app keypair via backend
+        const saved = typeof window !== "undefined" ? localStorage.getItem("terra_local_wallet") : null;
+        const parsed = saved ? JSON.parse(saved) : null;
+        if (!parsed?.secretKey) {
+          throw new Error("Local wallet keys not found in storage. Please generate or connect a wallet.");
+        }
+
+        const res = await fetch("/api/wallet", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "transact",
+            secretKey: parsed.secretKey,
+            toPublicKey: burnRecipient.toBase58(),
+            amountSol: 0.0005,
+            memo: memoText,
+          }),
+        });
+
+        const resData = await res.json();
+        if (!resData.success) {
+          throw new Error(resData.error || "Burn settlement failed");
+        }
+        signature = resData.signature;
+      } else {
+        setVisible(true);
+        return;
+      }
+
       setBurnSignature(signature);
 
       const newRetirement: PastRetirement = {
@@ -718,7 +759,7 @@ export default function RetirePage() {
                       <div>Scan QR to verify proof on Solana Explorer:</div>
                       {burnSignature && (
                         <Link
-                          href={`/verify/${burnSignature}`}
+                          href={`/verify/${burnSignature}?beneficiary=${encodeURIComponent(beneficiaryName)}&project=${encodeURIComponent(selectedProject.name)}&amount=${amountToRetire}&grade=${selectedProject.grade}`}
                           className="text-[#1a5734] hover:underline font-bold text-xs flex items-center gap-1"
                         >
                           <span>Public Verification Page</span>
@@ -731,8 +772,8 @@ export default function RetirePage() {
                       <QRCode
                         value={
                           burnSignature
-                            ? `https://terraverify-gold.vercel.app/verify/${burnSignature}`
-                            : `https://terraverify-gold.vercel.app/verify/sample`
+                            ? `${typeof window !== "undefined" ? window.location.origin : "https://terraverify-gold.vercel.app"}/verify/${burnSignature}?beneficiary=${encodeURIComponent(beneficiaryName)}&project=${encodeURIComponent(selectedProject.name)}&amount=${amountToRetire}`
+                            : `${typeof window !== "undefined" ? window.location.origin : "https://terraverify-gold.vercel.app"}/verify/sample`
                         }
                         size={64}
                         level="M"

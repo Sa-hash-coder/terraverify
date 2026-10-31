@@ -1,0 +1,87 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "PRJ-001",
+      "properties": {
+        "name": "Amazon Reforestation Block 7",
+        "region": "Amazonas, Brazil",
+        "country": "Brazil",
+        "area_hectares": 12500,
+        "methodology": "AR-ACM0003",
+        "baseline_ndvi": 0.845,
+        "baseline_canopy_pct": 84.5,
+        "cqs_target": "AAA",
+        "deed_id": "BR-1500800-AMZ-2026-BLK7"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-62.25, -3.50],
+            [-62.15, -3.50],
+            [-62.15, -3.42],
+            [-62.25, -3.42],
+            [-62.25, -3.50]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "PRJ-002",
+      "properties": {
+        "name": "Congo Basin Conservation",
+        "region": "Équateur, DRC",
+        "country": "Democratic Republic of Congo",
+        "area_hectares": 45000,
+        "methodology": "VM0007",
+        "baseline_ndvi": 0.812,
+        "baseline_canopy_pct": 88.0,
+        "cqs_target": "AA",
+        "deed_id": "CDF-EQUAT-2026-0941"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [24.45, 0.70],
+            [24.60, 0.70],
+            [24.60, 0.85],
+            [24.45, 0.85],
+            [24.45, 0.70]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "PRJ-003",
+      "properties": {
+        "name": "Borneo Peatland Protection",
+        "region": "Central Kalimantan, Indonesia",
+        "country": "Indonesia",
+        "area_hectares": 8200,
+        "methodology": "VM0015",
+        "baseline_ndvi": 0.621,
+        "baseline_canopy_pct": 62.1,
+        "cqs_target": "C",
+        "deed_id": "HGU 00412/KALBAR/2026"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [110.30, -1.55],
+            [110.42, -1.55],
+            [110.42, -1.42],
+            [110.30, -1.42],
+            [110.30, -1.55]
+          ]
+        ]
+      }
+    }
+  ]
+}
+

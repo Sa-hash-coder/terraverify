@@ -65,27 +65,24 @@ export default function LandingNavbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 w-full transition-colors duration-200 ${
-          scrolled
-            ? "bg-[#07130f]/95 backdrop-blur-md border-b border-[#162922] shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
-            : "bg-[#07130f]/80 backdrop-blur-sm border-b border-[#162922]/60"
+        className={`sticky top-0 z-50 w-full transition-colors duration-200 bg-[#06140d] border-b border-[#0f291e] ${
+          scrolled ? "shadow-[0_4px_20px_rgba(0,0,0,0.4)]" : ""
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Brand Logo & Wordmark */}
           <Link
             href="/"
-            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38b87c]"
+            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             aria-label="TerraVerify Home"
           >
-            {/* Scientific Minimalist Emblem */}
-            <div className="w-8 h-8 rounded border border-[#38b87c]/40 bg-[#0d1714] flex items-center justify-center text-[#38b87c] group-hover:border-[#38b87c] transition-colors">
+            <div className="w-8 h-8 rounded-lg border border-[#143d28] bg-[#091f14] flex items-center justify-center text-emerald-400 group-hover:border-emerald-400 transition-colors shadow-[0_0_12px_rgba(16,185,129,0.15)]">
               <svg
                 className="w-4 h-4"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 aria-hidden="true"
@@ -93,53 +90,47 @@ export default function LandingNavbar() {
                 <circle cx="12" cy="12" r="3" />
                 <path d="M12 2a10 10 0 0 0-7.07 17.07" />
                 <path d="M12 22a10 10 0 0 0 7.07-17.07" />
-                <path d="m4.93 4.93 4.24 4.24" />
-                <path d="m14.83 14.83 4.24 4.24" />
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-semibold tracking-tight text-[#f4f5ef]">
-                Terra<span className="text-[#a8c7b5]">Verify</span>
+              <span className="text-base font-bold tracking-tight text-white leading-tight">
+                Terra<span className="text-emerald-400">Verify</span>
               </span>
-              <span className="text-[10px] uppercase tracking-widest text-[#718078] font-mono leading-none">
-                Earth Observation Protocol
+              <span className="text-[8.5px] font-mono tracking-[0.24em] text-emerald-400/80 uppercase font-semibold leading-none mt-0.5">
+                EARTH OBSERVATION PROTOCOL
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
           <nav
-            className="hidden md:flex items-center gap-8 text-sm font-medium text-[#a8c7b5]"
+            className="hidden md:flex items-center gap-1 bg-[#091f14]/90 p-1 rounded-xl border border-[#143d28] shadow-inner shrink-0"
             aria-label="Main Navigation"
           >
-            <a
-              href="#how-it-works"
-              onClick={(e) => smoothScrollTo("how-it-works", e)}
-              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c] cursor-pointer"
+            <Link
+              href="/explorer"
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors"
             >
-              How It Works
-            </a>
-            <a
-              href="#verification"
-              onClick={(e) => smoothScrollTo("verification", e)}
-              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c] cursor-pointer"
+              Explorer
+            </Link>
+            <Link
+              href="/marketplace"
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors"
             >
-              Verification
-            </a>
-            <a
-              href="#technology"
-              onClick={(e) => smoothScrollTo("technology", e)}
-              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c] cursor-pointer"
+              Marketplace
+            </Link>
+            <Link
+              href="/retire"
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors"
             >
-              Technology
-            </a>
-            <a
-              href="#about"
-              onClick={(e) => smoothScrollTo("about", e)}
-              className="hover:text-[#f4f5ef] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38b87c] cursor-pointer"
+              Retire
+            </Link>
+            <Link
+              href="/register"
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d] transition-colors"
             >
-              About
-            </a>
+              Register
+            </Link>
           </nav>
 
           {/* Rightmost Option: Add or Create a Solana Wallet & Disconnect */}

@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "carbon_credit",
+    "marketplace",
+    "project_registry",
+    "transfer_hook",
+    "verification_oracle"
+]
+resolver = "2"
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+

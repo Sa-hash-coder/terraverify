@@ -1,0 +1,43 @@
+{
+  "calibration_standard": "Copernicus Sentinel-2 L2A Top-of-Canopy Reflectance",
+  "bands": {
+    "red": "B04",
+    "nir": "B08",
+    "green": "B03",
+    "blue": "B02",
+    "scl": "SCL"
+  },
+  "cloud_mask_values": [3, 8, 9, 10, 11],
+  "thresholds": {
+    "dense_forest_ndvi": 0.70,
+    "moderate_forest_ndvi": 0.50,
+    "sparse_vegetation_ndvi": 0.30,
+    "warning_loss_pct": 2.0,
+    "fail_loss_pct": 5.0,
+    "critical_fail_loss_pct": 10.0
+  },
+  "projects": {
+    "PRJ-001": {
+      "name": "Amazon Reforestation Block 7",
+      "baseline_date": "2024-01-15",
+      "baseline_forest_pct": 84.5,
+      "baseline_ndvi_mean": 0.845,
+      "status": "Verified"
+    },
+    "PRJ-002": {
+      "name": "Congo Basin Conservation",
+      "baseline_date": "2024-02-01",
+      "baseline_forest_pct": 88.0,
+      "baseline_ndvi_mean": 0.812,
+      "status": "Verified"
+    },
+    "PRJ-003": {
+      "name": "Borneo Peatland Protection",
+      "baseline_date": "2024-01-20",
+      "baseline_forest_pct": 62.1,
+      "baseline_ndvi_mean": 0.621,
+      "status": "Suspended"
+    }
+  }
+}
+

@@ -1,10 +1,36 @@
 "use client";
 
-import React, { use } from "react";
+import React, { use, useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle2, ExternalLink, ArrowLeft, Printer, ShieldCheck, Calendar, MapPin, Building } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { 
+  CheckCircle2, 
+  ExternalLink, 
+  ArrowLeft, 
+  Printer, 
+  ShieldCheck, 
+  Calendar, 
+  Building, 
+  Layers,
+  Clock,
+  Sparkles,
+  Loader2
+} from "lucide-react";
 import PageShell from "../../../components/layout/page-shell";
-import { PageHeader, Panel, DataRow, GradeBadge, AddressChip } from "../../../components/shared/design-system";
+import { Panel, GradeBadge, AddressChip } from "../../../components/shared/design-system";
+
+interface OnChainTxData {
+  onChain: boolean;
+  signature: string;
+  slot?: number;
+  blockTime: string;
+  sender?: string;
+  recipient?: string;
+  transferSol?: number;
+  memo?: string | null;
+  status: string;
+  explorerUrl: string;
+}
 
 export default function VerifySignaturePage({
   params,
@@ -12,32 +38,122 @@ export default function VerifySignaturePage({
   params: Promise<{ signature: string }>;
 }) {
   const resolvedParams = use(params);
+  const searchParams = useSearchParams();
   const signature = resolvedParams.signature || "5wHmd1tsz2veD44UNLaRbg7aD463D11RdCz9zRYkKAkFYgSm";
+
+  const [loading, setLoading] = useState(true);
+  const [txData, setTxData] = useState<OnChainTxData | null>(null);
+
+  // Defaults or query parameters passed from Retirement Console
+  const queryBeneficiary = searchParams.get("beneficiary");
+  const queryAmount = searchParams.get("amount");
+  const queryProject = searchParams.get("project");
+  const queryGrade = searchParams.get("grade") || "AAA";
+
+  const [certificateData, setCertificateData] = useState({
+    beneficiary: queryBeneficiary || "Acme Corporation ESG Division",
+    amount: queryAmount ? `${Number(queryAmount).toLocaleString()} Tonnes CO₂e` : "500 Tonnes CO₂e",
+    project: queryProject || "Amazon Reforestation Block 7 (Grade AAA)",
+    grade: queryGrade,
+    timestamp: new Date().toUTCString(),
+    sender: "Connected Solana Wallet",
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchOnChainAttestation() {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/verify/${signature}`);
+        if (!res.ok) throw new Error("Failed to query verification API");
+        const json: OnChainTxData = await res.json();
+
+        if (isMounted && json) {
+          setTxData(json);
+
+          // If the on-chain Memo text contains structured burn metadata, parse it:
+          // e.g. "TerraVerify Burn: 500 tCO2e retired by Acme Corp for Amazon Reforestation"
+          if (json.memo && json.memo.includes("TerraVerify Burn:")) {
+            const memoStr = json.memo.replace("TerraVerify Burn:", "").trim();
+            const parts = memoStr.split("|").map((s) => s.trim());
+
+            if (parts.length >= 3) {
+              setCertificateData((prev) => ({
+                ...prev,
+                amount: `${parts[0]} Tonnes CO₂e`,
+                beneficiary: parts[1],
+                project: parts[2],
+                timestamp: json.blockTime || prev.timestamp,
+                sender: json.sender || prev.sender,
+              }));
+            }
+          } else if (json.blockTime) {
+            setCertificateData((prev) => ({
+              ...prev,
+              timestamp: json.blockTime,
+              sender: json.sender || prev.sender,
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("Could not retrieve on-chain attestation:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    fetchOnChainAttestation();
+    return () => {
+      isMounted = false;
+    };
+  }, [signature]);
 
   return (
     <PageShell>
       <div className="max-w-3xl mx-auto space-y-6">
         <Link
           href="/retire"
-          className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)] font-mono transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-[var(--muted)] hover:text-[var(--foreground)] font-mono transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Retirement Console</span>
         </Link>
 
         {/* Verification Status Header */}
-        <div className="p-6 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border)] text-left shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[var(--accent-subtle)] text-[var(--accent)] flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-6 h-6 text-[var(--accent)]" />
+        <div className="p-6 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border)] text-left shadow-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-[var(--foreground)]">
+                Verified Carbon Offset Certificate
+              </h1>
+              <p className="text-xs text-emerald-500 font-mono flex items-center gap-2 mt-0.5">
+                <span>Solana Ledger Attestation</span>
+                <span>•</span>
+                <span>Token-2022 Burn Proof</span>
+                {txData?.slot && (
+                  <>
+                    <span>•</span>
+                    <span className="text-[var(--muted)]">Slot #{txData.slot}</span>
+                  </>
+                )}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-[var(--text)]">
-              Verified Carbon Offset Certificate
-            </h1>
-            <p className="text-xs text-[var(--accent)] font-mono">
-              Solana Ledger Attestation · Token-2022 Burn Proof
-            </p>
-          </div>
+
+          {loading ? (
+            <div className="flex items-center gap-1.5 text-xs text-[var(--muted)] font-mono">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Verifying ledger...</span>
+            </div>
+          ) : (
+            <span className="px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+              {txData?.onChain ? "Live On-Chain Proof" : "Ledger Confirmed"}
+            </span>
+          )}
         </div>
 
         {/* Institutional Certificate Card (Paper Aesthetic) */}
@@ -75,7 +191,7 @@ export default function VerifySignaturePage({
                   Beneficiary Entity
                 </span>
                 <span className="text-base font-bold text-[#111c16]">
-                  Acme Corporation ESG Division
+                  {certificateData.beneficiary}
                 </span>
               </div>
 
@@ -84,7 +200,7 @@ export default function VerifySignaturePage({
                   Retired Quantity
                 </span>
                 <span className="text-xl font-mono font-bold text-[#1a5734]">
-                  12,500 Tonnes CO₂e
+                  {certificateData.amount}
                 </span>
               </div>
 
@@ -93,7 +209,7 @@ export default function VerifySignaturePage({
                   Project of Origin
                 </span>
                 <span className="font-semibold text-[#111c16]">
-                  Amazon Reforestation Block 7 (Grade AAA)
+                  {certificateData.project}
                 </span>
               </div>
 
@@ -102,7 +218,7 @@ export default function VerifySignaturePage({
                   Retirement Timestamp
                 </span>
                 <span className="font-mono text-[#111c16]">
-                  {new Date().toUTCString()}
+                  {certificateData.timestamp}
                 </span>
               </div>
             </div>
@@ -115,6 +231,17 @@ export default function VerifySignaturePage({
                 {signature}
               </div>
             </div>
+
+            {txData?.memo && (
+              <div className="space-y-1 font-mono text-xs">
+                <span className="text-[#697a70] text-[11px] uppercase block">
+                  On-Chain Memo Attestation:
+                </span>
+                <div className="p-2.5 rounded bg-[#f4f5ee] border border-[#e2e4dc] text-[#2d3a33] text-[11px]">
+                  {txData.memo}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="pt-6 border-t border-[#e2e4dc] flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs">
@@ -124,7 +251,7 @@ export default function VerifySignaturePage({
 
             <button
               onClick={() => window.print()}
-              className="px-4 py-2 rounded-lg bg-[var(--text)] text-[var(--bg-app)] hover:opacity-90 transition-opacity flex items-center gap-1.5 font-medium cursor-pointer print:hidden"
+              className="px-4 py-2 rounded-lg bg-[#111c16] text-white hover:opacity-90 transition-opacity flex items-center gap-1.5 font-medium cursor-pointer print:hidden"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print Official Certificate</span>
@@ -134,12 +261,12 @@ export default function VerifySignaturePage({
 
         {/* Public Blockchain Proof Link */}
         <Panel className="p-4 flex items-center justify-between text-xs font-mono">
-          <span className="text-[var(--text-muted)]">Verify ledger proof directly on Solana Explorer:</span>
+          <span className="text-[var(--muted)]">Verify ledger proof directly on Solana Explorer:</span>
           <a
             href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--accent)] hover:opacity-90 hover:underline flex items-center gap-1 font-semibold"
+            className="text-emerald-500 hover:opacity-90 hover:underline flex items-center gap-1 font-semibold"
           >
             <span>Explorer Transaction Proof</span>
             <ExternalLink className="w-3.5 h-3.5" />

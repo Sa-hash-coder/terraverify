@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey, TransactionInstruction } from "@solana/web3.js";
 
 import PageShell from "../../components/layout/page-shell";
 import { 
@@ -250,7 +250,8 @@ export default function MarketplacePage() {
     setErrorMsg(null);
     setTxHash(null);
 
-    if (!connected || !publicKey) {
+    const hasActiveWallet = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
+    if (!hasActiveWallet) {
       setVisible(true);
       return;
     }
@@ -278,20 +279,65 @@ export default function MarketplacePage() {
     try {
       setTrading(true);
 
-      const recipient = new PublicKey("Efnm4SRpWogLYYMXnrrwbJ1i7WFbM343rtoASXkxwkoC");
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: publicKey,
-          toPubkey: recipient,
-          lamports: Math.round(0.001 * LAMPORTS_PER_SOL), // Nominal Devnet test trade
-        })
+      const recipient = new PublicKey(
+        selectedListing.seller && selectedListing.seller.length >= 32 && !selectedListing.seller.includes(" ")
+          ? selectedListing.seller
+          : "Efnm4SRpWogLYYMXnrrwbJ1i7WFbM343rtoASXkxwkoC"
       );
+      const memoProgram = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+      const memoText = `TerraVerify Purchase: ${amountNum} tCO2e of ${selectedListing.project} @ ${unitPrice} SOL`;
 
-      const { blockhash } = await connection.getLatestBlockhash();
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = publicKey;
+      let signature: string;
 
-      const signature = await sendTransaction(transaction, connection);
+      if (connected && publicKey) {
+        const transaction = new Transaction().add(
+          SystemProgram.transfer({
+            fromPubkey: publicKey,
+            toPubkey: recipient,
+            lamports: Math.max(1000, Math.round(Math.min(0.005, totalCostNum) * LAMPORTS_PER_SOL)),
+          }),
+          new TransactionInstruction({
+            keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
+            programId: memoProgram,
+            data: Buffer.from(memoText, "utf-8"),
+          })
+        );
+
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = publicKey;
+
+        signature = await sendTransaction(transaction, connection);
+      } else if (localWallet?.publicKey) {
+        // Transact via in-app wallet
+        const saved = typeof window !== "undefined" ? localStorage.getItem("terra_local_wallet") : null;
+        const parsed = saved ? JSON.parse(saved) : null;
+        if (!parsed?.secretKey) {
+          throw new Error("Local wallet keys not found in storage. Please generate or connect a wallet.");
+        }
+
+        const res = await fetch("/api/wallet", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "transact",
+            secretKey: parsed.secretKey,
+            toPublicKey: recipient.toBase58(),
+            amountSol: Math.min(0.005, totalCostNum || 0.001),
+            memo: memoText,
+          }),
+        });
+
+        const resData = await res.json();
+        if (!resData.success) {
+          throw new Error(resData.error || "Trade execution failed");
+        }
+        signature = resData.signature;
+      } else {
+        setVisible(true);
+        return;
+      }
+
       setTxHash(signature);
 
       // Decrement available amount locally

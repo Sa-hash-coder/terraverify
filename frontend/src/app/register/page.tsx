@@ -4,8 +4,9 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { Keypair, PublicKey, Transaction, SystemProgram, TransactionInstruction, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import {
   Compass,
   MapPin,
@@ -116,7 +117,8 @@ const STEPS = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { connected, publicKey } = useWallet();
+  const { connection } = useConnection();
+  const { connected, publicKey, sendTransaction } = useWallet();
   const { setVisible: openWalletModal } = useWalletModal();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -168,6 +170,7 @@ export default function RegisterPage() {
   // Submission Flow
   const [submitting, setSubmitting] = useState(false);
   const [submittedAccount, setSubmittedAccount] = useState<string | null>(null);
+  const [submittedTxSig, setSubmittedTxSig] = useState<string | null>(null);
   const [hasDraftNotice, setHasDraftNotice] = useState(false);
 
   // Country selection sync
@@ -365,10 +368,69 @@ export default function RegisterPage() {
   const handleSubmitProject = async () => {
     setSubmitting(true);
     try {
+      const projectKeypair = Keypair.generate();
+      const regAccount = projectKeypair.publicKey.toBase58();
+      const projId = `PRJ-00${Math.floor(Math.random() * 900 + 100)}`;
+      let txSig: string | null = null;
+
+      // Check if wallet is active for on-chain registry broadcast
+      const memoProgram = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+      const memoText = `TerraVerify Register: ${projId} | ${projectName} | Land: ${landId} | Area: ${calculatedAreaHa || 124.5} ha | Registry: ${regAccount}`;
+
+      if (connected && publicKey) {
+        try {
+          const transaction = new Transaction().add(
+            SystemProgram.transfer({
+              fromPubkey: publicKey,
+              toPubkey: projectKeypair.publicKey,
+              lamports: 1000,
+            }),
+            new TransactionInstruction({
+              keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
+              programId: memoProgram,
+              data: Buffer.from(memoText, "utf-8"),
+            })
+          );
+
+          const { blockhash } = await connection.getLatestBlockhash();
+          transaction.recentBlockhash = blockhash;
+          transaction.feePayer = publicKey;
+
+          txSig = await sendTransaction(transaction, connection);
+        } catch (txErr) {
+          console.warn("Wallet broadcast deferred:", txErr);
+        }
+      } else {
+        // Try with local in-app wallet if available
+        const saved = typeof window !== "undefined" ? localStorage.getItem("terra_local_wallet") : null;
+        const parsed = saved ? JSON.parse(saved) : null;
+        if (parsed?.secretKey) {
+          try {
+            const res = await fetch("/api/wallet", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "transact",
+                secretKey: parsed.secretKey,
+                toPublicKey: projectKeypair.publicKey.toBase58(),
+                amountSol: 0.001,
+                memo: memoText,
+              }),
+            });
+            const resData = await res.json();
+            if (resData.success) {
+              txSig = resData.signature;
+            }
+          } catch (localTxErr) {
+            console.warn("Local wallet broadcast error:", localTxErr);
+          }
+        }
+      }
+
       const payload = {
         action: "register",
         newProject: {
-          id: `PRJ-00${Math.floor(Math.random() * 900 + 100)}`,
+          id: projId,
           name: projectName || "Registered Ecological Preserve",
           location: `${countryConfig.name} (${landId || "Deed Verified"})`,
           area: `${calculatedAreaHa || 124.5} ha`,
@@ -379,24 +441,25 @@ export default function RegisterPage() {
           lastScan: "Baseline recorded (Copernicus Sentinel-2)",
           trend: "Baseline",
           deedId: landId || "DEED-REG-2026",
+          oracleAccount: regAccount,
+          txSignature: txSig,
           lat: mapCenter[0].toFixed(4),
           lon: mapCenter[1].toFixed(4),
         },
       };
 
-      const res = await fetch("/api/telemetry", {
+      await fetch("/api/telemetry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      // generate mock Solana registry account address
-      const regAccount = "7VbXo" + Math.random().toString(36).substring(2, 10) + "OracleReg2026";
       setSubmittedAccount(regAccount);
+      setSubmittedTxSig(txSig);
     } catch (err) {
       console.error(err);
-      // Fallback
-      setSubmittedAccount("7VbXoA4bN2k1OracleReg2026");
+      const fallbackKp = Keypair.generate();
+      setSubmittedAccount(fallbackKp.publicKey.toBase58());
     } finally {
       setSubmitting(false);
     }
@@ -515,9 +578,25 @@ export default function RegisterPage() {
             </div>
 
             {/* Registry Account */}
-            <div className="p-4 bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl flex items-center justify-between text-xs">
-              <span className="text-[var(--muted)]">Registry Account Address:</span>
-              <AddressChip address={submittedAccount} />
+            <div className="space-y-2">
+              <div className="p-4 bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl flex items-center justify-between text-xs">
+                <span className="text-[var(--muted)]">Registry Account Address:</span>
+                <AddressChip address={submittedAccount} />
+              </div>
+              {submittedTxSig && (
+                <div className="p-4 bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl flex items-center justify-between text-xs">
+                  <span className="text-[var(--muted)]">On-Chain Registration Tx:</span>
+                  <a
+                    href={`https://explorer.solana.com/tx/${submittedTxSig}?cluster=devnet`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-500 hover:underline flex items-center gap-1 font-mono text-xs font-semibold"
+                  >
+                    <span>View on Solana Explorer</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-center gap-3 pt-2">

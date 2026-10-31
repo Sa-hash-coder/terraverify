@@ -369,17 +369,22 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
             }`}
             title="TerraVerify Home"
           >
-            <div className="w-8 h-8 rounded-lg border border-[var(--accent)]/40 bg-[var(--surface-raised)] flex items-center justify-center text-[var(--accent)] shrink-0">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <div className="w-8 h-8 rounded-lg border border-[#143d28] bg-[#091f14] flex items-center justify-center text-emerald-400 shrink-0 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="3" />
                 <path d="M12 2a10 10 0 0 0-7.07 17.07" />
                 <path d="M12 22a10 10 0 0 0 7.07-17.07" />
               </svg>
             </div>
             {!collapsed && (
-              <span className="text-base font-bold tracking-tight text-[var(--text)] whitespace-nowrap overflow-hidden">
-                Terra<span className="text-[var(--accent)]">Verify</span>
-              </span>
+              <div className="flex flex-col whitespace-nowrap overflow-hidden">
+                <span className="text-base font-bold tracking-tight text-white leading-tight">
+                  Terra<span className="text-emerald-400">Verify</span>
+                </span>
+                <span className="text-[8px] font-mono tracking-[0.2em] text-emerald-400/80 uppercase font-semibold leading-none mt-0.5">
+                  EARTH OBSERVATION PROTOCOL
+                </span>
+              </div>
             )}
           </Link>
         </div>

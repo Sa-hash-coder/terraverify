@@ -5,11 +5,16 @@ import {
   clusterApiUrl,
   LAMPORTS_PER_SOL,
   PublicKey,
+  Transaction,
+  SystemProgram,
+  TransactionInstruction,
 } from "@solana/web3.js";
 
-// Solana devnet connection
-const DEVNET_RPC = process.env.SOLANA_RPC_URL || clusterApiUrl("devnet");
+// Primary and fallback Solana devnet connections
+const DEVNET_RPC = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
 const connection = new Connection(DEVNET_RPC, "confirmed");
+
+const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 
 // Helper to encode uint8array to base58 without requiring direct dependency
 function toBase58(buffer: Uint8Array): string {
@@ -33,10 +38,34 @@ function toBase58(buffer: Uint8Array): string {
   return digits.reverse().map((d) => ALPHABET[d]).join("");
 }
 
+export async function GET() {
+  try {
+    const slot = await connection.getSlot().catch(() => 0);
+    return NextResponse.json({
+      status: "online",
+      network: "devnet",
+      rpc: DEVNET_RPC,
+      currentSlot: slot,
+      supportedActions: ["create", "airdrop", "balance", "transact"],
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Error querying cluster";
+    return NextResponse.json({ status: "degraded", network: "devnet", error: msg });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { action = "create", publicKey: targetPublicKey, airdrop = true } = body;
+    const { 
+      action = "create", 
+      publicKey: targetPublicKey, 
+      airdrop = true,
+      secretKey,
+      toPublicKey,
+      amountSol = 0.001,
+      memo,
+    } = body;
 
     // Action 1: Create a brand new Solana Keypair / Wallet
     if (action === "create") {
@@ -126,6 +155,7 @@ export async function POST(request: Request) {
           signature,
           balance: balanceLamports / LAMPORTS_PER_SOL,
           message: "1.0 SOL airdropped on Devnet successfully.",
+          explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=devnet`,
         });
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Airdrop failed";
@@ -161,6 +191,75 @@ export async function POST(request: Request) {
         return NextResponse.json(
           { success: false, error: "Failed to retrieve balance" },
           { status: 400 }
+        );
+      }
+    }
+
+    // Action 4: Transact (Submit an on-chain transaction with memo)
+    if (action === "transact") {
+      if (!secretKey || !Array.isArray(secretKey)) {
+        return NextResponse.json(
+          { success: false, error: "Valid secretKey array is required to sign transaction" },
+          { status: 400 }
+        );
+      }
+
+      if (!toPublicKey) {
+        return NextResponse.json(
+          { success: false, error: "toPublicKey recipient is required" },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const signerKeypair = Keypair.fromSecretKey(new Uint8Array(secretKey));
+        const recipientPubkey = new PublicKey(toPublicKey);
+        const lamports = Math.max(1000, Math.round(Number(amountSol) * LAMPORTS_PER_SOL));
+
+        const tx = new Transaction();
+
+        // Add transfer instruction
+        tx.add(
+          SystemProgram.transfer({
+            fromPubkey: signerKeypair.publicKey,
+            toPubkey: recipientPubkey,
+            lamports,
+          })
+        );
+
+        // Add memo if provided
+        if (memo && typeof memo === "string") {
+          tx.add(
+            new TransactionInstruction({
+              keys: [{ pubkey: signerKeypair.publicKey, isSigner: true, isWritable: false }],
+              programId: MEMO_PROGRAM_ID,
+              data: Buffer.from(memo, "utf-8"),
+            })
+          );
+        }
+
+        const latestBlockhash = await connection.getLatestBlockhash();
+        tx.recentBlockhash = latestBlockhash.blockhash;
+        tx.feePayer = signerKeypair.publicKey;
+        tx.sign(signerKeypair);
+
+        const signature = await connection.sendRawTransaction(tx.serialize());
+        await connection.confirmTransaction({
+          signature,
+          blockhash: latestBlockhash.blockhash,
+          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        }, "confirmed");
+
+        return NextResponse.json({
+          success: true,
+          signature,
+          explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=devnet`,
+        });
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Transaction failed";
+        return NextResponse.json(
+          { success: false, error: msg },
+          { status: 500 }
         );
       }
     }
