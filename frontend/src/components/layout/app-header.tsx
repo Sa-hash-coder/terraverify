@@ -69,6 +69,13 @@ export default function AppHeader() {
   const [createWalletOpen, setCreateWalletOpen] = useState(false);
   const [localWallet, setLocalWalletState] = useState<{ publicKey: string; balance?: number } | null>(getInitialLocalWallet);
 
+  const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    left: number;
+    width: number;
+    opacity: number;
+  }>({ left: 0, width: 0, opacity: 0 });
+
   const setBalance = (bal: number | null) => {
     cachedBalance = bal;
     setBalanceState(bal);
@@ -232,6 +239,31 @@ export default function AppHeader() {
     { label: "Register", href: "/register" },
   ];
 
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeIdx = navItems.findIndex((item) => pathname.startsWith(item.href));
+      if (activeIdx !== -1 && tabRefs.current[activeIdx]) {
+        const el = tabRefs.current[activeIdx];
+        if (el) {
+          setIndicatorStyle({
+            left: el.offsetLeft,
+            width: el.offsetWidth,
+            opacity: 1,
+          });
+        }
+      } else {
+        setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+      }
+    };
+
+    const frameId = requestAnimationFrame(updateIndicator);
+    window.addEventListener("resize", updateIndicator);
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", updateIndicator);
+    };
+  }, [pathname]);
+
   const handleCopyAddress = () => {
     if (activePubkey) {
       navigator.clipboard.writeText(activePubkey);
@@ -271,19 +303,36 @@ export default function AppHeader() {
             </div>
           </Link>
 
-          {/* Center: Desktop Navigation with deep forest green container */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#091f14]/90 p-1 rounded-xl border border-[#143d28] shadow-inner shrink-0">
-            {navItems.map((item) => {
+          {/* Center: Desktop Navigation with smooth horizontal sliding indicator */}
+          <nav
+            className="hidden md:flex items-center gap-1 bg-[#091f14]/90 p-1 rounded-xl border border-[#143d28] shadow-inner shrink-0 relative"
+            aria-label="Main Navigation"
+          >
+            {/* Sliding Active Pill */}
+            <div
+              className="absolute top-1 bottom-1 rounded-lg bg-[#2d6a4f] shadow-[0_2px_8px_rgba(45,106,79,0.4)] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+              style={{
+                left: `${indicatorStyle.left}px`,
+                width: `${indicatorStyle.width}px`,
+                opacity: indicatorStyle.opacity,
+              }}
+              aria-hidden="true"
+            />
+
+            {navItems.map((item, idx) => {
               const isActive = pathname.startsWith(item.href);
 
               return (
                 <Link
                   key={item.href}
+                  ref={(el) => {
+                    tabRefs.current[idx] = el;
+                  }}
                   href={item.href}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold ${
+                  className={`relative z-10 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 cursor-pointer ${
                     isActive
-                      ? "bg-[#2d6a4f] text-white font-bold shadow-[0_2px_8px_rgba(45,106,79,0.4)]"
-                      : "text-[#9ab5a6] hover:text-white hover:bg-[#0e2c1d]"
+                      ? "text-white font-bold"
+                      : "text-[#9ab5a6] hover:text-white"
                   }`}
                 >
                   {item.label}
