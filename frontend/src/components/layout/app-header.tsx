@@ -274,73 +274,70 @@ export default function AppHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#06120d]/95 backdrop-blur-md border-b border-[#0f241a] transition-colors">
+      <header className="sticky top-0 z-40 w-full bg-[#f2f5ef]/95 backdrop-blur-md border-b border-[#e1e7de] transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          {/* Left: Brand Logo & Wordmark matching Image Theme */}
+          {/* Left: Brand Logo & Wordmark matching exact uploaded screenshot */}
           <Link
             href="/"
-            className="flex items-center gap-3.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2ecc71] rounded-lg"
+            className="flex items-center gap-3.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a3d2a] rounded-lg"
             aria-label="TerraVerify Home"
           >
-            {/* Viewfinder Reticle Icon with Target Center Dot */}
-            <div className="w-8 h-8 flex items-center justify-center text-[#2ecc71] shrink-0 group-hover:scale-105 transition-transform duration-200">
+            {/* Circular Logo with "T" monogram and top-right light green satellite accent */}
+            <div className="w-8 h-8 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
               <svg
-                className="w-7 h-7"
-                viewBox="0 0 28 28"
+                className="w-8 h-8"
+                viewBox="0 0 36 36"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
+                {/* Light green satellite orbit receiver accent at top right */}
                 <path
-                  d="M4 10V7a3 3 0 0 1 3-3h3"
-                  stroke="currentColor"
+                  d="M25 10L30 5"
+                  stroke="#8bdab6"
                   strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <circle cx="30" cy="5" r="1.5" fill="#8bdab6" />
+
+                {/* Dark Green Outer Ring */}
+                <circle
+                  cx="16"
+                  cy="19"
+                  r="11.5"
+                  stroke="#0a3d2a"
+                  strokeWidth="2.2"
+                />
+
+                {/* Inner "T" shape */}
+                <path
+                  d="M9.5 15H22.5M16 15V30"
+                  stroke="#0a3d2a"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                <path
-                  d="M18 4h3a3 3 0 0 1 3 3v3"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M24 18v3a3 3 0 0 1-3 3h-3"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M10 24H7a3 3 0 0 1-3-3v-3"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle cx="14" cy="14" r="2.25" fill="currentColor" />
               </svg>
             </div>
 
             <div className="flex flex-col text-left">
-              <span className="text-[17px] font-bold text-white tracking-tight leading-tight">
+              <span className="text-[17px] font-bold text-[#0a3d2a] tracking-tight leading-tight">
                 TerraVerify
               </span>
-              <span className="text-[12px] text-[#8e9f96] font-normal leading-tight mt-0.5">
+              <span className="text-[12px] text-[#5c7366] font-normal leading-tight mt-0.5">
                 Earth observation protocol
               </span>
             </div>
           </Link>
 
-          {/* Center: Inner Navigation Tabs in Rounded Pill Container with Smooth Gliding Indicator */}
+          {/* Center: Inner Navigation Tabs in Rounded Container with Smooth Gliding Indicator */}
           <nav
-            className="hidden md:flex items-center gap-1 bg-[#0a1813]/90 p-1.5 rounded-full border border-[#163024] shadow-[0_2px_14px_rgba(0,0,0,0.3)] backdrop-blur-md shrink-0 relative"
+            className="hidden md:flex items-center gap-1 bg-[#fafcf8] p-1.5 rounded-2xl border border-[#d8ded4] shadow-[0_1px_4px_rgba(0,0,0,0.03)] shrink-0 relative"
             aria-label="Inner App Navigation"
           >
             {/* Sliding Active Pill */}
             <div
-              className="absolute top-1.5 bottom-1.5 rounded-full bg-[#183d2c] border border-[#2ecc71]/40 shadow-[0_0_12px_rgba(46,204,113,0.18)] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+              className="absolute top-1.5 bottom-1.5 rounded-xl bg-[#e0ebe2] shadow-2xs pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
               style={{
                 left: `${indicatorStyle.left}px`,
                 width: `${indicatorStyle.width}px`,
@@ -359,10 +356,10 @@ export default function AppHeader() {
                     tabRefs.current[idx] = el;
                   }}
                   href={item.href}
-                  className={`relative z-10 px-5 py-2 rounded-full text-sm font-semibold transition-colors duration-200 cursor-pointer ${
+                  className={`relative z-10 px-5 py-1.5 rounded-xl text-sm font-semibold transition-colors duration-200 cursor-pointer ${
                     isActive
-                      ? "text-white font-bold"
-                      : "text-[#8e9f96] hover:text-white font-medium"
+                      ? "text-[#0a3d2a] font-bold"
+                      : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
                   }`}
                 >
                   {item.label}
@@ -371,19 +368,19 @@ export default function AppHeader() {
             })}
           </nav>
 
-          {/* Right: Theme Toggle, Logout & Wallet */}
+          {/* Right: Theme Toggle, Logout & Wallet matching Light Eco Theme */}
           <div className="flex items-center gap-3 shrink-0">
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
               title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
-              className="p-2 rounded-full bg-[#0a1813] hover:bg-[#13281f] border border-[#163024] text-[#8e9f96] hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-full bg-white hover:bg-[#edf2ea] border border-[#d8ded4] text-[#4a6356] hover:text-[#0a3d2a] transition-colors cursor-pointer shadow-2xs"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
-                <Sun className="w-4 h-4 text-amber-400" />
+                <Sun className="w-4 h-4 text-amber-500" />
               ) : (
-                <Moon className="w-4 h-4 text-slate-300" />
+                <Moon className="w-4 h-4 text-slate-500" />
               )}
             </button>
 
@@ -391,7 +388,7 @@ export default function AppHeader() {
             <button
               onClick={handleLogout}
               title="Logout and return to Home"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#0a1813] hover:bg-[#1b2b22] border border-[#163024] hover:border-rose-500/40 text-[#8e9f96] hover:text-rose-400 text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-[#fee2e2] border border-[#d8ded4] hover:border-rose-400 text-[#4a6356] hover:text-rose-600 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -399,19 +396,19 @@ export default function AppHeader() {
 
             {/* Wallet Integration Widget matching Theme */}
             {!isWalletConnected || !activePubkey ? (
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-4 shrink-0">
                 <button
                   onClick={() => setCreateWalletOpen(true)}
                   disabled={connecting}
-                  className="text-sm font-medium text-[#f4f5ef] hover:text-white transition-colors cursor-pointer px-2 py-1"
+                  className="text-sm font-medium text-[#2d4d3d] hover:text-[#0a3d2a] transition-colors cursor-pointer px-1 py-1"
                 >
                   Create wallet
                 </button>
                 <button
                   onClick={() => setAdapterModalVisible(true)}
-                  className="px-5 py-2.5 rounded-full bg-[#2ecc71] hover:bg-[#34d399] text-[#07130f] font-semibold text-sm transition-all flex items-center gap-2 shadow-[0_2px_14px_rgba(46,204,113,0.35)] cursor-pointer"
+                  className="px-5 py-2.5 rounded-full bg-[#0a3d2a] hover:bg-[#114d36] text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-[0_2px_8px_rgba(10,61,42,0.2)] cursor-pointer"
                 >
-                  <Wallet className="w-4 h-4 text-[#07130f]" />
+                  <Wallet className="w-4 h-4 text-white" />
                   <span>Connect wallet</span>
                 </button>
               </div>
@@ -419,47 +416,47 @@ export default function AppHeader() {
               <div className="relative shrink-0" ref={menuRef}>
                 <button
                   onClick={() => setWalletMenuOpen(!walletMenuOpen)}
-                  className="h-10 px-4 rounded-full bg-[#2ecc71] hover:bg-[#34d399] text-[#07130f] font-semibold flex items-center justify-between gap-3 cursor-pointer shadow-[0_2px_12px_rgba(46,204,113,0.3)] transition-all select-none"
+                  className="h-10 px-4 rounded-full bg-[#0a3d2a] hover:bg-[#114d36] text-white font-semibold flex items-center justify-between gap-3 cursor-pointer shadow-[0_2px_8px_rgba(10,61,42,0.2)] transition-all select-none"
                   aria-expanded={walletMenuOpen}
                 >
                   <div className="flex items-center gap-2 shrink-0 min-w-0">
-                    <Wallet className="w-4 h-4 text-[#07130f] shrink-0" />
+                    <Wallet className="w-4 h-4 text-white shrink-0" />
                     <span className="text-xs font-bold font-mono tracking-wide truncate">
                       {activePubkey.slice(0, 4)}...{activePubkey.slice(-4)}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0 pl-1 border-l border-[#1b7046]/30">
-                    <span className="text-xs font-mono font-bold text-[#07130f]">
+                  <div className="flex items-center gap-1.5 shrink-0 pl-1 border-l border-white/20">
+                    <span className="text-xs font-mono font-bold text-white">
                       {(balance ?? 1.0).toFixed(2)} SOL
                     </span>
-                    <ChevronDown className="w-3.5 h-3.5 text-[#07130f] shrink-0" />
+                    <ChevronDown className="w-3.5 h-3.5 text-white shrink-0" />
                   </div>
                 </button>
 
                 {/* Wallet Dropdown Menu */}
                 {walletMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#081710] border border-[#163024] shadow-2xl p-3 z-50 text-xs space-y-3">
+                  <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-[#d8ded4] shadow-xl p-3 z-50 text-xs space-y-3">
                     <div>
-                      <div className="text-[11px] text-[#8e9f96] font-mono uppercase">
+                      <div className="text-[11px] text-[#5c7366] font-mono uppercase">
                         Solana Devnet
                       </div>
-                      <div className="text-sm font-mono font-bold text-[#f4f5ef] mt-0.5">
+                      <div className="text-sm font-mono font-bold text-[#0a3d2a] mt-0.5">
                         {balance !== null ? `${balance.toFixed(3)} SOL` : "Loading..."}
                       </div>
-                      <div className="text-[11px] font-mono text-[#718078] truncate select-all mt-1 p-1.5 rounded-lg bg-[#07130f] border border-[#163024]">
+                      <div className="text-[11px] font-mono text-[#5c7366] truncate select-all mt-1 p-1.5 rounded-lg bg-[#f2f5ef] border border-[#d8ded4]">
                         {activePubkey}
                       </div>
                     </div>
 
-                    <div className="space-y-1 pt-1 border-t border-[#163024]">
+                    <div className="space-y-1 pt-1 border-t border-[#e1e7de]">
                       <button
                         onClick={handleCopyAddress}
-                        className="w-full flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#163024] text-[#f4f5ef] transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#f2f5ef] text-[#111e16] transition-colors text-left cursor-pointer"
                       >
                         {copied ? (
-                          <Check className="w-3.5 h-3.5 text-[#2ecc71]" />
+                          <Check className="w-3.5 h-3.5 text-[#0a3d2a]" />
                         ) : (
-                          <Copy className="w-3.5 h-3.5 text-[#8e9f96]" />
+                          <Copy className="w-3.5 h-3.5 text-[#5c7366]" />
                         )}
                         <span>{copied ? "Address Copied" : "Copy Address"}</span>
                       </button>
@@ -468,19 +465,19 @@ export default function AppHeader() {
                         href={`https://explorer.solana.com/address/${activePubkey}?cluster=devnet`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#163024] text-[#f4f5ef] transition-colors text-left"
+                        className="w-full flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#f2f5ef] text-[#111e16] transition-colors text-left"
                       >
-                        <ExternalLink className="w-3.5 h-3.5 text-[#8e9f96]" />
+                        <ExternalLink className="w-3.5 h-3.5 text-[#5c7366]" />
                         <span>View on Solana Explorer</span>
                       </a>
 
                       <button
                         onClick={handleRequestFaucet}
                         disabled={requestingFaucet}
-                        className="w-full flex items-center gap-2 p-1.5 rounded hover:bg-[#162922] light:hover:bg-slate-100 text-[#38b87c] transition-colors text-left cursor-pointer disabled:opacity-50"
+                        className="w-full flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#f2f5ef] text-[#0a3d2a] transition-colors text-left cursor-pointer disabled:opacity-50"
                       >
                         {faucetSuccess ? (
-                          <span className="flex items-center gap-1.5 text-emerald-400">
+                          <span className="flex items-center gap-1.5 text-[#0a3d2a]">
                             <Check className="w-3.5 h-3.5" />
                             <span>Funded 1 SOL</span>
                           </span>
@@ -493,23 +490,24 @@ export default function AppHeader() {
                       </button>
                     </div>
 
-                    <div className="pt-2 border-t border-[#162922] light:border-slate-100 flex items-center justify-between">
+                    <div className="pt-2 border-t border-[#e1e7de] flex items-center justify-between">
                       <button
                         onClick={() => {
                           setWalletMenuOpen(false);
                           setCreateWalletOpen(true);
                         }}
-                        className="text-[11px] text-[#8e9f96] hover:text-white transition-colors cursor-pointer"
+                        className="text-[11px] text-[#5c7366] hover:text-[#0a3d2a] transition-colors cursor-pointer"
                       >
                         Keypair Tools
                       </button>
                       <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-1 text-[11px] text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
-                        title="Disconnect connected wallet and return Home"
+                        onClick={() => {
+                          setWalletMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="text-[11px] text-rose-600 hover:text-rose-700 transition-colors cursor-pointer"
                       >
-                        <LogOut className="w-3 h-3" />
-                        <span>Disconnect & Logout</span>
+                        Disconnect
                       </button>
                     </div>
                   </div>

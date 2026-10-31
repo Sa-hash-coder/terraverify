@@ -38,7 +38,6 @@ export default function LandingNavbar() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 16);
 
-      // Scroll spy for active section highlight
       const sections = ["about", "technology", "how-it-works", "verification"];
       const scrollPos = window.scrollY + 200;
 
@@ -59,7 +58,6 @@ export default function LandingNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Check if a local wallet was generated and saved
   const syncLocalWallet = () => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("terra_local_wallet");
@@ -86,76 +84,68 @@ export default function LandingNavbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 w-full transition-colors duration-200 bg-[#06120d]/95 backdrop-blur-md border-b border-[#0f241a] ${
-          scrolled ? "shadow-[0_4px_24px_rgba(0,0,0,0.5)]" : ""
+        className={`sticky top-0 z-50 w-full transition-colors duration-200 bg-[#f2f5ef]/95 backdrop-blur-md border-b border-[#e1e7de] ${
+          scrolled ? "shadow-[0_4px_20px_rgba(0,0,0,0.06)]" : ""
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          {/* Brand Logo & Wordmark matching Image Theme */}
+          {/* Brand Logo & Wordmark matching exact uploaded screenshot */}
           <Link
             href="/"
-            className="flex items-center gap-3.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2ecc71] rounded-lg"
+            className="flex items-center gap-3.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a3d2a] rounded-lg"
             aria-label="TerraVerify Home"
           >
-            {/* Viewfinder Reticle Icon with Target Center Dot */}
-            <div className="w-8 h-8 flex items-center justify-center text-[#2ecc71] shrink-0 group-hover:scale-105 transition-transform duration-200">
+            {/* Circular Logo with "T" monogram and top-right light green satellite accent */}
+            <div className="w-8 h-8 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
               <svg
-                className="w-7 h-7"
-                viewBox="0 0 28 28"
+                className="w-8 h-8"
+                viewBox="0 0 36 36"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
-                {/* Top-Left Reticle Corner */}
+                {/* Light green satellite orbit receiver accent at top right */}
                 <path
-                  d="M4 10V7a3 3 0 0 1 3-3h3"
-                  stroke="currentColor"
+                  d="M25 10L30 5"
+                  stroke="#8bdab6"
                   strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <circle cx="30" cy="5" r="1.5" fill="#8bdab6" />
+
+                {/* Dark Green Outer Ring */}
+                <circle
+                  cx="16"
+                  cy="19"
+                  r="11.5"
+                  stroke="#0a3d2a"
+                  strokeWidth="2.2"
+                />
+
+                {/* Inner "T" shape */}
+                <path
+                  d="M9.5 15H22.5M16 15V30"
+                  stroke="#0a3d2a"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                {/* Top-Right Reticle Corner */}
-                <path
-                  d="M18 4h3a3 3 0 0 1 3 3v3"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {/* Bottom-Right Reticle Corner */}
-                <path
-                  d="M24 18v3a3 3 0 0 1-3 3h-3"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {/* Bottom-Left Reticle Corner */}
-                <path
-                  d="M10 24H7a3 3 0 0 1-3-3v-3"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {/* Center Sensor / Target Dot */}
-                <circle cx="14" cy="14" r="2.25" fill="currentColor" />
               </svg>
             </div>
 
             <div className="flex flex-col text-left">
-              <span className="text-[17px] font-bold text-white tracking-tight leading-tight">
+              <span className="text-[17px] font-bold text-[#0a3d2a] tracking-tight leading-tight">
                 TerraVerify
               </span>
-              <span className="text-[12px] text-[#8e9f96] font-normal leading-tight mt-0.5">
+              <span className="text-[12px] text-[#5c7366] font-normal leading-tight mt-0.5">
                 Earth observation protocol
               </span>
             </div>
           </Link>
 
-          {/* Center Navigation Pill Container */}
+          {/* Center Navigation Tabs Container matching Light Eco Theme */}
           <nav
-            className="hidden md:flex items-center gap-7 bg-[#0a1813]/90 px-8 py-2.5 rounded-full border border-[#163024] shadow-[0_2px_14px_rgba(0,0,0,0.3)] backdrop-blur-md"
+            className="hidden md:flex items-center gap-1.5 bg-[#fafcf8] p-1.5 rounded-2xl border border-[#d8ded4] shadow-[0_1px_4px_rgba(0,0,0,0.03)]"
             aria-label="Main Navigation"
           >
             <a
@@ -164,10 +154,10 @@ export default function LandingNavbar() {
                 setActiveSection("how-it-works");
                 smoothScrollTo("how-it-works", e);
               }}
-              className={`text-sm transition-colors cursor-pointer ${
+              className={`text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer ${
                 activeSection === "how-it-works"
-                  ? "font-semibold text-white"
-                  : "font-medium text-[#8e9f96] hover:text-white"
+                  ? "bg-[#e0ebe2] text-[#0a3d2a] font-semibold shadow-2xs"
+                  : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
               }`}
             >
               How It Works
@@ -178,10 +168,10 @@ export default function LandingNavbar() {
                 setActiveSection("verification");
                 smoothScrollTo("verification", e);
               }}
-              className={`text-sm transition-colors cursor-pointer ${
+              className={`text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer ${
                 activeSection === "verification"
-                  ? "font-semibold text-white"
-                  : "font-medium text-[#8e9f96] hover:text-white"
+                  ? "bg-[#e0ebe2] text-[#0a3d2a] font-semibold shadow-2xs"
+                  : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
               }`}
             >
               Verification
@@ -192,10 +182,10 @@ export default function LandingNavbar() {
                 setActiveSection("technology");
                 smoothScrollTo("technology", e);
               }}
-              className={`text-sm transition-colors cursor-pointer ${
+              className={`text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer ${
                 activeSection === "technology"
-                  ? "font-semibold text-white"
-                  : "font-medium text-[#8e9f96] hover:text-white"
+                  ? "bg-[#e0ebe2] text-[#0a3d2a] font-semibold shadow-2xs"
+                  : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
               }`}
             >
               Technology
@@ -206,34 +196,34 @@ export default function LandingNavbar() {
                 setActiveSection("about");
                 smoothScrollTo("about", e);
               }}
-              className={`text-sm transition-colors cursor-pointer ${
+              className={`text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer ${
                 activeSection === "about"
-                  ? "font-semibold text-white"
-                  : "font-medium text-[#8e9f96] hover:text-white"
+                  ? "bg-[#e0ebe2] text-[#0a3d2a] font-semibold shadow-2xs"
+                  : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
               }`}
             >
               About
             </a>
           </nav>
 
-          {/* Rightmost Actions matching Screenshot Theme */}
-          <div className="hidden md:flex items-center gap-5">
+          {/* Right Actions matching Screenshot */}
+          <div className="hidden md:flex items-center gap-6">
             {isWalletConnected ? (
               <div className="flex items-center gap-4">
                 <Link
                   href="/explorer"
-                  className="text-sm font-medium text-[#f4f5ef] hover:text-white transition-colors"
+                  className="text-sm font-medium text-[#2d4d3d] hover:text-[#0a3d2a] transition-colors"
                 >
                   Explorer
                 </Link>
 
-                <div className="flex items-center gap-1.5 p-1 rounded-full bg-[#0a1813] border border-[#163024]">
+                <div className="flex items-center gap-1.5 p-1 rounded-full bg-[#fafcf8] border border-[#d8ded4] shadow-xs">
                   <button
                     onClick={() => {
                       setWalletDialogInitialTab("connect");
                       setWalletDialogOpen(true);
                     }}
-                    className="px-4 py-2 text-xs font-semibold rounded-full bg-[#2ecc71] hover:bg-[#34d399] text-[#07130f] transition-all flex items-center gap-2 shadow-[0_2px_10px_rgba(46,204,113,0.3)] cursor-pointer"
+                    className="px-4 py-2 text-xs font-semibold rounded-full bg-[#0a3d2a] hover:bg-[#114d36] text-white transition-all flex items-center gap-2 shadow-[0_2px_8px_rgba(10,61,42,0.2)] cursor-pointer"
                     title="Solana Wallet Active"
                   >
                     <svg
@@ -254,7 +244,7 @@ export default function LandingNavbar() {
                   </button>
                   <button
                     onClick={handleDisconnectWallet}
-                    className="px-2.5 py-1.5 text-xs text-[#fca5a5] hover:text-[#f87171] hover:bg-[#201818] rounded-full transition-colors cursor-pointer mr-1"
+                    className="px-2.5 py-1.5 text-xs text-[#b91c1c] hover:text-[#991b1b] hover:bg-[#fee2e2] rounded-full transition-colors cursor-pointer mr-1"
                     title="Disconnect wallet"
                   >
                     Disconnect
@@ -262,22 +252,22 @@ export default function LandingNavbar() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-5">
-                {/* 1. Create wallet (Text action) */}
+              <div className="flex items-center gap-6">
+                {/* 1. Create wallet (Clean text action) */}
                 <button
                   onClick={() => {
                     setWalletDialogInitialTab("create");
                     setWalletDialogOpen(true);
                   }}
-                  className="text-sm font-medium text-[#f4f5ef] hover:text-white transition-colors cursor-pointer px-1 py-1"
+                  className="text-sm font-medium text-[#2d4d3d] hover:text-[#0a3d2a] transition-colors cursor-pointer px-1 py-1"
                 >
                   Create wallet
                 </button>
 
-                {/* 2. Connect wallet (Emerald Pill Button with Wallet Icon) */}
+                {/* 2. Connect wallet (Deep Forest Green Pill Button with White Wallet Icon) */}
                 <button
                   onClick={() => setAdapterModalVisible(true)}
-                  className="px-5 py-2.5 rounded-full bg-[#2ecc71] hover:bg-[#34d399] text-[#07130f] font-semibold text-sm transition-all duration-200 flex items-center gap-2.5 shadow-[0_2px_14px_rgba(46,204,113,0.35)] hover:shadow-[0_4px_18px_rgba(46,204,113,0.45)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  className="px-5 py-2.5 rounded-full bg-[#0a3d2a] hover:bg-[#114d36] text-white font-semibold text-sm transition-all duration-200 flex items-center gap-2 shadow-[0_2px_8px_rgba(10,61,42,0.2)] hover:shadow-[0_4px_14px_rgba(10,61,42,0.3)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <svg
                     className="w-4 h-4 fill-none stroke-current"
@@ -307,7 +297,7 @@ export default function LandingNavbar() {
                 }
                 setWalletDialogOpen(true);
               }}
-              className="px-3 py-1.5 rounded-full bg-[#2ecc71] text-[#07130f] font-semibold text-xs flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-full bg-[#0a3d2a] text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs"
             >
               <svg
                 className="w-3.5 h-3.5 fill-none stroke-current"
@@ -324,7 +314,7 @@ export default function LandingNavbar() {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#a8c7b5] hover:text-[#f4f5ef] rounded-lg border border-[#162922] focus:outline-none"
+              className="p-2 text-[#4a6356] hover:text-[#0a3d2a] rounded-lg border border-[#d8ded4] bg-white focus:outline-none"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -355,8 +345,8 @@ export default function LandingNavbar() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[#06120d] border-b border-[#0f241a] px-6 py-6 space-y-4">
-            <nav className="flex flex-col space-y-3 text-sm font-medium text-[#8e9f96]">
+          <div className="md:hidden bg-[#f2f5ef] border-b border-[#e1e7de] px-6 py-6 space-y-4">
+            <nav className="flex flex-col space-y-3 text-sm font-medium text-[#4a6356]">
               <a
                 href="#how-it-works"
                 onClick={(e) => {
@@ -364,7 +354,7 @@ export default function LandingNavbar() {
                   setActiveSection("how-it-works");
                   smoothScrollTo("how-it-works", e);
                 }}
-                className="py-1 hover:text-white cursor-pointer"
+                className="py-1 hover:text-[#0a3d2a] cursor-pointer"
               >
                 How It Works
               </a>
@@ -375,7 +365,7 @@ export default function LandingNavbar() {
                   setActiveSection("verification");
                   smoothScrollTo("verification", e);
                 }}
-                className="py-1 text-white font-semibold cursor-pointer"
+                className="py-1 text-[#0a3d2a] font-semibold cursor-pointer"
               >
                 Verification
               </a>
@@ -386,7 +376,7 @@ export default function LandingNavbar() {
                   setActiveSection("technology");
                   smoothScrollTo("technology", e);
                 }}
-                className="py-1 hover:text-white cursor-pointer"
+                className="py-1 hover:text-[#0a3d2a] cursor-pointer"
               >
                 Technology
               </a>
@@ -397,19 +387,19 @@ export default function LandingNavbar() {
                   setActiveSection("about");
                   smoothScrollTo("about", e);
                 }}
-                className="py-1 hover:text-white cursor-pointer"
+                className="py-1 hover:text-[#0a3d2a] cursor-pointer"
               >
                 About
               </a>
             </nav>
-            <div className="pt-4 border-t border-[#0f241a] flex flex-col gap-3">
+            <div className="pt-4 border-t border-[#e1e7de] flex flex-col gap-3">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   setWalletDialogInitialTab("create");
                   setWalletDialogOpen(true);
                 }}
-                className="w-full text-center py-2.5 text-xs font-semibold text-white bg-[#0a1813] border border-[#163024] rounded-full"
+                className="w-full text-center py-2.5 text-xs font-semibold text-[#0a3d2a] bg-white border border-[#d8ded4] rounded-full"
               >
                 Create wallet
               </button>
@@ -418,7 +408,7 @@ export default function LandingNavbar() {
                   setMobileMenuOpen(false);
                   setAdapterModalVisible(true);
                 }}
-                className="w-full text-center py-2.5 text-xs font-semibold text-[#07130f] bg-[#2ecc71] hover:bg-[#34d399] rounded-full flex items-center justify-center gap-2 shadow-[0_2px_10px_rgba(46,204,113,0.3)]"
+                className="w-full text-center py-2.5 text-xs font-semibold text-white bg-[#0a3d2a] hover:bg-[#114d36] rounded-full flex items-center justify-center gap-2 shadow-xs"
               >
                 <svg
                   className="w-3.5 h-3.5 fill-none stroke-current"
