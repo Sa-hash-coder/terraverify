@@ -28,6 +28,13 @@ export default function WalletDialog({ isOpen, onClose, onSuccess }: WalletDialo
   const { connection } = useConnection();
 
   const [activeTab, setActiveTab] = useState<"create" | "connect">("create");
+  const [tabDirection, setTabDirection] = useState<"right" | "left">("right");
+
+  const handleTabChange = (tab: "create" | "connect") => {
+    if (tab === activeTab) return;
+    setTabDirection(tab === "connect" ? "right" : "left");
+    setActiveTab(tab);
+  };
   const [isGenerating, setIsGenerating] = useState(false);
   const [createdWallet, setCreatedWallet] = useState<CreatedWallet | null>(null);
   const [showSecretKey, setShowSecretKey] = useState(false);
@@ -211,15 +218,15 @@ export default function WalletDialog({ isOpen, onClose, onSuccess }: WalletDialo
       aria-labelledby="wallet-modal-title"
       className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
     >
-      {/* Backdrop */}
+      {/* Backdrop with smooth fade in */}
       <div
-        className="fixed inset-0 bg-black/75 transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm animate-backdrop-fade transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Dialog Window */}
-      <div className="relative w-full max-w-md bg-[#111312] border border-[#272b28] rounded-xl shadow-2xl text-[#f4f4f5] z-10 overflow-hidden flex flex-col">
+      {/* Dialog Window with prompt zoom-in animation */}
+      <div className="relative w-full max-w-md bg-[#111312] border border-[#272b28] rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] text-[#f4f4f5] z-10 overflow-hidden flex flex-col animate-modal-zoom">
         {/* Header */}
         <div className="px-5 py-4 border-b border-[#222623] flex items-center justify-between">
           <div>
@@ -234,7 +241,7 @@ export default function WalletDialog({ isOpen, onClose, onSuccess }: WalletDialo
           <button
             onClick={onClose}
             aria-label="Close"
-            className="p-1 rounded text-[#8a918d] hover:text-white hover:bg-[#1c201d] transition-colors"
+            className="p-1 rounded text-[#8a918d] hover:text-white hover:bg-[#1c201d] transition-colors cursor-pointer"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -243,33 +250,45 @@ export default function WalletDialog({ isOpen, onClose, onSuccess }: WalletDialo
           </button>
         </div>
 
-        {/* Tab Buttons */}
-        <div className="px-5 pt-3 pb-1 flex gap-4 border-b border-[#222623] text-xs">
-          <button
-            onClick={() => setActiveTab("create")}
-            className={`pb-2.5 font-medium transition-colors border-b-2 ${
-              activeTab === "create"
-                ? "border-white text-white"
-                : "border-transparent text-[#8a918d] hover:text-white"
-            }`}
-          >
-            Create Wallet
-          </button>
-          <button
-            onClick={() => setActiveTab("connect")}
-            className={`pb-2.5 font-medium transition-colors border-b-2 ${
-              activeTab === "connect"
-                ? "border-white text-white"
-                : "border-transparent text-[#8a918d] hover:text-white"
-            }`}
-          >
-            Connect Extension
-          </button>
+        {/* Tab Buttons (Styled like homepage tabs) */}
+        <div className="px-5 pt-3 pb-2 border-b border-[#222623]">
+          <div className="p-1 rounded-xl bg-[#090d0b] border border-[#1d2621] flex gap-1">
+            <button
+              type="button"
+              onClick={() => handleTabChange("create")}
+              className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-mono transition-all duration-200 cursor-pointer text-center ${
+                activeTab === "create"
+                  ? "bg-[#18261e] text-[#38b87c] font-bold shadow-xs border border-[#38b87c]/30"
+                  : "text-[#8a918d] hover:text-white"
+              }`}
+            >
+              Create Wallet
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTabChange("connect")}
+              className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-mono transition-all duration-200 cursor-pointer text-center ${
+                activeTab === "connect"
+                  ? "bg-[#18261e] text-[#38b87c] font-bold shadow-xs border border-[#38b87c]/30"
+                  : "text-[#8a918d] hover:text-white"
+              }`}
+            >
+              Connect Extension
+            </button>
+          </div>
         </div>
 
-        {/* Body Content */}
-        <div className="p-5 space-y-4">
-          {activeTab === "create" && (
+        {/* Body Content with slide animation */}
+        <div className="p-5 overflow-hidden">
+          <div
+            key={activeTab}
+            className={
+              tabDirection === "right"
+                ? "animate-tab-slide-right space-y-4"
+                : "animate-tab-slide-left space-y-4"
+            }
+          >
+            {activeTab === "create" && (
             <>
               {!createdWallet ? (
                 <div className="py-3 space-y-4 text-left">
@@ -483,6 +502,7 @@ export default function WalletDialog({ isOpen, onClose, onSuccess }: WalletDialo
               )}
             </div>
           )}
+          </div>
         </div>
 
         {/* Footer */}

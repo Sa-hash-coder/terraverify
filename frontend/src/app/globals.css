@@ -264,6 +264,76 @@ body {
   animation: zoomInSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Dialog Backdrop Fade In */
+@keyframes backdropFadeIn {
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
+}
+.animate-backdrop-fade {
+  animation: backdropFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Dialog Modal Zoom In */
+@keyframes modalZoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.90) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-modal-zoom {
+  animation: modalZoomIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center center;
+}
+
+/* Tab Slide Transitions */
+@keyframes tabSlideFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-tab-slide-right {
+  animation: tabSlideFromRight 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tabSlideFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-tab-slide-left {
+  animation: tabSlideFromLeft 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-modal-zoom,
+  .animate-tab-slide-right,
+  .animate-tab-slide-left,
+  .animate-backdrop-fade {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 /* Hide scrollbar utility */
 .scrollbar-none::-webkit-scrollbar {
   display: none;
