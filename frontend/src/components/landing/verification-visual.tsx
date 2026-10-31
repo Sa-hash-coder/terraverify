@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import WalletDialog from "../wallet/wallet-dialog";
@@ -66,6 +66,26 @@ export default function VerificationVisualSection() {
   const [walletDialogOpen, setWalletDialogOpen] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [filterMode, setFilterMode] = useState<"natural" | "infrared">("natural");
+  const [inView, setInView] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+      },
+      {
+        threshold: 0.15,
+        rootMargin: "-20px 0px -20px 0px",
+      }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const checkHasWallet = () => {
     if (connected && publicKey) return true;
@@ -95,14 +115,21 @@ export default function VerificationVisualSection() {
   return (
     <section
       id="verification"
-      className="py-20 md:py-32 border-b border-[#d6dfd9] bg-[#f4f5ef] text-[#101814] transition-colors"
+      ref={sectionRef}
+      className="py-20 md:py-32 border-b border-[#d6dfd9] bg-[#f4f5ef] text-[#101814] transition-colors overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16">
+        <div
+          className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+          style={{
+            transform: inView ? "translate3d(0, 0, 0)" : "translate3d(0, -20px, 0)",
+            opacity: inView ? 1 : 0.6,
+          }}
+        >
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e8f2ec] border border-[#cfe0d5] mb-4">
-              <span className="w-2 h-2 rounded-full bg-[#38b87c]" />
+              <span className="w-2 h-2 rounded-full bg-[#38b87c] animate-pulse" />
               <span className="text-xs font-mono uppercase tracking-widest text-[#1b7046] font-medium">
                 Independent Telemetry
               </span>
@@ -122,10 +149,10 @@ export default function VerificationVisualSection() {
               <button
                 key={p.id}
                 onClick={() => setSelectedIdx(idx)}
-                className={`px-3 py-1.5 rounded text-xs font-mono transition-all ${
+                className={`px-3 py-1.5 rounded text-xs font-mono transition-all duration-200 cursor-pointer ${
                   selectedIdx === idx
-                    ? "bg-[#ffffff] text-[#101814] font-bold shadow-xs border border-[#b8ccbf]"
-                    : "text-[#55675e] hover:text-[#101814]"
+                    ? "bg-[#ffffff] text-[#101814] font-bold shadow-xs border border-[#b8ccbf] scale-[1.02]"
+                    : "text-[#55675e] hover:text-[#101814] hover:bg-white/50"
                 }`}
               >
                 {p.id} ({p.status === "VERIFIED" ? "Verified" : "Suspended"})
@@ -134,8 +161,15 @@ export default function VerificationVisualSection() {
           </div>
         </div>
 
-        {/* Verification Console Body */}
-        <div className="rounded-lg border border-[#162922] bg-[#0d1714] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        {/* Verification Console Body with Two-way Scroll Motion & 3D Perspective Lift */}
+        <div
+          className="rounded-lg border border-[#162922] bg-[#0d1714] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+          style={{
+            transform: inView ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 30px, 0) scale(0.98)",
+            opacity: inView ? 1 : 0.65,
+            willChange: "transform, opacity",
+          }}
+        >
           {/* Top Verification Header Bar */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 sm:p-6 bg-[#07130f] border-b border-[#162922] text-left">
             <div>
@@ -163,7 +197,7 @@ export default function VerificationVisualSection() {
               <div className="flex items-center gap-1.5">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    current.status === "VERIFIED" ? "bg-[#38b87c]" : "bg-red-400"
+                    current.status === "VERIFIED" ? "bg-[#38b87c] animate-pulse" : "bg-red-400"
                   }`}
                 />
                 <span
@@ -200,11 +234,11 @@ export default function VerificationVisualSection() {
           {/* Interactive GIS Viewport + Telemetry Panel */}
           <div className="grid grid-cols-1 lg:grid-cols-12">
             {/* GIS Satellite Viewport (8 Cols) */}
-            <div className="lg:col-span-8 relative aspect-[16/10] bg-[#050c0a] overflow-hidden">
+            <div className="lg:col-span-8 relative aspect-[16/10] bg-[#050c0a] overflow-hidden group">
               <img
                 src={current.image}
                 alt={`${current.project} satellite view`}
-                className={`w-full h-full object-cover transition-all duration-500 ${
+                className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${
                   filterMode === "infrared"
                     ? "hue-rotate-90 contrast-125 saturate-150"
                     : "brightness-95 contrast-105"
@@ -288,7 +322,7 @@ export default function VerificationVisualSection() {
               <div className="absolute top-4 right-4 bg-[#07130f]/90 backdrop-blur-sm border border-[#162922] p-1 rounded flex items-center gap-1 text-[11px] font-mono">
                 <button
                   onClick={() => setFilterMode("natural")}
-                  className={`px-2 py-1 rounded transition-colors ${
+                  className={`px-2 py-1 rounded transition-colors cursor-pointer ${
                     filterMode === "natural"
                       ? "bg-[#38b87c] text-[#07130f] font-semibold"
                       : "text-[#8e9f96] hover:text-[#f4f5ef]"
@@ -298,7 +332,7 @@ export default function VerificationVisualSection() {
                 </button>
                 <button
                   onClick={() => setFilterMode("infrared")}
-                  className={`px-2 py-1 rounded transition-colors ${
+                  className={`px-2 py-1 rounded transition-colors cursor-pointer ${
                     filterMode === "infrared"
                       ? "bg-[#38b87c] text-[#07130f] font-semibold"
                       : "text-[#8e9f96] hover:text-[#f4f5ef]"
@@ -322,7 +356,7 @@ export default function VerificationVisualSection() {
                     Verification Metrics
                   </span>
                   <span
-                    className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
+                    className={`text-xs font-mono font-bold px-2 py-0.5 rounded transition-transform duration-300 hover:scale-105 ${
                       current.status === "VERIFIED"
                         ? "bg-[#13221d] text-[#38b87c] border border-[#38b87c]/30"
                         : "bg-red-500/10 text-red-400 border border-red-500/30"
@@ -332,23 +366,23 @@ export default function VerificationVisualSection() {
                   </span>
                 </div>
 
-                {/* Score Data List */}
-                <div className="space-y-4 font-mono text-xs">
-                  <div className="flex justify-between items-baseline pb-2 border-b border-[#162922]">
+                {/* Score Data List with Hover Accents */}
+                <div className="space-y-3 font-mono text-xs">
+                  <div className="flex justify-between items-baseline p-2 rounded hover:bg-[#11231c] transition-colors border-b border-[#162922]/60">
                     <span className="text-[#8e9f96]">NDVI Score:</span>
                     <span className="text-[#f4f5ef] font-semibold text-sm">
                       {current.ndvi}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-baseline pb-2 border-b border-[#162922]">
+                  <div className="flex justify-between items-baseline p-2 rounded hover:bg-[#11231c] transition-colors border-b border-[#162922]/60">
                     <span className="text-[#8e9f96]">Canopy Retention:</span>
                     <span className="text-[#f4f5ef] font-semibold text-sm">
                       {current.forestCover}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-baseline pb-2 border-b border-[#162922]">
+                  <div className="flex justify-between items-baseline p-2 rounded hover:bg-[#11231c] transition-colors border-b border-[#162922]/60">
                     <span className="text-[#8e9f96]">30-Day Trend:</span>
                     <span
                       className={`font-semibold text-sm ${
@@ -361,7 +395,7 @@ export default function VerificationVisualSection() {
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-baseline pb-2 border-b border-[#162922]">
+                  <div className="flex justify-between items-baseline p-2 rounded hover:bg-[#11231c] transition-colors border-b border-[#162922]/60">
                     <span className="text-[#8e9f96]">Transfer Hook:</span>
                     <span
                       className={`font-semibold ${
@@ -376,7 +410,7 @@ export default function VerificationVisualSection() {
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-baseline pb-2 border-b border-[#162922]">
+                  <div className="flex justify-between items-baseline p-2 rounded hover:bg-[#11231c] transition-colors border-b border-[#162922]/60">
                     <span className="text-[#8e9f96]">Oracle Account:</span>
                     <span className="text-[#a8c7b5] text-[11px]">
                       {current.oracleAccount}
@@ -385,7 +419,7 @@ export default function VerificationVisualSection() {
                 </div>
 
                 {/* Automated Audit Note */}
-                <div className="p-3.5 rounded bg-[#07130f] border border-[#162922] text-xs text-[#8e9f96] leading-relaxed">
+                <div className="p-3.5 rounded bg-[#07130f] border border-[#162922] text-xs text-[#8e9f96] leading-relaxed transition-all duration-300 hover:border-[#38b87c]/40 hover:shadow-xs">
                   <span className="text-[#f4f5ef] font-semibold block mb-1">
                     System Diagnostic:
                   </span>
@@ -397,7 +431,7 @@ export default function VerificationVisualSection() {
               <div className="pt-6 border-t border-[#162922] mt-6">
                 <button
                   onClick={handleOpenExplorer}
-                  className="w-full py-2.5 px-4 rounded bg-[#0d1714] hover:bg-[#13221d] border border-[#162922] hover:border-[#a8c7b5]/30 text-xs font-semibold text-[#f4f5ef] transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded bg-[#0d1714] hover:bg-[#13221d] border border-[#162922] hover:border-[#a8c7b5]/30 text-xs font-semibold text-[#f4f5ef] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                 >
                   <span>Open Full Satellite Explorer</span>
                   <span>→</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { smoothScrollTo } from "../../lib/scroll";
@@ -10,6 +10,26 @@ export default function FinalCtaSection() {
   const router = useRouter();
   const { connected, publicKey } = useWallet();
   const [walletDialogOpen, setWalletDialogOpen] = useState(false);
+  const [inView, setInView] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+      },
+      {
+        threshold: 0.2,
+        rootMargin: "-20px 0px -20px 0px",
+      }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const checkHasWallet = () => {
     if (connected && publicKey) return true;
@@ -35,17 +55,33 @@ export default function FinalCtaSection() {
   };
 
   return (
-    <section className="py-24 md:py-36 border-b border-[#d6dfd9] bg-[#f4f5ef] text-[#101814] relative overflow-hidden transition-colors">
+    <section
+      ref={sectionRef}
+      className="py-24 md:py-36 border-b border-[#d6dfd9] bg-[#f4f5ef] text-[#101814] relative overflow-hidden transition-colors"
+    >
       {/* Subtle topographic / radial atmospheric light */}
       <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#38b87c]/10 rounded-full blur-3xl pointer-events-none"
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#38b87c]/10 rounded-full blur-3xl pointer-events-none transition-opacity duration-1000"
+        style={{ opacity: inView ? 1 : 0.2 }}
         aria-hidden="true"
       />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+      <div
+        className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+        style={{
+          transform: inView ? "translate3d(0, 0, 0) scale(1)" : "translate3d(0, 30px, 0) scale(0.97)",
+          opacity: inView ? 1 : 0.5,
+          willChange: "transform, opacity",
+        }}
+      >
         {/* Subtle eyebrow marker */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#e8f2ec] border border-[#cfe0d5] text-[#1b7046] text-xs font-mono font-semibold tracking-wide mb-8">
-          <span className="w-2 h-2 rounded-full bg-[#38b87c]" />
+        <div
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#e8f2ec] border border-[#cfe0d5] text-[#1b7046] text-xs font-mono font-semibold tracking-wide mb-8 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{
+            transform: inView ? "translate3d(0, 0, 0)" : "translate3d(0, -10px, 0)",
+          }}
+        >
+          <span className="w-2 h-2 rounded-full bg-[#38b87c] animate-pulse" />
           <span>RESTORING INTEGRITY TO VOLUNTARY CARBON MARKETS</span>
         </div>
 
@@ -60,11 +96,11 @@ export default function FinalCtaSection() {
           transparent carbon market.
         </p>
 
-        {/* Action Buttons */}
+        {/* Action Buttons with Dynamic Hover Zoom */}
         <div className="flex flex-wrap items-center justify-center gap-4">
           <button
             onClick={handleExplore}
-            className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-[#ffffff] bg-[#1b7046] hover:bg-[#155836] rounded-lg transition-all flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(27,112,70,0.25)] hover:shadow-[0_6px_20px_rgba(27,112,70,0.35)] cursor-pointer"
+            className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-[#ffffff] bg-[#1b7046] hover:bg-[#155836] rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(27,112,70,0.25)] hover:shadow-[0_8px_24px_rgba(27,112,70,0.35)] hover:-translate-y-0.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             <span>Explore TerraVerify</span>
             <svg
@@ -84,7 +120,7 @@ export default function FinalCtaSection() {
           <a
             href="#how-it-works"
             onClick={(e) => smoothScrollTo("how-it-works", e)}
-            className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-[#101814] bg-[#ffffff] hover:bg-[#f0f4f1] rounded-lg border border-[#d6dfd9] shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-[#101814] bg-[#ffffff] hover:bg-[#f0f4f1] rounded-lg border border-[#d6dfd9] shadow-sm transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             <span>See How Verification Works</span>
           </a>

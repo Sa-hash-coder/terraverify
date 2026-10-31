@@ -1,8 +1,28 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function TechnologySection() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [inView, setInView] = useState(false);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setInView(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.2, rootMargin: "-30px 0px -30px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   const layers = [
     {
       step: "01",
@@ -58,9 +78,16 @@ export default function TechnologySection() {
         </div>
 
         {/* System Diagram Schematic */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* Left: Interactive Architecture Flowchart */}
-          <div className="lg:col-span-5 bg-[#f8faf9] border border-[#d6dfd9] rounded-xl p-6 sm:p-8 space-y-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+          <div
+            style={{
+              transform: inView ? "translate3d(0, 0, 0)" : "translate3d(-30px, 0, 0)",
+              opacity: inView ? 1 : 0.6,
+              transition: "transform 600ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms ease",
+            }}
+            className="lg:col-span-5 bg-[#f8faf9] border border-[#d6dfd9] rounded-2xl p-6 sm:p-8 space-y-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] motion-reduce:transform-none"
+          >
             <div className="text-xs font-mono uppercase tracking-wider text-[#6e8075] font-semibold pb-3 border-b border-[#e2ece5]">
               System Pipeline Flow
             </div>
@@ -73,7 +100,7 @@ export default function TechnologySection() {
                 { title: "On-Chain Record", subtitle: "Solana Token-2022 Ledger Proof" },
               ].map((item, idx, arr) => (
                 <React.Fragment key={item.title}>
-                  <div className="p-4 rounded-lg bg-[#ffffff] border border-[#d6dfd9] flex items-center justify-between text-left group hover:border-[#1b7046] hover:shadow-sm transition-all">
+                  <div className="p-4 rounded-lg bg-[#ffffff] border border-[#d6dfd9] flex items-center justify-between text-left group hover:border-[#1b7046] hover:shadow-sm hover:scale-[1.01] transition-all cursor-pointer">
                     <div>
                       <div className="text-sm font-semibold text-[#101814]">
                         {item.title}
@@ -113,43 +140,66 @@ export default function TechnologySection() {
             </div>
           </div>
 
-          {/* Right: Detailed Layer Breakdown Cards */}
+          {/* Right: Detailed Layer Breakdown Cards with two-way scroll & hover zoom */}
           <div className="lg:col-span-7 space-y-4">
-            {layers.map((layer) => (
-              <div
-                key={layer.step}
-                className="p-6 rounded-xl bg-[#ffffff] border border-[#d6dfd9] text-left hover:border-[#1b7046]/40 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-mono font-semibold px-2.5 py-0.5 rounded bg-[#e8f2ec] text-[#1b7046] border border-[#cfe0d5]">
-                      STAGE {layer.step}
+            {layers.map((layer, idx) => {
+              const isHovered = hoveredIdx === idx;
+              const tilts = [-1.5, 1.0, -1.0, 1.5];
+              const restingTransform = inView
+                ? `translate3d(0, 0, 0) rotate(${tilts[idx]}deg) scale(1)`
+                : `translate3d(40px, ${idx * 6}px, 0) rotate(${tilts[idx] * 2}deg) scale(0.96)`;
+              const transform = isHovered
+                ? "translate3d(0, -8px, 0) rotate(0deg) scale(1.03)"
+                : restingTransform;
+
+              return (
+                <div
+                  key={layer.step}
+                  onMouseEnter={() => setHoveredIdx(idx)}
+                  onMouseLeave={() => setHoveredIdx(null)}
+                  style={{
+                    transform,
+                    opacity: inView ? 1 : 0.65,
+                    zIndex: isHovered ? 30 : 10,
+                    transitionDelay: isHovered ? "0ms" : inView ? `${idx * 80}ms` : `${(3 - idx) * 50}ms`,
+                  }}
+                  className={`workflow-card-base p-6 rounded-2xl bg-[#ffffff] text-left cursor-pointer transition-all ${
+                    isHovered
+                      ? "border-2 border-[#1b7046] shadow-[0_20px_40px_rgba(27,112,70,0.15)] ring-2 ring-[#38b87c]/20"
+                      : "border border-[#d6dfd9] shadow-sm hover:border-[#1b7046]/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-mono font-semibold px-2.5 py-0.5 rounded bg-[#e8f2ec] text-[#1b7046] border border-[#cfe0d5]">
+                        STAGE {layer.step}
+                      </span>
+                      <h3 className="text-base font-bold text-[#101814]">
+                        {layer.layer}
+                      </h3>
+                    </div>
+                    <span className="text-xs font-mono text-[#6e8075] hidden sm:inline">
+                      {layer.tech}
                     </span>
-                    <h3 className="text-base font-bold text-[#101814]">
-                      {layer.layer}
-                    </h3>
                   </div>
-                  <span className="text-xs font-mono text-[#6e8075] hidden sm:inline">
-                    {layer.tech}
-                  </span>
-                </div>
 
-                <p className="text-sm text-[#4f6358] leading-relaxed mb-4">
-                  {layer.desc}
-                </p>
+                  <p className="text-sm text-[#4f6358] leading-relaxed mb-4">
+                    {layer.desc}
+                  </p>
 
-                <div className="flex flex-wrap gap-2 pt-2 border-t border-[#f0f4f1]">
-                  {layer.attributes.map((attr) => (
-                    <span
-                      key={attr}
-                      className="text-[11px] font-mono text-[#1b7046] bg-[#f4f8f5] px-2.5 py-1 rounded border border-[#dae8df]"
-                    >
-                      {attr}
-                    </span>
-                  ))}
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-[#f0f4f1]">
+                    {layer.attributes.map((attr) => (
+                      <span
+                        key={attr}
+                        className="text-[11px] font-mono text-[#1b7046] bg-[#f4f8f5] px-2.5 py-1 rounded border border-[#dae8df]"
+                      >
+                        {attr}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

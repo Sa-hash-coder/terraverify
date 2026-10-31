@@ -1,9 +1,85 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [isSeparated, setIsSeparated] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const updateSize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsSeparated(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.25, rootMargin: "-20px 0px -20px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const getCardTransform = (idx: number) => {
+    const isHovered = hoveredIdx === idx;
+
+    if (isDesktop) {
+      if (isHovered) {
+        return "translate3d(0, -14px, 0) rotate(0deg) scale(1.05)";
+      }
+      if (isSeparated) {
+        // Tilted fan-out resting posture
+        const tilts = [-2.5, -0.8, 0.8, 2.5];
+        const yOffsets = [0, 4, 4, 0];
+        return `translate3d(0, ${yOffsets[idx]}px, 0) rotate(${tilts[idx]}deg) scale(1)`;
+      }
+      // Bundled together towards center
+      const bundleX = [148, 49, -49, -148];
+      const bundleRotations = [-6.5, -2, 2, 6.5];
+      const bundleY = [8, 4, 4, 8];
+      return `translate3d(${bundleX[idx]}%, ${bundleY[idx]}px, 0) rotate(${bundleRotations[idx]}deg) scale(0.95)`;
+    } else {
+      // Mobile / tablet
+      if (isHovered) {
+        return "translate3d(0, -8px, 0) rotate(0deg) scale(1.03)";
+      }
+      if (isSeparated) {
+        return "translate3d(0, 0, 0) rotate(0deg) scale(1)";
+      }
+      return `translate3d(0, ${idx * 6}px, 0) rotate(${idx % 2 === 0 ? -1.5 : 1.5}deg) scale(0.97)`;
+    }
+  };
+
+  const getCardZIndex = (idx: number) => {
+    if (hoveredIdx === idx) return 40;
+    if (!isSeparated) {
+      return 10 + idx * 5;
+    }
+    return activeStep === idx ? 20 : 10;
+  };
+
+  const getTransitionDelay = (idx: number) => {
+    if (hoveredIdx !== null) return "0ms";
+    if (isSeparated) {
+      return `${idx * 90}ms`;
+    }
+    return `${(3 - idx) * 60}ms`;
+  };
 
   const steps = [
     {
@@ -121,49 +197,74 @@ export default function HowItWorksSection() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="max-w-3xl mb-16 sm:mb-20">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e2ebe4] border border-[#cfe0d5] mb-4">
-            <span className="w-2 h-2 rounded-full bg-[#38b87c]" />
-            <span className="text-xs font-mono uppercase tracking-widest text-[#1b7046] font-medium">
-              Verification Workflow
-            </span>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between max-w-7xl mb-16 sm:mb-20">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e2ebe4] border border-[#cfe0d5] mb-4">
+              <span className="w-2 h-2 rounded-full bg-[#38b87c]" />
+              <span className="text-xs font-mono uppercase tracking-widest text-[#1b7046] font-medium">
+                Verification Workflow
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#101814] mb-4 sm:mb-6">
+              An infrastructure workflow for ecological proof.
+            </h2>
+            <p className="text-base sm:text-lg text-[#4f6358] leading-relaxed">
+              Four synchronized stages connecting orbital sensor passes to the
+              Solana settlement layer.
+            </p>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#101814] mb-6">
-            An infrastructure workflow for ecological proof.
-          </h2>
-          <p className="text-base sm:text-lg text-[#4f6358] leading-relaxed">
-            Four synchronized stages connecting orbital sensor passes to the
-            Solana settlement layer.
-          </p>
+          <button
+            onClick={() => {
+              setIsSeparated(false);
+              setTimeout(() => setIsSeparated(true), 250);
+            }}
+            className="mt-4 sm:mt-0 self-start sm:self-end px-3 py-1.5 rounded-lg border border-[#cfe0d5] bg-[#ffffff] hover:bg-[#e8f2ec] text-[#1b7046] text-xs font-mono font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+            title="Replay card bundle and fan-out animation"
+          >
+            <span>↺ Replay Fan-out</span>
+          </button>
         </div>
 
         {/* Process Track with Connecting Lines */}
-        <div className="relative mb-12">
+        <div ref={containerRef} className="relative mb-14 overflow-visible">
           {/* Subtle Horizontal Connecting Line on desktop */}
           <div
-            className="hidden lg:block absolute top-7 left-12 right-12 h-[2px] bg-[#d6ded8] z-0"
+            className={`hidden lg:block absolute top-7 left-12 right-12 h-[2px] bg-[#d6ded8] z-0 transition-opacity duration-700 ${
+              isSeparated ? "opacity-100" : "opacity-0"
+            }`}
             aria-hidden="true"
           />
 
-          {/* Grid of Steps */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6 relative z-10">
+          {/* Grid of Steps with Fan-out Card Animation */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6 relative z-10 overflow-visible py-4">
             {steps.map((step, idx) => {
               const isSelected = activeStep === idx;
+              const isHovered = hoveredIdx === idx;
+
               return (
                 <div
                   key={step.num}
                   onClick={() => setActiveStep(idx)}
-                  className={`group cursor-pointer p-6 rounded-xl transition-all text-left ${
-                    isSelected
+                  onMouseEnter={() => setHoveredIdx(idx)}
+                  onMouseLeave={() => setHoveredIdx(null)}
+                  style={{
+                    transform: getCardTransform(idx),
+                    zIndex: getCardZIndex(idx),
+                    transitionDelay: getTransitionDelay(idx),
+                  }}
+                  className={`workflow-card-base group cursor-pointer p-6 rounded-2xl text-left select-none ${
+                    isHovered
+                      ? "bg-[#ffffff] border-2 border-[#1b7046] shadow-[0_22px_45px_rgba(27,112,70,0.18)] ring-4 ring-[#38b87c]/20"
+                      : isSelected
                       ? "bg-[#ffffff] border-2 border-[#1b7046] shadow-[0_8px_30px_rgba(27,112,70,0.12)] ring-2 ring-[#38b87c]/15"
-                      : "bg-[#ffffff] border border-[#d6dfd9] hover:border-[#38b87c] hover:shadow-md"
+                      : "bg-[#ffffff] border border-[#d6dfd9] shadow-sm hover:border-[#38b87c]"
                   }`}
                 >
                   {/* Step Header Indicator */}
                   <div className="flex items-center justify-between mb-6">
                     <div
                       className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-colors ${
-                        isSelected
+                        isSelected || isHovered
                           ? "bg-[#1b7046] text-[#ffffff] border-[#1b7046]"
                           : "bg-[#f0f8f3] text-[#1b7046] border-[#d6dfd9] group-hover:border-[#38b87c]"
                       }`}

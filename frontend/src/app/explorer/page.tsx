@@ -426,10 +426,10 @@ export default function ExplorerPage() {
                             setSelectedProjectId(proj.id);
                             setDetailOpen(true);
                           }}
-                          className={`p-4 rounded-2xl transition-all cursor-pointer text-left relative ${
+                          className={`p-4 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer text-left relative hover:-translate-y-1 hover:scale-[1.012] active:scale-[0.99] ${
                             isSelected
                               ? "bg-white border-2 border-[#2d6a4f] shadow-md ring-2 ring-[#2d6a4f]/15 text-[#111e16]"
-                              : "bg-white border border-[#dbe3d8] hover:border-[#b4c7b0] hover:shadow-xs text-[#111e16]"
+                              : "bg-white border border-[#dbe3d8] hover:border-[#2d6a4f]/50 hover:shadow-md text-[#111e16]"
                           }`}
                         >
                           {/* Card Header */}
@@ -701,7 +701,7 @@ export default function ExplorerPage() {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#f0f4ee] border border-[#e1e8de]">
+                <div className="p-4 rounded-2xl bg-[#f0f4ee] border border-[#e1e8de] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xs hover:border-[#b4c7b0]">
                   <div className="text-xs text-[#5c7366] font-medium">Canopy Cover</div>
                   <div className="font-mono text-2xl font-bold text-[#111e16] mt-1">
                     {selectedProject.forestCover}
@@ -711,7 +711,7 @@ export default function ExplorerPage() {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#f0f4ee] border border-[#e1e8de]">
+                <div className="p-4 rounded-2xl bg-[#f0f4ee] border border-[#e1e8de] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xs hover:border-[#b4c7b0]">
                   <div className="text-xs text-[#5c7366] font-medium">Canopy Quality</div>
                   <div className="font-mono text-2xl font-bold text-[#111e16] mt-1">
                     {selectedProject.cqsScore} <span className="text-xs font-normal text-[#5c7366]">/ 100</span>
@@ -722,7 +722,7 @@ export default function ExplorerPage() {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#f0f4ee] border border-[#e1e8de]">
+                <div className="p-4 rounded-2xl bg-[#f0f4ee] border border-[#e1e8de] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xs hover:border-[#b4c7b0]">
                   <div className="text-xs text-[#5c7366] font-medium">Cloud Obscurity</div>
                   <div className="font-mono text-2xl font-bold text-[#111e16] mt-1">
                     {selectedProject.cloudCover}
