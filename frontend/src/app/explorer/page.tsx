@@ -25,7 +25,6 @@ import {
   PanelLeftOpen,
   Eye,
   RotateCcw,
-  Sparkles,
   Satellite
 } from "lucide-react";
 import PageShell from "../../components/layout/page-shell";

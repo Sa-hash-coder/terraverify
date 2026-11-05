@@ -17,7 +17,6 @@ import {
   TrendingUp,
   Plus,
   Minus,
-  Sparkles,
   Flame,
   LogOut,
   Droplet,
