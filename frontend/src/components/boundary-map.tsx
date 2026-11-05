@@ -49,8 +49,13 @@ export default function BoundaryMap({
     });
     mapInstance.current = map;
 
-    // Basemap: Dark Carto underneath to prevent blank or black canvas
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    // Basemap: Dark Canvas to prevent blank canvas (Esri unmetered or Carto with key)
+    const cartoKey = process.env.NEXT_PUBLIC_CARTO_API_KEY || "";
+    const darkBasemapUrl = cartoKey
+      ? `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${cartoKey}`
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+
+    L.tileLayer(darkBasemapUrl, {
       maxZoom: 19,
       subdomains: "abcd",
       zIndex: 1,

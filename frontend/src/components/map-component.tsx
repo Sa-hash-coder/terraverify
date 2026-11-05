@@ -84,35 +84,62 @@ export default function MapComponent({
     // Zoom control at topright (centered vertically on right edge matching Image 1)
     L.control.zoom({ position: "topright" }).addTo(map);
 
-    // 0. Permanent Dark Basemap: Renders immediately so map canvas is never black
-    const baseDarkLayer = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 19, subdomains: "abcd", zIndex: 1 }
-    ).addTo(map);
+    // Optional CARTO API Key (get free key at https://carto.com/basemaps/apikey)
+    const cartoKey = process.env.NEXT_PUBLIC_CARTO_API_KEY || "";
+    const keyQuery = cartoKey ? `?key=${cartoKey}` : "";
 
-    // 1. True Color: Esri World Imagery (High-res Sentinel satellite)
+    // 0. Permanent Dark Basemap: Esri Dark Canvas (clean, no key required, zero watermark) or Carto Dark with key
+    const baseDarkUrl = cartoKey
+      ? `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png${keyQuery}`
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+
+    const baseDarkLayer = L.tileLayer(baseDarkUrl, {
+      maxZoom: 19,
+      subdomains: "abcd",
+      zIndex: 1,
+    }).addTo(map);
+
+    // 1. True Color: Esri World Imagery (High-res Sentinel satellite - unmetered, zero watermark)
     const trueColorLayer = L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       { maxZoom: 18, opacity: activeLayer === "truecolor" ? layerOpacity / 100 : 0, zIndex: 2 }
     ).addTo(map);
 
     // 2. NDVI Health: Sentinel False-Color vegetation index simulation
-    const ndviLayer = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-      { maxZoom: 18, subdomains: "abcd", opacity: activeLayer === "ndvi" ? layerOpacity / 100 : 0, zIndex: 3 }
-    ).addTo(map);
+    const ndviUrl = cartoKey
+      ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png${keyQuery}`
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}";
+
+    const ndviLayer = L.tileLayer(ndviUrl, {
+      maxZoom: 18,
+      subdomains: "abcd",
+      opacity: activeLayer === "ndvi" ? layerOpacity / 100 : 0,
+      zIndex: 3,
+    }).addTo(map);
 
     // 3. NIR Band 8: Deep infrared reflectance simulation
-    const nirLayer = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 18, subdomains: "abcd", opacity: activeLayer === "nir" ? layerOpacity / 100 : 0, zIndex: 3 }
-    ).addTo(map);
+    const nirUrl = cartoKey
+      ? `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png${keyQuery}`
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+
+    const nirLayer = L.tileLayer(nirUrl, {
+      maxZoom: 18,
+      subdomains: "abcd",
+      opacity: activeLayer === "nir" ? layerOpacity / 100 : 0,
+      zIndex: 3,
+    }).addTo(map);
 
     // 4. Change Delta Layer
-    const changeLayer = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 18, subdomains: "abcd", opacity: activeLayer === "change" ? layerOpacity / 100 : 0, zIndex: 3 }
-    ).addTo(map);
+    const changeUrl = cartoKey
+      ? `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png${keyQuery}`
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+
+    const changeLayer = L.tileLayer(changeUrl, {
+      maxZoom: 18,
+      subdomains: "abcd",
+      opacity: activeLayer === "change" ? layerOpacity / 100 : 0,
+      zIndex: 3,
+    }).addTo(map);
 
     trueColorLayer.on("tileerror", () => {
       setTileError(true);
