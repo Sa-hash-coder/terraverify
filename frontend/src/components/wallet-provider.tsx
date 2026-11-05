@@ -10,15 +10,24 @@ import { clusterApiUrl } from "@solana/web3.js";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 export default function WalletProviderComponent({ children }: { children: React.ReactNode }) {
-  // Use Devnet cluster URL
-  const endpoint = useMemo(() => clusterApiUrl(WalletAdapterNetwork.Devnet), []);
+  // Use custom RPC URL if provided, otherwise fallback to Devnet cluster
+  const endpoint = useMemo(
+    () => process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl(WalletAdapterNetwork.Devnet),
+    []
+  );
 
   // Standard wallet adapter configuration
   const wallets = useMemo(() => [], []);
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
+    <ConnectionProvider
+      endpoint={endpoint}
+      config={{
+        commitment: "confirmed",
+        confirmTransactionInitialTimeout: 10000,
+      }}
+    >
+      <WalletProvider wallets={wallets} autoConnect={false}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

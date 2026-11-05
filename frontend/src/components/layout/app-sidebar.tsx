@@ -160,12 +160,13 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
 
   const handleDisconnect = () => {
     if (connected) {
-      try {
-        disconnect();
-      } catch {}
+      disconnect().catch(() => {});
     }
     if (typeof window !== "undefined") {
-      localStorage.removeItem("terra_local_wallet");
+      try {
+        localStorage.removeItem("terra_local_wallet");
+        localStorage.removeItem("walletName");
+      } catch {}
     }
     setLocalWallet(null);
     setBalance(null);

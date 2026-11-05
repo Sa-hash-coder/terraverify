@@ -128,12 +128,13 @@ export default function AppHeader() {
 
   const handleDisconnectWallet = () => {
     if (connected) {
-      try {
-        disconnect();
-      } catch {}
+      disconnect().catch(() => {});
     }
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('terra_local_wallet');
+      try {
+        localStorage.removeItem('terra_local_wallet');
+        localStorage.removeItem('walletName');
+      } catch {}
     }
     setLocalWallet(null);
     setBalance(null);
@@ -182,37 +183,43 @@ export default function AppHeader() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch balance
+  // Fetch balance with timeout to prevent RPC hanging
   useEffect(() => {
-    if (connected && publicKey) {
-      const fetchBalance = async () => {
-        try {
-          const bal = await connection.getBalance(publicKey);
-          setBalance(bal / 1e9);
-        } catch {
-          // fail silently
+    let isCancelled = false;
+    const fetchBal = async (pk: PublicKey) => {
+      try {
+        const balPromise = connection.getBalance(pk);
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+        const lamports = await Promise.race([balPromise, timeoutPromise]);
+        if (!isCancelled && typeof lamports === 'number') {
+          setBalance(lamports / 1e9);
         }
-      };
+      } catch {
+        // keep existing balance
+      }
+    };
 
-      fetchBalance();
-      const interval = setInterval(fetchBalance, 6000);
-      return () => clearInterval(interval);
+    if (connected && publicKey) {
+      fetchBal(publicKey);
+      const interval = setInterval(() => fetchBal(publicKey), 15000);
+      return () => {
+        isCancelled = true;
+        clearInterval(interval);
+      };
     } else if (localWallet?.publicKey) {
       try {
         const pk = new PublicKey(localWallet.publicKey);
-        connection
-          .getBalance(pk)
-          .then((bal) => setBalance(bal / 1e9))
-          .catch(() => {
-            setBalance(localWallet.balance ?? 1.0);
-          });
+        fetchBal(pk);
       } catch {
         setBalance(localWallet.balance ?? 1.0);
       }
     } else {
       setBalance(null);
     }
-  }, [connected, publicKey, localWallet, connection]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [connected, publicKey, localWallet?.publicKey, connection]);
 
   // Handle Faucet
   const handleRequestFaucet = async () => {

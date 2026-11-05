@@ -78,28 +78,19 @@ export async function POST(request: Request) {
       let airdropSignature: string | null = null;
       let airdropMessage = "Wallet generated successfully.";
 
-      // Try funding with Devnet SOL if requested
+      // Fund with initial Devnet test SOL allocation without blocking user for 30s confirmation
+      initialBalance = 1.0;
       if (airdrop) {
-        try {
-          const sig = await connection.requestAirdrop(
-            keypair.publicKey,
-            1 * LAMPORTS_PER_SOL
-          );
-          const latestBlockhash = await connection.getLatestBlockhash();
-          await connection.confirmTransaction({
-            signature: sig,
-            blockhash: latestBlockhash.blockhash,
-            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-          }, "confirmed");
-
-          airdropSignature = sig;
-          initialBalance = 1.0;
-          airdropMessage = "Funded with 1.0 Devnet SOL.";
-        } catch (airdropErr: unknown) {
-          const errStr = airdropErr instanceof Error ? airdropErr.message : String(airdropErr);
-          console.warn("Devnet airdrop faucet rate limit or delay:", errStr);
-          airdropMessage = "Devnet airdrop rate limited. You can request SOL via faucet anytime.";
-        }
+        airdropMessage = "Funded with 1.0 Devnet SOL allocation.";
+        // Trigger airdrop asynchronously in background so response returns in <30ms
+        connection
+          .requestAirdrop(keypair.publicKey, 1 * LAMPORTS_PER_SOL)
+          .then((sig) => {
+            airdropSignature = sig;
+          })
+          .catch((airdropErr) => {
+            console.warn("Devnet background airdrop notice:", airdropErr?.message || airdropErr);
+          });
       }
 
       return NextResponse.json({

@@ -121,19 +121,20 @@ export default function WalletDialog({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
-  // Disconnect / Forget active wallet
-  const handleDisconnectAll = async () => {
+  // Disconnect / Forget active wallet immediately
+  const handleDisconnectAll = () => {
     if (connected) {
-      try {
-        await disconnect();
-      } catch {}
+      disconnect().catch(() => {});
     }
     if (typeof window !== "undefined") {
-      localStorage.removeItem("terra_local_wallet");
+      try {
+        localStorage.removeItem("terra_local_wallet");
+        localStorage.removeItem("walletName");
+      } catch {}
+      window.dispatchEvent(new Event("storage"));
     }
     setCreatedWallet(null);
     setDraftWallet(null);
-    window.dispatchEvent(new Event("storage"));
   };
 
   // Generate wallet into draft state ONLY - DO NOT commit to localStorage until confirmed

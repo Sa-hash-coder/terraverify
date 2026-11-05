@@ -151,12 +151,13 @@ export default function RetirePage() {
 
   const handleDisconnectWallet = () => {
     if (connected) {
-      try {
-        disconnect();
-      } catch {}
+      disconnect().catch(() => {});
     }
     if (typeof window !== "undefined") {
-      localStorage.removeItem("terra_local_wallet");
+      try {
+        localStorage.removeItem("terra_local_wallet");
+        localStorage.removeItem("walletName");
+      } catch {}
     }
     setLocalWallet(null);
     window.dispatchEvent(new Event("storage"));

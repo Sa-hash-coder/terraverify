@@ -225,40 +225,50 @@ export default function MarketplacePage() {
 
   const handleDisconnectWallet = () => {
     if (connected) {
-      try {
-        disconnect();
-      } catch {}
+      disconnect().catch(() => {});
     }
     if (typeof window !== "undefined") {
-      localStorage.removeItem("terra_local_wallet");
+      try {
+        localStorage.removeItem("terra_local_wallet");
+        localStorage.removeItem("walletName");
+      } catch {}
     }
     setLocalWallet(null);
     setWalletBalance(null);
     window.dispatchEvent(new Event("storage"));
   };
 
-  // Fetch wallet SOL balance (from adapter or local wallet)
+  // Fetch wallet SOL balance with timeout
   useEffect(() => {
+    let isCancelled = false;
+    const fetchBal = async (pk: PublicKey) => {
+      try {
+        const balPromise = connection.getBalance(pk);
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+        const lamports = await Promise.race([balPromise, timeoutPromise]);
+        if (!isCancelled && typeof lamports === "number") {
+          setWalletBalance(lamports / 1e9);
+        }
+      } catch {
+        // fail silently
+      }
+    };
+
     if (connected && publicKey) {
-      connection.getBalance(publicKey).then((lamports) => {
-        setWalletBalance(lamports / 1e9);
-      }).catch(() => {
-        setWalletBalance(null);
-      });
+      fetchBal(publicKey);
     } else if (localWallet?.publicKey) {
       try {
         const pk = new PublicKey(localWallet.publicKey);
-        connection.getBalance(pk).then((lamports) => {
-          setWalletBalance(lamports / 1e9);
-        }).catch(() => {
-          setWalletBalance(localWallet.balance ?? 1.0);
-        });
+        fetchBal(pk);
       } catch {
         setWalletBalance(localWallet.balance ?? 1.0);
       }
     } else {
       setWalletBalance(null);
     }
+    return () => {
+      isCancelled = true;
+    };
   }, [connected, publicKey, localWallet, connection, txHash]);
 
   const selectedListing = useMemo(
