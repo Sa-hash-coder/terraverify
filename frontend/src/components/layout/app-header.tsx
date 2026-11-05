@@ -1,38 +1,27 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { PublicKey } from "@solana/web3.js";
-import { 
-  Sun, 
-  Moon, 
-  Wallet, 
-  Copy, 
-  Check, 
-  ExternalLink, 
-  LogOut, 
-  Droplet, 
-  ChevronDown,
-  Menu,
-  X
-} from "lucide-react";
-import WalletDialog from "../wallet/wallet-dialog";
+import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import { PublicKey } from '@solana/web3.js';
+import { Sun, Moon, Wallet, Copy, Check, ExternalLink, LogOut, Droplet, ChevronDown, Menu, X } from 'lucide-react';
+import WalletDialog from '../wallet/wallet-dialog';
 
 // Module-level persistent cache across route changes in SPA session
 let cachedLocalWallet: { publicKey: string; balance?: number } | null = null;
 let cachedBalance: number | null = null;
+let lastNavPosition: { left: number; width: number; activeIdx: number } | null = null;
 
 const getInitialLocalWallet = (): { publicKey: string; balance?: number } | null => {
   if (cachedLocalWallet) return cachedLocalWallet;
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     try {
-      const saved = localStorage.getItem("terra_local_wallet");
+      const saved = localStorage.getItem('terra_local_wallet');
       if (saved) {
         cachedLocalWallet = JSON.parse(saved);
-        if (typeof cachedLocalWallet?.balance === "number") {
+        if (typeof cachedLocalWallet?.balance === 'number') {
           cachedBalance = cachedLocalWallet.balance;
         }
         return cachedLocalWallet;
@@ -45,7 +34,7 @@ const getInitialLocalWallet = (): { publicKey: string; balance?: number } | null
 const getInitialBalance = (): number | null => {
   if (cachedBalance !== null) return cachedBalance;
   const lw = getInitialLocalWallet();
-  if (typeof lw?.balance === "number") {
+  if (typeof lw?.balance === 'number') {
     cachedBalance = lw.balance;
     return lw.balance;
   }
@@ -59,33 +48,44 @@ export default function AppHeader() {
   const { publicKey, connected, disconnect, connecting } = useWallet();
   const { setVisible: setAdapterModalVisible } = useWalletModal();
 
-  const [balance, setBalanceState] = useState<number | null>(getInitialBalance);
+  const [mounted, setMounted] = useState(false);
+  const [balance, setBalanceState] = useState<number | null>(null);
   const [walletMenuOpen, setWalletMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [requestingFaucet, setRequestingFaucet] = useState(false);
   const [faucetSuccess, setFaucetSuccess] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("light");
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [createWalletOpen, setCreateWalletOpen] = useState(false);
-  const [localWallet, setLocalWalletState] = useState<{ publicKey: string; balance?: number } | null>(getInitialLocalWallet);
+  const [localWallet, setLocalWalletState] = useState<{ publicKey: string; balance?: number } | null>(null);
 
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [hasAnimated, setHasAnimated] = useState(Boolean(lastNavPosition));
   const [indicatorStyle, setIndicatorStyle] = useState<{
     left: number;
     width: number;
     opacity: number;
-  }>({ left: 0, width: 0, opacity: 0 });
+  }>(() => {
+    if (lastNavPosition) {
+      return {
+        left: lastNavPosition.left,
+        width: lastNavPosition.width,
+        opacity: 1,
+      };
+    }
+    return { left: 0, width: 0, opacity: 0 };
+  });
 
   const setBalance = (bal: number | null) => {
     cachedBalance = bal;
     setBalanceState(bal);
-    if (typeof window !== "undefined" && bal !== null) {
+    if (typeof window !== 'undefined' && bal !== null) {
       try {
-        const saved = localStorage.getItem("terra_local_wallet");
+        const saved = localStorage.getItem('terra_local_wallet');
         if (saved) {
           const parsed = JSON.parse(saved);
           parsed.balance = bal;
-          localStorage.setItem("terra_local_wallet", JSON.stringify(parsed));
+          localStorage.setItem('terra_local_wallet', JSON.stringify(parsed));
         }
       } catch {}
     }
@@ -94,7 +94,7 @@ export default function AppHeader() {
   const setLocalWallet = (wallet: { publicKey: string; balance?: number } | null) => {
     cachedLocalWallet = wallet;
     setLocalWalletState(wallet);
-    if (wallet && typeof wallet.balance === "number") {
+    if (wallet && typeof wallet.balance === 'number') {
       cachedBalance = wallet.balance;
       setBalanceState(wallet.balance);
     }
@@ -102,8 +102,8 @@ export default function AppHeader() {
 
   // Sync saved local wallet from localStorage
   const syncLocalWallet = () => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("terra_local_wallet");
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('terra_local_wallet');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -116,10 +116,11 @@ export default function AppHeader() {
   };
 
   useEffect(() => {
+    setMounted(true);
     syncLocalWallet();
     const handleStorage = () => syncLocalWallet();
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
@@ -131,42 +132,42 @@ export default function AppHeader() {
         disconnect();
       } catch {}
     }
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("terra_local_wallet");
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('terra_local_wallet');
     }
     setLocalWallet(null);
     setBalance(null);
     setWalletMenuOpen(false);
-    window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleLogout = () => {
     handleDisconnectWallet();
     setMobileNavOpen(false);
-    router.push("/");
+    router.push('/');
   };
 
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Theme synchronization
   useEffect(() => {
-    const saved = (localStorage.getItem("terra_theme") as "dark" | "light") || "light";
+    const saved = (localStorage.getItem('terra_theme') as 'dark' | 'light') || 'light';
     setTheme(saved);
-    if (saved === "light") {
-      document.body.classList.add("light");
+    if (saved === 'light') {
+      document.body.classList.add('light');
     } else {
-      document.body.classList.remove("light");
+      document.body.classList.remove('light');
     }
   }, []);
 
   const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
+    const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
-    localStorage.setItem("terra_theme", next);
-    if (next === "light") {
-      document.body.classList.add("light");
+    localStorage.setItem('terra_theme', next);
+    if (next === 'light') {
+      document.body.classList.add('light');
     } else {
-      document.body.classList.remove("light");
+      document.body.classList.remove('light');
     }
   };
 
@@ -177,8 +178,8 @@ export default function AppHeader() {
         setWalletMenuOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Fetch balance
@@ -199,9 +200,12 @@ export default function AppHeader() {
     } else if (localWallet?.publicKey) {
       try {
         const pk = new PublicKey(localWallet.publicKey);
-        connection.getBalance(pk).then((bal) => setBalance(bal / 1e9)).catch(() => {
-          setBalance(localWallet.balance ?? 1.0);
-        });
+        connection
+          .getBalance(pk)
+          .then((bal) => setBalance(bal / 1e9))
+          .catch(() => {
+            setBalance(localWallet.balance ?? 1.0);
+          });
       } catch {
         setBalance(localWallet.balance ?? 1.0);
       }
@@ -217,26 +221,23 @@ export default function AppHeader() {
       setRequestingFaucet(true);
       const signature = await connection.requestAirdrop(publicKey, 1000000000);
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-      await connection.confirmTransaction(
-        { signature, blockhash, lastValidBlockHeight },
-        "confirmed"
-      );
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, 'confirmed');
       setFaucetSuccess(true);
       const newBal = await connection.getBalance(publicKey);
       setBalance(newBal / 1e9);
       setTimeout(() => setFaucetSuccess(false), 3500);
     } catch (err) {
-      console.error("Faucet error:", err);
+      console.error('Faucet error:', err);
     } finally {
       setRequestingFaucet(false);
     }
   };
 
   const navItems = [
-    { label: "Explorer", href: "/explorer" },
-    { label: "Marketplace", href: "/marketplace" },
-    { label: "Retire", href: "/retire" },
-    { label: "Register", href: "/register" },
+    { label: 'Explorer', href: '/explorer' },
+    { label: 'Marketplace', href: '/marketplace' },
+    { label: 'Retire', href: '/retire' },
+    { label: 'Register', href: '/register' },
   ];
 
   useEffect(() => {
@@ -245,10 +246,17 @@ export default function AppHeader() {
       if (activeIdx !== -1 && tabRefs.current[activeIdx]) {
         const el = tabRefs.current[activeIdx];
         if (el) {
-          setIndicatorStyle({
+          const newPos = {
             left: el.offsetLeft,
             width: el.offsetWidth,
             opacity: 1,
+          };
+          setIndicatorStyle(newPos);
+          lastNavPosition = { left: el.offsetLeft, width: el.offsetWidth, activeIdx };
+
+          // Enable smooth animation for subsequent transitions
+          requestAnimationFrame(() => {
+            setHasAnimated(true);
           });
         }
       } else {
@@ -256,11 +264,10 @@ export default function AppHeader() {
       }
     };
 
-    const frameId = requestAnimationFrame(updateIndicator);
-    window.addEventListener("resize", updateIndicator);
+    updateIndicator();
+    window.addEventListener('resize', updateIndicator);
     return () => {
-      cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", updateIndicator);
+      window.removeEventListener('resize', updateIndicator);
     };
   }, [pathname]);
 
@@ -292,22 +299,11 @@ export default function AppHeader() {
                 aria-hidden="true"
               >
                 {/* Light green satellite orbit receiver accent at top right */}
-                <path
-                  d="M25 10L30 5"
-                  stroke="#8bdab6"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
+                <path d="M25 10L30 5" stroke="#8bdab6" strokeWidth="2.5" strokeLinecap="round" />
                 <circle cx="30" cy="5" r="1.5" fill="#8bdab6" />
 
                 {/* Dark Green Outer Ring */}
-                <circle
-                  cx="16"
-                  cy="19"
-                  r="11.5"
-                  stroke="#0a3d2a"
-                  strokeWidth="2.2"
-                />
+                <circle cx="16" cy="19" r="11.5" stroke="#0a3d2a" strokeWidth="2.2" />
 
                 {/* Inner "T" shape */}
                 <path
@@ -321,9 +317,7 @@ export default function AppHeader() {
             </div>
 
             <div className="flex flex-col text-left">
-              <span className="text-[17px] font-bold text-[#0a3d2a] tracking-tight leading-tight">
-                TerraVerify
-              </span>
+              <span className="text-[17px] font-bold text-[#0a3d2a] tracking-tight leading-tight">TerraVerify</span>
               <span className="text-[12px] text-[#5c7366] font-normal leading-tight mt-0.5">
                 Earth observation protocol
               </span>
@@ -337,7 +331,11 @@ export default function AppHeader() {
           >
             {/* Sliding Active Pill */}
             <div
-              className="absolute top-1.5 bottom-1.5 rounded-xl bg-[#e0ebe2] shadow-2xs pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+              className={`absolute top-1.5 bottom-1.5 rounded-xl bg-[#e0ebe2] shadow-2xs pointer-events-none ${
+                hasAnimated
+                  ? 'transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none'
+                  : 'transition-none'
+              }`}
               style={{
                 left: `${indicatorStyle.left}px`,
                 width: `${indicatorStyle.width}px`,
@@ -356,10 +354,21 @@ export default function AppHeader() {
                     tabRefs.current[idx] = el;
                   }}
                   href={item.href}
+                  onClick={() => {
+                    const el = tabRefs.current[idx];
+                    if (el) {
+                      setHasAnimated(true);
+                      const newPos = {
+                        left: el.offsetLeft,
+                        width: el.offsetWidth,
+                        opacity: 1,
+                      };
+                      setIndicatorStyle(newPos);
+                      lastNavPosition = { left: el.offsetLeft, width: el.offsetWidth, activeIdx: idx };
+                    }
+                  }}
                   className={`relative z-10 px-5 py-1.5 rounded-xl text-sm font-semibold transition-colors duration-200 cursor-pointer ${
-                    isActive
-                      ? "text-[#0a3d2a] font-bold"
-                      : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
+                    isActive ? 'text-[#0a3d2a] font-bold' : 'text-[#4a6356] hover:text-[#0a3d2a] font-medium'
                   }`}
                 >
                   {item.label}
@@ -373,11 +382,11 @@ export default function AppHeader() {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
+              title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
               className="p-2 rounded-full bg-white hover:bg-[#edf2ea] border border-[#d8ded4] text-[#4a6356] hover:text-[#0a3d2a] transition-colors cursor-pointer shadow-2xs"
               aria-label="Toggle theme"
             >
-              {theme === "dark" ? (
+              {theme === 'dark' ? (
                 <Sun className="w-4 h-4 text-amber-500" />
               ) : (
                 <Moon className="w-4 h-4 text-slate-500" />
@@ -395,7 +404,7 @@ export default function AppHeader() {
             </button>
 
             {/* Wallet Integration Widget matching Theme */}
-            {!isWalletConnected || !activePubkey ? (
+            {!mounted || !isWalletConnected || !activePubkey ? (
               <div className="flex items-center gap-4 shrink-0">
                 <button
                   onClick={() => setCreateWalletOpen(true)}
@@ -426,9 +435,7 @@ export default function AppHeader() {
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0 pl-1 border-l border-white/20">
-                    <span className="text-xs font-mono font-bold text-white">
-                      {(balance ?? 1.0).toFixed(2)} SOL
-                    </span>
+                    <span className="text-xs font-mono font-bold text-white">{(balance ?? 1.0).toFixed(2)} SOL</span>
                     <ChevronDown className="w-3.5 h-3.5 text-white shrink-0" />
                   </div>
                 </button>
@@ -437,11 +444,9 @@ export default function AppHeader() {
                 {walletMenuOpen && (
                   <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-[#d8ded4] shadow-xl p-3 z-50 text-xs space-y-3">
                     <div>
-                      <div className="text-[11px] text-[#5c7366] font-mono uppercase">
-                        Solana Devnet
-                      </div>
+                      <div className="text-[11px] text-[#5c7366] font-mono uppercase">Solana Devnet</div>
                       <div className="text-sm font-mono font-bold text-[#0a3d2a] mt-0.5">
-                        {balance !== null ? `${balance.toFixed(3)} SOL` : "Loading..."}
+                        {balance !== null ? `${balance.toFixed(3)} SOL` : 'Loading...'}
                       </div>
                       <div className="text-[11px] font-mono text-[#5c7366] truncate select-all mt-1 p-1.5 rounded-lg bg-[#f2f5ef] border border-[#d8ded4]">
                         {activePubkey}
@@ -458,7 +463,7 @@ export default function AppHeader() {
                         ) : (
                           <Copy className="w-3.5 h-3.5 text-[#5c7366]" />
                         )}
-                        <span>{copied ? "Address Copied" : "Copy Address"}</span>
+                        <span>{copied ? 'Address Copied' : 'Copy Address'}</span>
                       </button>
 
                       <a
@@ -484,7 +489,7 @@ export default function AppHeader() {
                         ) : (
                           <span className="flex items-center gap-1.5">
                             <Droplet className="w-3.5 h-3.5" />
-                            <span>{requestingFaucet ? "Requesting 1 SOL..." : "Request 1 Devnet SOL"}</span>
+                            <span>{requestingFaucet ? 'Requesting 1 SOL...' : 'Request 1 Devnet SOL'}</span>
                           </span>
                         )}
                       </button>
@@ -538,8 +543,8 @@ export default function AppHeader() {
                   onClick={() => setMobileNavOpen(false)}
                   className={`block px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-emerald-500 text-slate-950 font-bold shadow-sm"
-                      : "bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800"
+                      ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                      : 'bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800'
                   }`}
                 >
                   {item.label}

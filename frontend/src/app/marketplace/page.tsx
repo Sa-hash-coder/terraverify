@@ -19,13 +19,17 @@ import {
   Minus,
   Sparkles,
   Flame,
-  LogOut
+  LogOut,
+  Droplet,
+  Loader2,
+  Wallet
 } from "lucide-react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey, TransactionInstruction } from "@solana/web3.js";
 
 import PageShell from "../../components/layout/page-shell";
+import ForestMarketSimulation from "../../components/marketplace/forest-market-simulation";
 import { 
   PageHeader, 
   Panel, 
@@ -174,6 +178,50 @@ export default function MarketplacePage() {
 
   const isWalletActive = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
   const activePubkey = publicKey ? publicKey.toBase58() : localWallet?.publicKey || null;
+
+  const [airdropping, setAirdropping] = useState(false);
+  const [airdropMsg, setAirdropMsg] = useState<string | null>(null);
+
+  const handleRequestAirdrop = async () => {
+    if (!activePubkey) return;
+    setAirdropping(true);
+    setAirdropMsg(null);
+    try {
+      const res = await fetch("/api/wallet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "airdrop",
+          publicKey: activePubkey,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && typeof data.balance === "number") {
+        setWalletBalance(data.balance);
+        setAirdropMsg("1.0 SOL funded!");
+        setTimeout(() => setAirdropMsg(null), 3000);
+      } else {
+        const pk = new PublicKey(activePubkey);
+        const sig = await connection.requestAirdrop(pk, LAMPORTS_PER_SOL);
+        const latest = await connection.getLatestBlockhash();
+        await connection.confirmTransaction({ signature: sig, ...latest }, "confirmed");
+        const bal = await connection.getBalance(pk);
+        setWalletBalance(bal / LAMPORTS_PER_SOL);
+        setAirdropMsg("1.0 SOL funded!");
+        setTimeout(() => setAirdropMsg(null), 3000);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("429")) {
+        setAirdropMsg("Faucet rate limit. Please retry in 1m.");
+      } else {
+        setAirdropMsg("Airdrop request failed");
+      }
+      setTimeout(() => setAirdropMsg(null), 4000);
+    } finally {
+      setAirdropping(false);
+    }
+  };
 
   const handleDisconnectWallet = () => {
     if (connected) {
@@ -409,6 +457,14 @@ export default function MarketplacePage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Table / List (8 Columns) */}
           <div className="lg:col-span-8 space-y-4">
+            {/* Ongoing Forest Prices & Carbon Credit Return Simulation */}
+            <ForestMarketSimulation
+              selectedListingId={selectedListingId}
+              onSelectForest={(forestId) => {
+                setSelectedListingId(forestId);
+              }}
+            />
+
             {/* Filter Toolbar */}
             <Panel className="p-3.5 space-y-3">
               <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
@@ -556,185 +612,254 @@ export default function MarketplacePage() {
 
           {/* Right Sticky Trade Panel (4 Columns) */}
           <div className="lg:col-span-4 sticky top-24">
-            <Panel className="p-6 space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
-                <span className="text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
-                  Trade Execution
-                </span>
-                <span className="text-xs font-mono text-[var(--accent)] font-medium">
-                  SPL Token-2022
-                </span>
+            <Panel className="p-5 sm:p-6 space-y-4 shadow-xs border border-[#dbe3d8]">
+              {/* Header with status and wallet chip */}
+              <div className="flex items-center justify-between pb-3 border-b border-[#e1e8de]">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono uppercase tracking-wider text-[#111e16] font-bold">
+                    Trade Execution
+                  </span>
+                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-[#e6f4ea] text-[#1e6b3b] border border-[#a3cfbb]">
+                    SPL Token-2022
+                  </span>
+                </div>
+                {isWalletActive && activePubkey && (
+                  <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#5c7366] bg-[#f0f4ee] px-2 py-0.5 rounded-lg border border-[#dbe3d8]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#1e6b3b]" />
+                    <span>{activePubkey.slice(0, 4)}...{activePubkey.slice(-4)}</span>
+                    <button
+                      type="button"
+                      onClick={handleDisconnectWallet}
+                      className="text-[#c92a2a] hover:text-[#991b1b] p-0.5 rounded transition-colors cursor-pointer ml-1"
+                      title="Disconnect wallet"
+                    >
+                      <LogOut className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {selectedListing ? (
                 <>
                   {/* Selected Item Card */}
-                  <div className="flex gap-3 items-center p-3 rounded-lg bg-[var(--surface-raised)] border border-[var(--border)]">
+                  <div className="flex gap-3 items-center p-3 rounded-xl bg-[#f0f4ee] border border-[#dbe3d8]">
                     <img
                       src={selectedListing.image}
                       alt={selectedListing.project}
-                      className="w-12 h-12 rounded object-cover border border-[var(--border)]"
+                      className="w-12 h-12 rounded-lg object-cover border border-[#dbe3d8] shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <GradeBadge grade={selectedListing.grade} />
-                        <span className="text-xs font-bold text-[var(--text)] truncate">
+                        <span className="text-xs font-bold text-[#111e16] truncate">
                           {selectedListing.project}
                         </span>
                       </div>
-                      <div className="text-[11px] text-[var(--text-muted)] font-mono">
-                        {selectedListing.priceNum.toFixed(2)} SOL / tCO2e
+                      <div className="flex items-center justify-between text-[11px] font-mono">
+                        <span className="text-[#5c7366] truncate">{selectedListing.region}</span>
+                        <span className="font-bold text-[#2d6a4f] shrink-0 ml-1">
+                          {selectedListing.priceNum.toFixed(2)} SOL/t
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   {/* Suspended Hook Warning Banner */}
                   {isSuspended && (
-                    <div className="p-3.5 rounded-lg bg-[var(--danger-subtle)] border border-[var(--danger)]/30 text-xs text-[var(--danger)] space-y-1.5">
+                    <div className="p-3 rounded-xl bg-[#fce8e8] border border-[#f5c2c2] text-xs text-[#c92a2a] space-y-1">
                       <div className="flex items-center gap-1.5 font-bold">
                         <ShieldAlert className="w-4 h-4 shrink-0" />
                         <span>Trading Prohibited by Oracle</span>
                       </div>
-                      <p className="text-[11px] text-[var(--text)] leading-relaxed">
+                      <p className="text-[11px] text-[#5c7366] leading-relaxed">
                         {selectedListing.revocationReason ||
                           "This project has been suspended due to canopy telemetry loss. Token-2022 Transfer Hook refuses settlement."}
                       </p>
                     </div>
                   )}
 
-                  {/* Quantity Input */}
-                  <div className="space-y-1.5 text-left">
+                  {/* Quantity Input with Presets */}
+                  <div className="space-y-2 text-left">
                     <div className="flex items-center justify-between text-xs">
-                      <label className="text-[var(--text-muted)] font-medium">Quantity (tCO2e)</label>
-                      <span className="text-[11px] font-mono text-[var(--text-muted)]">
-                        Avail: {selectedListing.amount} t
+                      <label className="text-[#5c7366] font-medium">Quantity (tCO2e)</label>
+                      <span className="text-[11px] font-mono text-[#5c7366]">
+                        Avail: <strong className="text-[#111e16]">{selectedListing.amount.toLocaleString()} t</strong>
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center border border-[var(--border)] rounded-lg bg-[var(--surface-raised)] px-3 py-2 flex-1 focus-within:border-[var(--accent)] transition-colors">
-                        <input
-                          type="number"
-                          min="1"
-                          max={selectedListing.amount}
-                          value={buyAmount}
-                          onChange={(e) => setBuyAmount(e.target.value)}
-                          disabled={isSuspended}
-                          className="w-full bg-transparent text-sm font-mono text-[var(--text)] focus:outline-none"
-                        />
+                    <div className="flex items-center border border-[#dbe3d8] rounded-xl bg-white px-3 py-2 focus-within:border-[#2d6a4f] transition-colors shadow-2xs">
+                      <input
+                        type="number"
+                        min="1"
+                        max={selectedListing.amount}
+                        value={buyAmount}
+                        onChange={(e) => setBuyAmount(e.target.value)}
+                        disabled={isSuspended}
+                        className="w-full bg-transparent text-sm font-mono font-bold text-[#111e16] focus:outline-none"
+                        placeholder="10"
+                      />
+                      <span className="text-xs font-mono text-[#5c7366] mr-2">tCO2e</span>
+                      <button
+                        type="button"
+                        onClick={() => setBuyAmount(String(selectedListing.amount))}
+                        disabled={isSuspended}
+                        className="text-[10px] font-mono font-bold text-[#2d6a4f] bg-[#e6f4ea] hover:bg-[#d4edd9] px-2 py-0.5 rounded border border-[#a3cfbb] transition-colors cursor-pointer shrink-0"
+                      >
+                        MAX
+                      </button>
+                    </div>
+
+                    {/* Quick Selection Pills */}
+                    <div className="flex items-center gap-1.5 pt-0.5">
+                      <span className="text-[10px] text-[#5c7366] font-mono">Quick:</span>
+                      {[5, 10, 25, 50, 100].filter((q) => q <= selectedListing.amount).map((amt) => (
                         <button
+                          key={amt}
                           type="button"
-                          onClick={() => setBuyAmount(String(selectedListing.amount))}
+                          onClick={() => setBuyAmount(String(amt))}
                           disabled={isSuspended}
-                          className="text-[11px] font-mono font-bold text-[var(--accent)] hover:underline px-1 cursor-pointer"
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer ${
+                            amountNum === amt
+                              ? "bg-[#2d6a4f] text-white font-bold"
+                              : "bg-[#f0f4ee] text-[#5c7366] hover:bg-white border border-[#dbe3d8]"
+                          }`}
                         >
-                          MAX
+                          {amt}t
                         </button>
-                      </div>
+                      ))}
                     </div>
                   </div>
 
                   {/* Cost Summary Breakdown */}
-                  <div className="space-y-2 pt-2 border-t border-[var(--border-subtle)] text-xs font-mono">
-                    <div className="flex justify-between text-[var(--text-muted)]">
+                  <div className="space-y-2 pt-2 border-t border-[#e1e8de] text-xs font-mono">
+                    <div className="flex justify-between text-[#5c7366]">
                       <span>Subtotal</span>
-                      <span className="text-[var(--text)] font-medium">{totalCost} SOL</span>
+                      <span className="text-[#111e16] font-semibold">{totalCost} SOL</span>
                     </div>
-                    <div className="flex justify-between text-[var(--text-muted)]">
+                    <div className="flex justify-between text-[#5c7366]">
                       <span>Network Fee</span>
-                      <span className="text-[var(--text-muted)]">~0.00005 SOL</span>
+                      <span>~0.00005 SOL</span>
                     </div>
-                    <div className="flex justify-between text-[var(--text-muted)]">
-                      <span>Wallet Balance</span>
+
+                    {/* Wallet Balance with Airdrop Faucet Button */}
+                    <div className="flex items-center justify-between py-1.5 bg-[#f0f4ee] px-2.5 rounded-lg border border-[#dbe3d8]">
+                      <span className="text-[#5c7366]">Wallet Balance</span>
                       <div className="flex items-center gap-2">
-                        <span className={hasInsufficientBalance ? "text-[var(--danger)] font-bold" : "text-[var(--text)] font-medium"}>
+                        <span className={`font-semibold ${hasInsufficientBalance ? "text-[#c92a2a]" : "text-[#111e16]"}`}>
                           {walletBalance !== null ? `${walletBalance.toFixed(3)} SOL` : "Not connected"}
                         </span>
                         {isWalletActive && (
                           <button
                             type="button"
-                            onClick={handleDisconnectWallet}
-                            className="text-[10px] text-[var(--danger)] hover:underline cursor-pointer"
-                            title="Disconnect connected wallet"
+                            onClick={handleRequestAirdrop}
+                            disabled={airdropping}
+                            className="flex items-center gap-1 text-[10px] font-bold text-[#1e6b3b] bg-[#e6f4ea] hover:bg-[#d1ebd7] px-2 py-0.5 rounded border border-[#a3cfbb] transition-all cursor-pointer disabled:opacity-50"
+                            title="Request 1 Devnet SOL airdrop"
                           >
-                            [Disconnect]
+                            {airdropping ? (
+                              <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                            ) : (
+                              <Droplet className="w-2.5 h-2.5" />
+                            )}
+                            <span>{airdropping ? "Funding..." : "+1 SOL Faucet"}</span>
                           </button>
                         )}
                       </div>
                     </div>
-                    <div className="flex justify-between text-sm font-bold text-[var(--text)] pt-2 border-t border-[var(--border-subtle)]">
-                      <span>Total</span>
-                      <span className="text-[var(--accent)]">{totalCost} SOL</span>
+
+                    {airdropMsg && (
+                      <div className="text-[11px] font-mono text-center text-[#1e6b3b] bg-[#e6f4ea] py-1 px-2 rounded border border-[#a3cfbb]">
+                        {airdropMsg}
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-baseline text-sm font-bold text-[#111e16] pt-2 border-t border-[#e1e8de]">
+                      <span>Total Due</span>
+                      <span className="text-base text-[#2d6a4f]">{totalCost} SOL</span>
                     </div>
                   </div>
 
                   {/* Feedback Message */}
                   {errorMsg && (
-                    <div className="p-2.5 rounded bg-[var(--danger-subtle)] border border-[var(--danger)]/30 text-xs text-[var(--danger)] flex items-start gap-2">
+                    <div className="p-2.5 rounded-lg bg-[#fce8e8] border border-[#f5c2c2] text-xs text-[#c92a2a] flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                       <span>{errorMsg}</span>
                     </div>
                   )}
 
                   {txHash && (
-                    <div className="p-3 rounded bg-[var(--accent-subtle)] border border-[var(--accent)]/30 text-xs text-[var(--accent)] space-y-1">
+                    <div className="p-3 rounded-xl bg-[#e6f4ea] border border-[#a3cfbb] text-xs text-[#1e6b3b] space-y-1">
                       <div className="font-bold flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-[var(--accent)]" />
+                        <CheckCircle2 className="w-4 h-4 text-[#1e6b3b]" />
                         <span>Trade Confirmed on Solana Devnet</span>
                       </div>
                       <a
                         href={`https://explorer.solana.com/tx/${txHash}?cluster=devnet`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] underline flex items-center gap-1 break-all text-[var(--accent)]"
+                        className="text-[11px] underline flex items-center gap-1 break-all text-[#1e6b3b] hover:text-[#0f3d20]"
                       >
                         <span>View signature: {txHash.slice(0, 16)}...</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-3 h-3 shrink-0" />
                       </a>
                     </div>
                   )}
 
-                  {/* Action Button */}
+                  {/* Smart Action Buttons */}
                   {!isWalletActive ? (
                     <button
                       onClick={() => setVisible(true)}
-                      className="w-full py-3 px-4 rounded-xl bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs"
+                      className="w-full py-3 px-4 rounded-xl bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-2"
                     >
-                      Connect Wallet to Trade
+                      <Wallet className="w-4 h-4" />
+                      <span>Connect Wallet to Trade</span>
                     </button>
-                  ) : (
+                  ) : hasInsufficientBalance ? (
                     <div className="space-y-2">
-                      <button
-                        onClick={handleExecuteTrade}
-                        disabled={trading || isSuspended || hasInsufficientBalance}
-                        className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
-                          isSuspended
-                            ? "bg-[#f0f4ee] text-[#5c7366] cursor-not-allowed border border-[#dbe3d8]"
-                            : hasInsufficientBalance
-                            ? "bg-[#fce8e8] text-[#c92a2a] cursor-not-allowed border border-[#f5c2c2]"
-                            : "bg-[#2d6a4f] hover:bg-[#23563f] text-white"
-                        }`}
-                      >
-                        {trading ? (
-                          <span>Submitting to Solana...</span>
-                        ) : isSuspended ? (
-                          <span>Trading Blocked by Hook</span>
-                        ) : hasInsufficientBalance ? (
+                      <div className="p-3 rounded-xl bg-[#fce8e8]/60 border border-[#f5c2c2] text-xs space-y-2">
+                        <div className="flex items-center justify-between text-[#c92a2a] font-bold text-[11px]">
                           <span>Insufficient SOL Balance</span>
-                        ) : (
-                          <span>Execute Buy Order ({totalCost} SOL)</span>
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleDisconnectWallet}
-                        className="w-full py-2 px-3 rounded-xl border border-[var(--danger)]/30 hover:bg-[var(--danger-subtle)] text-[var(--danger)] font-medium text-[11px] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-                        title="Disconnect current wallet"
-                      >
-                        <LogOut className="w-3.5 h-3.5" />
-                        <span>Disconnect Wallet {activePubkey ? `(${activePubkey.slice(0, 4)}...${activePubkey.slice(-4)})` : ""}</span>
-                      </button>
+                          <span>Need {totalCost} SOL</span>
+                        </div>
+                        <p className="text-[11px] text-[#5c7366] leading-tight">
+                          Your wallet has {walletBalance?.toFixed(3)} SOL. Use the Devnet faucet below to get free test SOL instantly.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleRequestAirdrop}
+                          disabled={airdropping}
+                          className="w-full py-2.5 px-3 rounded-lg bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50"
+                        >
+                          {airdropping ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Droplet className="w-3.5 h-3.5" />
+                          )}
+                          <span>{airdropping ? "Airdropping 1 SOL..." : "Request 1 Devnet SOL (Faucet)"}</span>
+                        </button>
+                      </div>
                     </div>
+                  ) : (
+                    <button
+                      onClick={handleExecuteTrade}
+                      disabled={trading || isSuspended}
+                      className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
+                        isSuspended
+                          ? "bg-[#f0f4ee] text-[#5c7366] cursor-not-allowed border border-[#dbe3d8]"
+                          : "bg-[#2d6a4f] hover:bg-[#23563f] text-white"
+                      }`}
+                    >
+                      {trading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Confirming on Solana...</span>
+                        </>
+                      ) : isSuspended ? (
+                        <span>Trading Blocked by Hook</span>
+                      ) : (
+                        <span>Execute Buy Order · {totalCost} SOL</span>
+                      )}
+                    </button>
                   )}
                 </>
               ) : (
