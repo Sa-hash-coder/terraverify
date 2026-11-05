@@ -41,12 +41,28 @@ const getInitialBalance = (): number | null => {
   return 1.0;
 };
 
+const DEFAULT_TAB_POSITIONS: Record<number, { left: number; width: number }> = {
+  0: { left: 6, width: 88 },
+  1: { left: 98, width: 116 },
+  2: { left: 218, width: 76 },
+  3: { left: 298, width: 88 },
+};
+
+const navItems = [
+  { label: 'Explorer', href: '/explorer' },
+  { label: 'Marketplace', href: '/marketplace' },
+  { label: 'Retire', href: '/retire' },
+  { label: 'Register', href: '/register' },
+];
+
 export default function AppHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { connection } = useConnection();
   const { publicKey, connected, disconnect, connecting } = useWallet();
   const { setVisible: setAdapterModalVisible } = useWalletModal();
+
+  const currentIdx = navItems.findIndex((item) => pathname.startsWith(item.href));
 
   const [mounted, setMounted] = useState(false);
   const [balance, setBalanceState] = useState<number | null>(null);
@@ -60,7 +76,6 @@ export default function AppHeader() {
   const [localWallet, setLocalWalletState] = useState<{ publicKey: string; balance?: number } | null>(null);
 
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const [hasAnimated, setHasAnimated] = useState(Boolean(lastNavPosition));
   const [indicatorStyle, setIndicatorStyle] = useState<{
     left: number;
     width: number;
@@ -70,6 +85,14 @@ export default function AppHeader() {
       return {
         left: lastNavPosition.left,
         width: lastNavPosition.width,
+        opacity: 1,
+      };
+    }
+    const defaultPos = currentIdx !== -1 ? DEFAULT_TAB_POSITIONS[currentIdx] : null;
+    if (defaultPos) {
+      return {
+        left: defaultPos.left,
+        width: defaultPos.width,
         opacity: 1,
       };
     }
@@ -240,13 +263,6 @@ export default function AppHeader() {
     }
   };
 
-  const navItems = [
-    { label: 'Explorer', href: '/explorer' },
-    { label: 'Marketplace', href: '/marketplace' },
-    { label: 'Retire', href: '/retire' },
-    { label: 'Register', href: '/register' },
-  ];
-
   useEffect(() => {
     const updateIndicator = () => {
       const activeIdx = navItems.findIndex((item) => pathname.startsWith(item.href));
@@ -258,12 +274,9 @@ export default function AppHeader() {
             width: el.offsetWidth,
             opacity: 1,
           };
-          setIndicatorStyle(newPos);
-          lastNavPosition = { left: el.offsetLeft, width: el.offsetWidth, activeIdx };
-
-          // Enable smooth animation for subsequent transitions
           requestAnimationFrame(() => {
-            setHasAnimated(true);
+            setIndicatorStyle(newPos);
+            lastNavPosition = { left: el.offsetLeft, width: el.offsetWidth, activeIdx };
           });
         }
       } else {
@@ -338,11 +351,7 @@ export default function AppHeader() {
           >
             {/* Sliding Active Pill */}
             <div
-              className={`absolute top-1.5 bottom-1.5 rounded-xl bg-[#e0ebe2] shadow-2xs pointer-events-none ${
-                hasAnimated
-                  ? 'transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none'
-                  : 'transition-none'
-              }`}
+              className="absolute top-1.5 bottom-1.5 rounded-xl bg-[#e0ebe2] shadow-2xs pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
               style={{
                 left: `${indicatorStyle.left}px`,
                 width: `${indicatorStyle.width}px`,
@@ -364,14 +373,11 @@ export default function AppHeader() {
                   onClick={() => {
                     const el = tabRefs.current[idx];
                     if (el) {
-                      setHasAnimated(true);
-                      const newPos = {
+                      setIndicatorStyle({
                         left: el.offsetLeft,
                         width: el.offsetWidth,
                         opacity: 1,
-                      };
-                      setIndicatorStyle(newPos);
-                      lastNavPosition = { left: el.offsetLeft, width: el.offsetWidth, activeIdx: idx };
+                      });
                     }
                   }}
                   className={`relative z-10 px-5 py-1.5 rounded-xl text-sm font-semibold transition-colors duration-200 cursor-pointer ${
