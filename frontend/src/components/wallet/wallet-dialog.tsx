@@ -321,6 +321,25 @@ export default function WalletDialog({
       dispatchWalletEvents();
 
       const pubkey = target.adapter.publicKey?.toBase58() || publicKey?.toBase58();
+      if (pubkey) {
+        try {
+          localStorage.setItem(
+            "terra_local_wallet",
+            JSON.stringify({
+              publicKey: pubkey,
+              isExtension: true,
+              walletName: target.adapter.name,
+              balance: 1.0,
+              explorerUrl: `https://explorer.solana.com/address/${pubkey}?cluster=devnet`,
+              createdAt: new Date().toISOString(),
+            })
+          );
+          localStorage.setItem("walletName", target.adapter.name);
+        } catch {}
+      }
+
+      dispatchWalletEvents();
+
       if (pubkey && onSuccess) {
         onSuccess(pubkey);
       }
@@ -600,8 +619,27 @@ export default function WalletDialog({
                     <div className="pt-1">
                       <button
                         onClick={() => {
-                          if (onSuccess) onSuccess(publicKey.toBase58());
-                          else onClose();
+                          const activeKey = publicKey?.toBase58();
+                          if (activeKey) {
+                            try {
+                              localStorage.setItem(
+                                "terra_local_wallet",
+                                JSON.stringify({
+                                  publicKey: activeKey,
+                                  isExtension: true,
+                                  balance: adapterBalance ?? 1.0,
+                                  explorerUrl: `https://explorer.solana.com/address/${activeKey}?cluster=devnet`,
+                                  createdAt: new Date().toISOString(),
+                                })
+                              );
+                            } catch {}
+                            dispatchWalletEvents();
+                          }
+                          if (onSuccess && activeKey) {
+                            onSuccess(activeKey);
+                          } else {
+                            onClose();
+                          }
                         }}
                         className="w-full py-2.5 px-4 rounded-lg bg-[#38b87c] hover:bg-[#42cb8a] text-[#07130f] font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
                       >

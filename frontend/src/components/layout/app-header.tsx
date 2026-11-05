@@ -593,6 +593,10 @@ export default function AppHeader() {
       <WalletDialog
         isOpen={walletDialogOpen}
         onClose={() => setWalletDialogOpen(false)}
+        onSuccess={() => {
+          setWalletDialogOpen(false);
+          syncLocalWallet();
+        }}
         hideTabs={false}
         initialTab={walletDialogTab}
       />
