@@ -48,7 +48,11 @@ export default function PageShell({
 
     const handleStorage = () => syncLocalWallet();
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("terra_wallet_change", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("terra_wallet_change", handleStorage);
+    };
   }, []);
 
   const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWalletPubkey);

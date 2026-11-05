@@ -143,7 +143,11 @@ export default function RetirePage() {
     syncLocalWallet();
     const handleStorage = () => syncLocalWallet();
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("terra_wallet_change", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("terra_wallet_change", handleStorage);
+    };
   }, []);
 
   const isWalletActive = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
@@ -158,9 +162,10 @@ export default function RetirePage() {
         localStorage.removeItem("terra_local_wallet");
         localStorage.removeItem("walletName");
       } catch {}
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("terra_wallet_change"));
     }
     setLocalWallet(null);
-    window.dispatchEvent(new Event("storage"));
   };
 
   // Calculated emissions in Step 1

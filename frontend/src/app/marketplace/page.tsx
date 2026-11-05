@@ -30,6 +30,7 @@ import { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey, TransactionIns
 
 import PageShell from "../../components/layout/page-shell";
 import ForestMarketSimulation from "../../components/marketplace/forest-market-simulation";
+import WalletDialog from "../../components/wallet/wallet-dialog";
 import { 
   PageHeader, 
   Panel, 
@@ -148,6 +149,7 @@ export default function MarketplacePage() {
   const [newAmount, setNewAmount] = useState("100");
   const [newPrice, setNewPrice] = useState("0.15");
   const [listSuccess, setListSuccess] = useState(false);
+  const [walletDialogOpen, setWalletDialogOpen] = useState(false);
 
   const { connection } = useConnection();
   const { publicKey, sendTransaction, connected, disconnect } = useWallet();
@@ -173,7 +175,11 @@ export default function MarketplacePage() {
     syncLocalWallet();
     const handleStorage = () => syncLocalWallet();
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("terra_wallet_change", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("terra_wallet_change", handleStorage);
+    };
   }, []);
 
   const isWalletActive = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
@@ -818,7 +824,7 @@ export default function MarketplacePage() {
                   {/* Smart Action Buttons */}
                   {!isWalletActive ? (
                     <button
-                      onClick={() => setVisible(true)}
+                      onClick={() => setWalletDialogOpen(true)}
                       className="w-full py-3 px-4 rounded-xl bg-[#2d6a4f] hover:bg-[#23563f] text-white font-bold text-xs transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-2"
                     >
                       <Wallet className="w-4 h-4" />
@@ -1041,6 +1047,11 @@ export default function MarketplacePage() {
           </Panel>
         </div>
       )}
+      {/* Wallet Dialog for direct Extension / Devnet connection */}
+      <WalletDialog
+        isOpen={walletDialogOpen}
+        onClose={() => setWalletDialogOpen(false)}
+      />
     </PageShell>
   );
 }

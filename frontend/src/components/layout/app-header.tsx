@@ -72,7 +72,8 @@ export default function AppHeader() {
   const [faucetSuccess, setFaucetSuccess] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [createWalletOpen, setCreateWalletOpen] = useState(false);
+  const [walletDialogOpen, setWalletDialogOpen] = useState(false);
+  const [walletDialogTab, setWalletDialogTab] = useState<'create' | 'connect'>('connect');
   const [localWallet, setLocalWalletState] = useState<{ publicKey: string; balance?: number } | null>(null);
 
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -143,7 +144,11 @@ export default function AppHeader() {
     syncLocalWallet();
     const handleStorage = () => syncLocalWallet();
     window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    window.addEventListener('terra_wallet_change', handleStorage);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('terra_wallet_change', handleStorage);
+    };
   }, []);
 
   const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
@@ -158,11 +163,12 @@ export default function AppHeader() {
         localStorage.removeItem('terra_local_wallet');
         localStorage.removeItem('walletName');
       } catch {}
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('terra_wallet_change'));
     }
     setLocalWallet(null);
     setBalance(null);
     setWalletMenuOpen(false);
-    window.dispatchEvent(new Event('storage'));
   };
 
   const handleLogout = () => {
@@ -418,16 +424,22 @@ export default function AppHeader() {
 
             {/* Wallet Integration Widget matching Theme */}
             {!mounted || !isWalletConnected || !activePubkey ? (
-              <div className="flex items-center gap-4 shrink-0">
+              <div className="flex items-center gap-3 shrink-0">
                 <button
-                  onClick={() => setCreateWalletOpen(true)}
+                  onClick={() => {
+                    setWalletDialogTab('create');
+                    setWalletDialogOpen(true);
+                  }}
                   disabled={connecting}
                   className="text-sm font-medium text-[#2d4d3d] hover:text-[#0a3d2a] transition-colors cursor-pointer px-1 py-1"
                 >
                   Create wallet
                 </button>
                 <button
-                  onClick={() => setAdapterModalVisible(true)}
+                  onClick={() => {
+                    setWalletDialogTab('connect');
+                    setWalletDialogOpen(true);
+                  }}
                   className="px-5 py-2.5 rounded-full bg-[#0a3d2a] hover:bg-[#114d36] text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-[0_2px_8px_rgba(10,61,42,0.2)] cursor-pointer"
                 >
                   <Wallet className="w-4 h-4 text-white" />
@@ -512,7 +524,8 @@ export default function AppHeader() {
                       <button
                         onClick={() => {
                           setWalletMenuOpen(false);
-                          setCreateWalletOpen(true);
+                          setWalletDialogTab('create');
+                          setWalletDialogOpen(true);
                         }}
                         className="text-[11px] text-[#5c7366] hover:text-[#0a3d2a] transition-colors cursor-pointer"
                       >
@@ -578,10 +591,10 @@ export default function AppHeader() {
 
       {/* Portal-based Wallet Dialog */}
       <WalletDialog
-        isOpen={createWalletOpen}
-        onClose={() => setCreateWalletOpen(false)}
-        hideTabs={true}
-        initialTab="create"
+        isOpen={walletDialogOpen}
+        onClose={() => setWalletDialogOpen(false)}
+        hideTabs={false}
+        initialTab={walletDialogTab}
       />
     </>
   );

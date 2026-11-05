@@ -65,7 +65,11 @@ export default function AppSidebar({ onToggleCollapse }: AppSidebarProps) {
     loadLocalWallet();
     const handleStorage = () => loadLocalWallet();
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("terra_wallet_change", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("terra_wallet_change", handleStorage);
+    };
   }, [createWalletOpen]);
 
   // Load persisted sidebar state & theme
