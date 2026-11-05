@@ -156,6 +156,8 @@ export default function WalletDialog({
       try {
         localStorage.removeItem("terra_local_wallet");
         localStorage.removeItem("walletName");
+        localStorage.removeItem("terra_wallet_active");
+        localStorage.setItem("terra_logged_out", "true");
       } catch {}
     }
     setCreatedWallet(null);
@@ -223,6 +225,8 @@ export default function WalletDialog({
   const handleLoginAndContinue = () => {
     if (!createdWallet) return;
     try {
+      localStorage.removeItem("terra_logged_out");
+      localStorage.setItem("terra_wallet_active", "true");
       localStorage.setItem("terra_local_wallet", JSON.stringify(createdWallet));
       setIsConfirmedSession(true);
       dispatchWalletEvents();
@@ -323,6 +327,8 @@ export default function WalletDialog({
       const pubkey = target.adapter.publicKey?.toBase58() || publicKey?.toBase58();
       if (pubkey) {
         try {
+          localStorage.removeItem("terra_logged_out");
+          localStorage.setItem("terra_wallet_active", "true");
           localStorage.setItem(
             "terra_local_wallet",
             JSON.stringify({

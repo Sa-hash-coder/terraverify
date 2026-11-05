@@ -88,6 +88,9 @@ export default function VerificationVisualSection() {
   }, []);
 
   const checkHasWallet = () => {
+    if (typeof window !== "undefined" && localStorage.getItem("terra_logged_out") === "true") {
+      return false;
+    }
     if (connected && publicKey) return true;
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("terra_local_wallet");

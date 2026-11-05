@@ -150,17 +150,22 @@ export default function RetirePage() {
     };
   }, []);
 
-  const isWalletActive = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
-  const activePubkey = publicKey ? publicKey.toBase58() : localWallet?.publicKey || null;
+  const isLoggedOut = typeof window !== "undefined" && localStorage.getItem("terra_logged_out") === "true";
+  const isWalletActive = !isLoggedOut && (Boolean(connected && publicKey) || Boolean(localWallet?.publicKey));
+  const activePubkey = isWalletActive ? (publicKey ? publicKey.toBase58() : localWallet?.publicKey || null) : null;
 
   const handleDisconnectWallet = () => {
     if (connected) {
-      disconnect().catch(() => {});
+      try {
+        disconnect().catch(() => {});
+      } catch {}
     }
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem("terra_local_wallet");
         localStorage.removeItem("walletName");
+        localStorage.removeItem("terra_wallet_active");
+        localStorage.setItem("terra_logged_out", "true");
       } catch {}
       window.dispatchEvent(new Event("storage"));
       window.dispatchEvent(new CustomEvent("terra_wallet_change"));

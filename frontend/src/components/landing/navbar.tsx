@@ -20,19 +20,22 @@ export default function LandingNavbar() {
   const { connected, publicKey, disconnect } = useWallet();
   const { setVisible: setAdapterModalVisible } = useWalletModal();
 
-  const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWalletPubkey);
+  const isLoggedOut = typeof window !== "undefined" && localStorage.getItem("terra_logged_out") === "true";
+  const isWalletConnected = !isLoggedOut && (Boolean(connected && publicKey) || Boolean(localWalletPubkey));
 
   const handleDisconnectWallet = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (connected) {
       try {
-        disconnect();
+        disconnect().catch(() => {});
       } catch {}
     }
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem("terra_local_wallet");
         localStorage.removeItem("walletName");
+        localStorage.removeItem("terra_wallet_active");
+        localStorage.setItem("terra_logged_out", "true");
       } catch {}
       window.dispatchEvent(new Event("storage"));
       window.dispatchEvent(new CustomEvent("terra_wallet_change"));

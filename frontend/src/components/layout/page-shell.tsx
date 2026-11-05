@@ -55,7 +55,8 @@ export default function PageShell({
     };
   }, []);
 
-  const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWalletPubkey);
+  const isLoggedOut = typeof window !== "undefined" && localStorage.getItem("terra_logged_out") === "true";
+  const isWalletConnected = !isLoggedOut && (Boolean(connected && publicKey) || Boolean(localWalletPubkey));
 
   return (
     <div

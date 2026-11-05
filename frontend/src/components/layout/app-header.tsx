@@ -15,6 +15,11 @@ let cachedBalance: number | null = null;
 let lastNavPosition: { left: number; width: number; activeIdx: number } | null = null;
 
 const getInitialLocalWallet = (): { publicKey: string; balance?: number } | null => {
+  if (typeof window !== 'undefined' && localStorage.getItem('terra_logged_out') === 'true') {
+    cachedLocalWallet = null;
+    cachedBalance = null;
+    return null;
+  }
   if (cachedLocalWallet) return cachedLocalWallet;
   if (typeof window !== 'undefined') {
     try {
@@ -151,17 +156,24 @@ export default function AppHeader() {
     };
   }, []);
 
-  const isWalletConnected = Boolean(connected && publicKey) || Boolean(localWallet?.publicKey);
-  const activePubkey = publicKey ? publicKey.toBase58() : localWallet?.publicKey || null;
+  const isLoggedOut = typeof window !== 'undefined' && localStorage.getItem('terra_logged_out') === 'true';
+  const isWalletConnected = !isLoggedOut && (Boolean(connected && publicKey) || Boolean(localWallet?.publicKey));
+  const activePubkey = isWalletConnected ? (publicKey ? publicKey.toBase58() : localWallet?.publicKey || null) : null;
 
   const handleDisconnectWallet = () => {
+    cachedLocalWallet = null;
+    cachedBalance = null;
     if (connected) {
-      disconnect().catch(() => {});
+      try {
+        disconnect().catch(() => {});
+      } catch {}
     }
     if (typeof window !== 'undefined') {
       try {
         localStorage.removeItem('terra_local_wallet');
         localStorage.removeItem('walletName');
+        localStorage.removeItem('terra_wallet_active');
+        localStorage.setItem('terra_logged_out', 'true');
       } catch {}
       window.dispatchEvent(new Event('storage'));
       window.dispatchEvent(new CustomEvent('terra_wallet_change'));

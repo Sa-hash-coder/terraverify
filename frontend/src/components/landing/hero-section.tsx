@@ -17,6 +17,9 @@ export default function HeroSection() {
 
   // Check if wallet is connected or locally stored
   const checkHasWallet = () => {
+    if (typeof window !== "undefined" && localStorage.getItem("terra_logged_out") === "true") {
+      return false;
+    }
     if (connected && publicKey) return true;
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("terra_local_wallet");
@@ -32,7 +35,11 @@ export default function HeroSection() {
 
   const handleExploreProjects = (e: React.MouseEvent) => {
     e.preventDefault();
-    router.push("/explorer");
+    if (checkHasWallet()) {
+      router.push("/explorer");
+    } else {
+      setWalletDialogOpen(true);
+    }
   };
 
   return (

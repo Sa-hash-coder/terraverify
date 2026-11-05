@@ -26,6 +26,21 @@ export default function WalletProviderComponent({ children }: { children: React.
     []
   );
 
+  // Controlled autoConnect: NEVER auto-connect if user has explicitly logged out
+  const autoConnect = useMemo(() => {
+    return async () => {
+      if (typeof window === "undefined") return false;
+      if (localStorage.getItem("terra_logged_out") === "true") {
+        return false;
+      }
+      const active = localStorage.getItem("terra_wallet_active") === "true";
+      const hasWallet = Boolean(
+        localStorage.getItem("walletName") || localStorage.getItem("terra_local_wallet")
+      );
+      return Boolean(active && hasWallet);
+    };
+  }, []);
+
   return (
     <ConnectionProvider
       endpoint={endpoint}
@@ -34,7 +49,7 @@ export default function WalletProviderComponent({ children }: { children: React.
         confirmTransactionInitialTimeout: 10000,
       }}
     >
-      <WalletProvider wallets={wallets} autoConnect={true}>
+      <WalletProvider wallets={wallets} autoConnect={autoConnect}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
