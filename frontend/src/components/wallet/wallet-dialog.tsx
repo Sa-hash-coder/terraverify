@@ -20,6 +20,7 @@ import {
   ArrowRight,
   LogOut,
   Key,
+  Sparkles,
 } from "lucide-react";
 
 interface CreatedWallet {
@@ -48,21 +49,19 @@ export default function WalletDialog({
 }: WalletDialogProps) {
   const [mounted, setMounted] = useState(false);
   const { setVisible: setAdapterModalVisible } = useWalletModal();
-  const { connected, publicKey, disconnect, select, wallets, connect, connecting } = useWallet();
+  const { connected, publicKey, disconnect, select, wallets, connect } = useWallet();
   const { connection } = useConnection();
 
   const [activeTab, setActiveTab] = useState<"create" | "connect">(initialTab);
-  const [tabDirection, setTabDirection] = useState<"right" | "left">("right");
-
-  const handleTabChange = (tab: "create" | "connect") => {
-    if (tab === activeTab) return;
-    setTabDirection(tab === "connect" ? "right" : "left");
-    setActiveTab(tab);
-  };
-
   const [isGenerating, setIsGenerating] = useState(false);
   const [connectingAdapter, setConnectingAdapter] = useState<string | null>(null);
-  const [createdWallet, setCreatedWallet] = useState<CreatedWallet | null>(null);
+
+  // Active saved wallet (already confirmed & persisted)
+  const [savedWallet, setSavedWallet] = useState<CreatedWallet | null>(null);
+
+  // Temporary draft wallet (generated, but NOT yet connected until user confirms)
+  const [draftWallet, setDraftWallet] = useState<CreatedWallet | null>(null);
+
   const [showSecretKey, setShowSecretKey] = useState(false);
   const [copiedKey, setCopiedKey] = useState<"public" | "secret" | null>(null);
   const [airdropLoading, setAirdropLoading] = useState(false);
@@ -80,21 +79,23 @@ export default function WalletDialog({
     }
   };
 
-  // Reset and sync state when opening dialog
+  // Sync state when opening dialog
   useEffect(() => {
     if (isOpen) {
       setAirdropMsg(null);
       setActiveTab(initialTab);
+      setDraftWallet(null); // Clear any unconfirmed draft
+
       if (typeof window !== "undefined") {
-        const saved = localStorage.getItem("terra_local_wallet");
-        if (saved) {
+        const stored = localStorage.getItem("terra_local_wallet");
+        if (stored) {
           try {
-            setCreatedWallet(JSON.parse(saved));
+            setSavedWallet(JSON.parse(stored));
           } catch {
-            setCreatedWallet(null);
+            setSavedWallet(null);
           }
         } else {
-          setCreatedWallet(null);
+          setSavedWallet(null);
         }
       }
     }
@@ -133,6 +134,7 @@ export default function WalletDialog({
   }, [connected, publicKey, connection]);
 
   const handleClose = () => {
+    setDraftWallet(null); // discard unconfirmed wallet
     setAirdropMsg(null);
     onClose();
   };
@@ -160,16 +162,17 @@ export default function WalletDialog({
       } catch {}
       dispatchWalletUpdate();
     }
-    setCreatedWallet(null);
+    setSavedWallet(null);
+    setDraftWallet(null);
     setAirdropMsg(null);
   };
 
-  // Connect extension adapter directly
+  // Connect extension adapter directly in 1 click (no double modal)
   const handleConnectAdapter = async (walletName: string) => {
     setConnectingAdapter(walletName);
     try {
       select(walletName as any);
-      await new Promise((r) => setTimeout(r, 80));
+      await new Promise((r) => setTimeout(r, 100));
       await connect();
       dispatchWalletUpdate();
       if (onSuccess && publicKey) {
@@ -185,8 +188,8 @@ export default function WalletDialog({
     }
   };
 
-  // Generate and immediately connect Devnet keypair in 1 click
-  const handleGenerateWallet = async () => {
+  // Generate a draft devnet keypair (DOES NOT CONNECT AUTOMATICALLY)
+  const handleGenerateDraft = async () => {
     setIsGenerating(true);
     setAirdropMsg(null);
     try {
@@ -212,16 +215,8 @@ export default function WalletDialog({
         };
       }
 
-      // Immediately persist and activate
-      setCreatedWallet(walletData);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("terra_local_wallet", JSON.stringify(walletData));
-        dispatchWalletUpdate();
-      }
-      setAirdropMsg("Wallet connected & allocated 1.0 SOL!");
-      if (onSuccess) {
-        onSuccess(walletData.publicKey);
-      }
+      // Set ONLY as draft - do NOT save to localStorage yet!
+      setDraftWallet(walletData);
     } catch {
       try {
         const kp = Keypair.generate();
@@ -233,15 +228,7 @@ export default function WalletDialog({
           explorerUrl: `https://explorer.solana.com/address/${kp.publicKey.toBase58()}?cluster=devnet`,
           createdAt: new Date().toISOString(),
         };
-        setCreatedWallet(fallbackWallet);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("terra_local_wallet", JSON.stringify(fallbackWallet));
-          dispatchWalletUpdate();
-        }
-        setAirdropMsg("Devnet keypair connected!");
-        if (onSuccess) {
-          onSuccess(fallbackWallet.publicKey);
-        }
+        setDraftWallet(fallbackWallet);
       } catch (err) {
         console.error("Local wallet generation error:", err);
       }
@@ -250,9 +237,32 @@ export default function WalletDialog({
     }
   };
 
+  // User explicitly clicks "Confirm & Connect Wallet"
+  const handleConfirmConnectDraft = () => {
+    if (!draftWallet) return;
+    try {
+      localStorage.setItem("terra_local_wallet", JSON.stringify(draftWallet));
+      dispatchWalletUpdate();
+      setSavedWallet(draftWallet);
+      setDraftWallet(null);
+      if (onSuccess) {
+        onSuccess(draftWallet.publicKey);
+      }
+      onClose();
+    } catch (err) {
+      console.error("Failed to save wallet:", err);
+    }
+  };
+
+  // Discard draft without connecting
+  const handleDiscardDraft = () => {
+    setDraftWallet(null);
+  };
+
   // Request 1 SOL airdrop
   const handleRequestAirdrop = async () => {
-    if (!createdWallet) return;
+    const targetWallet = draftWallet || savedWallet;
+    if (!targetWallet) return;
     setAirdropLoading(true);
     setAirdropMsg(null);
 
@@ -260,16 +270,20 @@ export default function WalletDialog({
       const res = await fetch("/api/wallet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "airdrop", publicKey: createdWallet.publicKey }),
+        body: JSON.stringify({ action: "airdrop", publicKey: targetWallet.publicKey }),
       });
       const data = await res.json();
 
       if (data.success) {
-        const newBalance = data.balance ?? createdWallet.balance + 1.0;
-        const updated = { ...createdWallet, balance: newBalance };
-        setCreatedWallet(updated);
-        localStorage.setItem("terra_local_wallet", JSON.stringify(updated));
-        dispatchWalletUpdate();
+        const newBalance = data.balance ?? targetWallet.balance + 1.0;
+        const updated = { ...targetWallet, balance: newBalance };
+        if (draftWallet) {
+          setDraftWallet(updated);
+        } else {
+          setSavedWallet(updated);
+          localStorage.setItem("terra_local_wallet", JSON.stringify(updated));
+          dispatchWalletUpdate();
+        }
         setAirdropMsg("+1.0 SOL airdropped!");
       } else {
         setAirdropMsg(data.error || "Faucet busy, retry shortly");
@@ -289,15 +303,14 @@ export default function WalletDialog({
   };
 
   // Download keypair JSON
-  const handleDownloadKeypair = () => {
-    if (!createdWallet) return;
-    const blob = new Blob([JSON.stringify(createdWallet.secretKey)], {
+  const handleDownloadKeypair = (wallet: CreatedWallet) => {
+    const blob = new Blob([JSON.stringify(wallet.secretKey)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `solana-keypair-${createdWallet.publicKey.slice(0, 6)}.json`;
+    a.download = `solana-devnet-keypair-${wallet.publicKey.slice(0, 6)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -311,62 +324,62 @@ export default function WalletDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="wallet-modal-title"
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
     >
-      {/* Backdrop */}
+      {/* Backdrop with smooth fade in */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm animate-backdrop-fade cursor-pointer"
         onClick={handleClose}
         aria-hidden="true"
       />
 
-      {/* Dialog Window - Clean White Modern Theme */}
-      <div className="relative w-full max-w-md bg-white border border-[#d8ded4] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] text-[#111e16] z-10 overflow-hidden flex flex-col">
+      {/* Original Sleek Dark Dialogue Window with Pop Up & Zoom Animation */}
+      <div className="relative w-full max-w-md bg-[#111312] border border-[#272b28] rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] text-[#f4f4f5] z-10 overflow-hidden flex flex-col animate-modal-zoom">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#e1e7de] bg-[#fbfdfa] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#eef5ed] border border-[#d0ded0] flex items-center justify-center text-[#0a3d2a]">
+        <div className="px-5 py-4 border-b border-[#1e211f] bg-[#0d0f0e] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#18261e] border border-[#23422f] flex items-center justify-center text-[#4ade80]">
               <Wallet className="w-4 h-4" />
             </div>
             <div>
-              <h2 id="wallet-modal-title" className="text-sm font-bold text-[#111e16]">
+              <h2 id="wallet-modal-title" className="text-sm font-bold text-white tracking-tight">
                 {hideTabs ? "Solana Devnet Wallet" : "Connect Solana Wallet"}
               </h2>
-              <p className="text-[11px] text-[#5c7366]">Solana Devnet Network</p>
+              <p className="text-[11px] text-[#71717a] font-mono">Solana Devnet Network</p>
             </div>
           </div>
 
           <button
             onClick={handleClose}
             aria-label="Close"
-            className="p-1.5 rounded-lg text-[#5c7366] hover:text-[#111e16] hover:bg-[#eef2eb] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#71717a] hover:text-white hover:bg-[#1c201d] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Tab Buttons */}
+        {/* Tab Buttons (Dark theme) */}
         {!hideTabs && (
-          <div className="px-5 pt-3 pb-2 border-b border-[#e1e7de] bg-[#fbfdfa]">
-            <div className="p-1 rounded-xl bg-[#eef2eb] border border-[#d8ded4] flex gap-1">
+          <div className="px-5 pt-3 pb-2 border-b border-[#1e211f] bg-[#0d0f0e]">
+            <div className="p-1 rounded-xl bg-[#070908] border border-[#1e2320] flex gap-1">
               <button
                 type="button"
-                onClick={() => handleTabChange("connect")}
+                onClick={() => setActiveTab("connect")}
                 className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center ${
                   activeTab === "connect"
-                    ? "bg-white text-[#0a3d2a] font-bold shadow-xs border border-[#d8ded4]"
-                    : "text-[#5c7366] hover:text-[#111e16]"
+                    ? "bg-[#18261e] text-[#4ade80] border border-[#23422f] shadow-xs"
+                    : "text-[#8a918d] hover:text-white"
                 }`}
               >
                 Browser Extension
               </button>
               <button
                 type="button"
-                onClick={() => handleTabChange("create")}
+                onClick={() => setActiveTab("create")}
                 className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center ${
                   activeTab === "create"
-                    ? "bg-white text-[#0a3d2a] font-bold shadow-xs border border-[#d8ded4]"
-                    : "text-[#5c7366] hover:text-[#111e16]"
+                    ? "bg-[#18261e] text-[#4ade80] border border-[#23422f] shadow-xs"
+                    : "text-[#8a918d] hover:text-white"
                 }`}
               >
                 Instant Devnet Keypair
@@ -380,27 +393,27 @@ export default function WalletDialog({
           {activeTab === "connect" && (
             <div className="space-y-4 text-left text-xs">
               {connected && publicKey ? (
-                /* 1. Already connected via Extension */
+                /* Connected via Extension */
                 <div className="space-y-3.5">
-                  <div className="flex items-center justify-between text-[11px] text-[#0a3d2a] bg-[#e6f4ea] px-3 py-2 rounded-xl border border-[#bce0c9]">
+                  <div className="flex items-center justify-between text-[11px] text-[#4ade80] bg-[#14231a] px-3 py-2 rounded-xl border border-[#204a30]">
                     <span className="flex items-center gap-1.5 font-semibold">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#1e6b3b]" />
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#4ade80]" />
                       Browser Extension Connected
                     </span>
-                    <span className="w-2 h-2 rounded-full bg-[#1e6b3b] animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse" />
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-[#f7f9f6] border border-[#dbe3d8] space-y-2">
-                    <div className="flex items-center justify-between text-[11px] text-[#5c7366]">
+                  <div className="p-3.5 rounded-xl bg-[#161917] border border-[#272b28] space-y-2">
+                    <div className="flex items-center justify-between text-[11px] text-[#8a918d]">
                       <span>SOL Balance</span>
-                      <span className="font-mono text-sm font-bold text-[#0a3d2a]">
+                      <span className="font-mono text-sm font-bold text-[#4ade80]">
                         {adapterBalance !== null ? `${adapterBalance.toFixed(3)} SOL` : "—"}
                       </span>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="text-[10px] text-[#5c7366] font-mono uppercase">Public Address</div>
-                      <div className="font-mono text-xs text-[#111e16] bg-white p-2.5 rounded-lg border border-[#d8ded4] break-all select-all">
+                      <div className="text-[10px] text-[#71717a] font-mono uppercase">Public Address</div>
+                      <div className="font-mono text-xs text-[#e4e4e7] bg-[#0c0d0c] p-2.5 rounded-lg border border-[#222623] break-all select-all">
                         {publicKey.toBase58()}
                       </div>
                     </div>
@@ -409,14 +422,14 @@ export default function WalletDialog({
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleCopy(publicKey.toBase58(), "public")}
-                      className="flex-1 py-2 px-3 rounded-xl bg-white hover:bg-[#f2f5ef] border border-[#d8ded4] text-xs font-semibold text-[#111e16] transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                      className="flex-1 py-2 px-3 rounded-xl bg-[#1c201d] hover:bg-[#252b27] border border-[#272b28] text-xs font-semibold text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      {copiedKey === "public" ? <Check className="w-3.5 h-3.5 text-[#1e6b3b]" /> : <Copy className="w-3.5 h-3.5 text-[#5c7366]" />}
+                      {copiedKey === "public" ? <Check className="w-3.5 h-3.5 text-[#4ade80]" /> : <Copy className="w-3.5 h-3.5 text-[#8a918d]" />}
                       <span>{copiedKey === "public" ? "Copied" : "Copy Address"}</span>
                     </button>
                     <button
                       onClick={handleDisconnectAll}
-                      className="py-2 px-3 rounded-xl bg-[#fee2e2] hover:bg-[#fecaca] border border-[#fca5a5] text-xs font-semibold text-rose-700 transition-colors cursor-pointer flex items-center gap-1.5"
+                      className="py-2 px-3 rounded-xl bg-[#2a1717] hover:bg-[#3d1e1e] border border-[#522525] text-xs font-semibold text-rose-300 transition-colors cursor-pointer flex items-center gap-1.5"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Disconnect</span>
@@ -428,17 +441,17 @@ export default function WalletDialog({
                       if (onSuccess) onSuccess(publicKey.toBase58());
                       else onClose();
                     }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#0a3d2a] hover:bg-[#114d36] text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#1e4632] hover:bg-[#285e43] border border-[#317755] text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                   >
                     <span>Done &amp; Continue</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
-                /* 2. Not connected - show extension options */
+                /* Not connected: 1-click Direct Extension Connect (no asking twice!) */
                 <div className="space-y-3.5">
-                  <p className="text-xs text-[#5c7366] leading-relaxed">
-                    Connect an installed Solana browser extension to sign transactions directly:
+                  <p className="text-xs text-[#9ca3af] leading-relaxed">
+                    Connect an installed Solana browser extension directly to sign transactions:
                   </p>
 
                   <div className="space-y-2">
@@ -448,44 +461,48 @@ export default function WalletDialog({
                           key={w.adapter.name}
                           onClick={() => handleConnectAdapter(w.adapter.name)}
                           disabled={connectingAdapter === w.adapter.name}
-                          className="w-full p-3 rounded-xl bg-white hover:bg-[#f5f8f4] border border-[#d8ded4] hover:border-[#0a3d2a]/50 transition-all flex items-center justify-between cursor-pointer group disabled:opacity-60 shadow-2xs"
+                          className="w-full p-3 rounded-xl bg-[#161917] hover:bg-[#1f2420] border border-[#272b28] hover:border-[#38b87c]/50 transition-all flex items-center justify-between cursor-pointer group disabled:opacity-60"
                         >
                           <div className="flex items-center gap-3">
                             {w.adapter.icon ? (
                               <img src={w.adapter.icon} alt={w.adapter.name} className="w-6 h-6 rounded-md" />
                             ) : (
-                              <Wallet className="w-5 h-5 text-[#0a3d2a]" />
+                              <Wallet className="w-5 h-5 text-[#4ade80]" />
                             )}
-                            <span className="font-semibold text-[#111e16] text-xs">{w.adapter.name}</span>
+                            <span className="font-semibold text-white text-xs">{w.adapter.name}</span>
                           </div>
-                          <span className="text-[11px] font-bold text-[#0a3d2a] group-hover:underline">
+                          <span className="text-[11px] font-bold text-[#4ade80] group-hover:underline">
                             {connectingAdapter === w.adapter.name ? "Connecting..." : "Connect →"}
                           </span>
                         </button>
                       ))
-                    ) : null}
+                    ) : (
+                      <div className="p-3 rounded-xl bg-[#161917] border border-[#272b28] text-center text-xs text-[#8a918d]">
+                        No installed Solana extension detected in your browser.
+                      </div>
+                    )}
 
                     <button
                       onClick={() => {
                         onClose();
                         setAdapterModalVisible(true);
                       }}
-                      className="w-full py-2.5 px-4 rounded-xl bg-[#f7f9f6] hover:bg-[#eef2eb] border border-[#d8ded4] text-[#111e16] font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#0f1110] hover:bg-[#181c19] border border-[#272b28] text-[#9ca3af] hover:text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <Wallet className="w-4 h-4 text-[#0a3d2a]" />
-                      <span>All Solana Wallets (Adapter Modal)</span>
+                      <Wallet className="w-4 h-4 text-[#4ade80]" />
+                      <span>More Solana Wallets</span>
                     </button>
                   </div>
 
-                  <div className="pt-2 border-t border-[#e1e7de] text-center">
-                    <p className="text-[11px] text-[#5c7366] mb-2">No browser extension installed?</p>
+                  <div className="pt-2 border-t border-[#1e211f] text-center">
+                    <p className="text-[11px] text-[#71717a] mb-2">No browser extension installed?</p>
                     <button
                       type="button"
-                      onClick={() => handleTabChange("create")}
-                      className="text-xs font-semibold text-[#0a3d2a] hover:underline cursor-pointer inline-flex items-center gap-1.5"
+                      onClick={() => setActiveTab("create")}
+                      className="text-xs font-semibold text-[#4ade80] hover:underline cursor-pointer inline-flex items-center gap-1.5"
                     >
-                      <Key className="w-3.5 h-3.5 text-[#0a3d2a]" />
-                      <span>Use 1-Click Instant Devnet Wallet instead</span>
+                      <Key className="w-3.5 h-3.5 text-[#4ade80]" />
+                      <span>Use Instant Devnet Keypair instead</span>
                     </button>
                   </div>
                 </div>
@@ -495,120 +512,74 @@ export default function WalletDialog({
 
           {activeTab === "create" && (
             <div className="space-y-4 text-left text-xs">
-              {!createdWallet ? (
-                /* 1. Generate new devnet wallet */
-                <div className="space-y-4">
-                  <div className="p-3.5 rounded-xl bg-[#eef5ed] border border-[#cfe0ce] space-y-1.5">
-                    <div className="flex items-center gap-1.5 font-bold text-[#0a3d2a] text-xs">
-                      <Key className="w-4 h-4 text-[#0a3d2a]" />
-                      <span>Instant Devnet Testing Keypair</span>
-                    </div>
-                    <p className="text-[11px] text-[#4a6356] leading-relaxed">
-                      Generates a Solana ed25519 keypair and automatically funds it with test SOL on Devnet. Perfect for instant trading and verification testing without browser extensions.
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={handleGenerateWallet}
-                    disabled={isGenerating}
-                    className="w-full py-3 px-4 rounded-xl bg-[#0a3d2a] hover:bg-[#114d36] text-white font-bold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-md"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin text-white" />
-                        <span>Generating &amp; Funding Keypair...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Wallet className="w-4 h-4" />
-                        <span>Create &amp; Connect Devnet Wallet</span>
-                      </>
-                    )}
-                  </button>
-
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => handleTabChange("connect")}
-                      className="text-[11px] text-[#5c7366] hover:text-[#0a3d2a] transition-colors cursor-pointer"
-                    >
-                      Or connect an existing browser extension →
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* 2. Active devnet wallet details */
+              {/* STATE 1: Draft Keypair generated but not yet confirmed */}
+              {draftWallet ? (
                 <div className="space-y-3.5">
-                  <div className="flex items-center justify-between text-[11px] text-[#0a3d2a] bg-[#e6f4ea] px-3 py-2 rounded-xl border border-[#bce0c9]">
+                  <div className="flex items-center justify-between text-[11px] text-[#fbbf24] bg-[#261f0f] px-3 py-2 rounded-xl border border-[#4d3c1c]">
                     <span className="flex items-center gap-1.5 font-semibold">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#1e6b3b]" />
-                      Devnet Keypair Connected
+                      <Sparkles className="w-3.5 h-3.5 text-[#fbbf24]" />
+                      New Devnet Keypair Generated (Draft)
                     </span>
-                    <span className="w-2 h-2 rounded-full bg-[#1e6b3b] animate-pulse" />
+                    <span className="text-[10px] uppercase font-mono tracking-wider">Unconfirmed</span>
                   </div>
 
-                  {/* Balance & Airdrop row */}
-                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#f7f9f6] border border-[#dbe3d8]">
+                  {/* Balance info */}
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-[#161917] border border-[#272b28]">
                     <div>
-                      <div className="text-[10px] text-[#5c7366] font-mono uppercase">Devnet Balance</div>
-                      <div className="font-mono text-sm font-bold text-[#0a3d2a]">
-                        {createdWallet.balance.toFixed(2)} SOL
+                      <div className="text-[10px] text-[#71717a] font-mono uppercase">Devnet Balance</div>
+                      <div className="font-mono text-sm font-bold text-[#4ade80]">
+                        {draftWallet.balance.toFixed(2)} SOL
                       </div>
                     </div>
-
                     <button
                       onClick={handleRequestAirdrop}
                       disabled={airdropLoading}
-                      className="px-3 py-1.5 text-xs font-bold rounded-lg bg-[#e6f4ea] hover:bg-[#d4edd9] text-[#0a3d2a] border border-[#a3cfbb] transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs"
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[#18261e] hover:bg-[#23382c] text-[#4ade80] border border-[#274835] transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50"
                     >
-                      {airdropLoading ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Droplet className="w-3.5 h-3.5 text-[#0a3d2a]" />
-                      )}
+                      {airdropLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Droplet className="w-3 h-3" />}
                       <span>+1 SOL Faucet</span>
                     </button>
                   </div>
 
                   {airdropMsg && (
-                    <div className="text-[11px] font-mono text-[#0a3d2a] bg-[#e6f4ea] px-3 py-1.5 rounded-lg border border-[#a3cfbb] text-center">
+                    <div className="text-[11px] font-mono text-[#4ade80] bg-[#14231a] px-3 py-1.5 rounded-lg border border-[#204a30] text-center">
                       {airdropMsg}
                     </div>
                   )}
 
                   {/* Public Key */}
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px] text-[#5c7366]">
+                    <div className="flex items-center justify-between text-[11px] text-[#8a918d]">
                       <span>Public Address</span>
                       <button
-                        onClick={() => handleCopy(createdWallet.publicKey, "public")}
-                        className="text-[#0a3d2a] hover:underline cursor-pointer flex items-center gap-1 font-semibold"
+                        onClick={() => handleCopy(draftWallet.publicKey, "public")}
+                        className="text-[#4ade80] hover:underline cursor-pointer flex items-center gap-1"
                       >
-                        {copiedKey === "public" ? <Check className="w-3 h-3 text-[#1e6b3b]" /> : <Copy className="w-3 h-3" />}
+                        {copiedKey === "public" ? <Check className="w-3 h-3 text-[#4ade80]" /> : <Copy className="w-3 h-3" />}
                         <span>{copiedKey === "public" ? "Copied" : "Copy"}</span>
                       </button>
                     </div>
-                    <div className="font-mono text-xs text-[#111e16] bg-white p-2.5 rounded-lg border border-[#d8ded4] break-all select-all">
-                      {createdWallet.publicKey}
+                    <div className="font-mono text-xs text-[#e4e4e7] bg-[#0c0d0c] p-2.5 rounded-lg border border-[#222623] break-all select-all">
+                      {draftWallet.publicKey}
                     </div>
                   </div>
 
                   {/* Secret Key */}
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px] text-[#5c7366]">
+                    <div className="flex items-center justify-between text-[11px] text-[#8a918d]">
                       <span>Private Key</span>
                       <div className="flex gap-2">
                         <button
                           onClick={() => setShowSecretKey(!showSecretKey)}
-                          className="hover:text-[#111e16] cursor-pointer flex items-center gap-1 text-[#5c7366]"
+                          className="hover:text-white cursor-pointer flex items-center gap-1 text-[#8a918d]"
                         >
                           {showSecretKey ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                           <span>{showSecretKey ? "Hide" : "Show"}</span>
                         </button>
                         {showSecretKey && (
                           <button
-                            onClick={() => handleCopy(createdWallet.secretKeyBase58, "secret")}
-                            className="text-[#0a3d2a] hover:underline cursor-pointer flex items-center gap-1 font-semibold"
+                            onClick={() => handleCopy(draftWallet.secretKeyBase58, "secret")}
+                            className="text-[#4ade80] hover:underline cursor-pointer flex items-center gap-1"
                           >
                             <Copy className="w-3 h-3" />
                             <span>{copiedKey === "secret" ? "Copied" : "Copy"}</span>
@@ -616,27 +587,138 @@ export default function WalletDialog({
                         )}
                       </div>
                     </div>
-                    <div className="font-mono text-xs text-[#5c7366] bg-white p-2.5 rounded-lg border border-[#d8ded4] break-all select-all">
-                      {showSecretKey
-                        ? createdWallet.secretKeyBase58
-                        : "••••••••••••••••••••••••••••••••••••••••••••"}
+                    <div className="font-mono text-xs text-[#71717a] bg-[#0c0d0c] p-2.5 rounded-lg border border-[#222623] break-all select-all">
+                      {showSecretKey ? draftWallet.secretKeyBase58 : "••••••••••••••••••••••••••••••••••••••••••••"}
+                    </div>
+                  </div>
+
+                  {/* Download Backup */}
+                  <div className="pt-0.5">
+                    <button
+                      onClick={() => handleDownloadKeypair(draftWallet)}
+                      className="w-full py-1.5 px-3 rounded-lg bg-[#161917] hover:bg-[#1f2420] border border-[#272b28] text-xs font-semibold text-[#8a918d] hover:text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Download className="w-3.5 h-3.5 text-[#8a918d]" />
+                      <span>Download Keypair JSON (Backup)</span>
+                    </button>
+                  </div>
+
+                  {/* Explicit Confirmation Buttons - Never Connects Without User Explicit Click */}
+                  <div className="pt-2 flex gap-2">
+                    <button
+                      onClick={handleConfirmConnectDraft}
+                      className="flex-1 py-2.5 px-4 rounded-xl bg-[#1e4632] hover:bg-[#285e43] border border-[#317755] text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                    >
+                      <Check className="w-4 h-4 text-[#4ade80]" />
+                      <span>Confirm &amp; Connect Wallet</span>
+                    </button>
+                    <button
+                      onClick={handleDiscardDraft}
+                      className="py-2.5 px-3.5 rounded-xl bg-[#201818] hover:bg-[#2c1e1e] border border-[#3a2222] text-xs font-semibold text-[#fca5a5] hover:text-white transition-colors cursor-pointer"
+                    >
+                      Discard
+                    </button>
+                  </div>
+                </div>
+              ) : savedWallet ? (
+                /* STATE 2: Already has an active, confirmed Devnet keypair */
+                <div className="space-y-3.5">
+                  <div className="flex items-center justify-between text-[11px] text-[#4ade80] bg-[#14231a] px-3 py-2 rounded-xl border border-[#204a30]">
+                    <span className="flex items-center gap-1.5 font-semibold">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#4ade80]" />
+                      Devnet Keypair Connected
+                    </span>
+                    <span className="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse" />
+                  </div>
+
+                  {/* Balance & Airdrop row */}
+                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#161917] border border-[#272b28]">
+                    <div>
+                      <div className="text-[10px] text-[#71717a] font-mono uppercase">Devnet Balance</div>
+                      <div className="font-mono text-sm font-bold text-[#4ade80]">
+                        {savedWallet.balance.toFixed(2)} SOL
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleRequestAirdrop}
+                      disabled={airdropLoading}
+                      className="px-3 py-1.5 text-xs font-bold rounded-lg bg-[#18261e] hover:bg-[#23382c] text-[#4ade80] border border-[#274835] transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      {airdropLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Droplet className="w-3.5 h-3.5 text-[#4ade80]" />
+                      )}
+                      <span>+1 SOL Faucet</span>
+                    </button>
+                  </div>
+
+                  {airdropMsg && (
+                    <div className="text-[11px] font-mono text-[#4ade80] bg-[#14231a] px-3 py-1.5 rounded-lg border border-[#204a30] text-center">
+                      {airdropMsg}
+                    </div>
+                  )}
+
+                  {/* Public Key */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px] text-[#8a918d]">
+                      <span>Public Address</span>
+                      <button
+                        onClick={() => handleCopy(savedWallet.publicKey, "public")}
+                        className="text-[#4ade80] hover:underline cursor-pointer flex items-center gap-1"
+                      >
+                        {copiedKey === "public" ? <Check className="w-3 h-3 text-[#4ade80]" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedKey === "public" ? "Copied" : "Copy"}</span>
+                      </button>
+                    </div>
+                    <div className="font-mono text-xs text-[#e4e4e7] bg-[#0c0d0c] p-2.5 rounded-lg border border-[#222623] break-all select-all">
+                      {savedWallet.publicKey}
+                    </div>
+                  </div>
+
+                  {/* Secret Key */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px] text-[#8a918d]">
+                      <span>Private Key</span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setShowSecretKey(!showSecretKey)}
+                          className="hover:text-white cursor-pointer flex items-center gap-1 text-[#8a918d]"
+                        >
+                          {showSecretKey ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                          <span>{showSecretKey ? "Hide" : "Show"}</span>
+                        </button>
+                        {showSecretKey && (
+                          <button
+                            onClick={() => handleCopy(savedWallet.secretKeyBase58, "secret")}
+                            className="text-[#4ade80] hover:underline cursor-pointer flex items-center gap-1"
+                          >
+                            <Copy className="w-3 h-3" />
+                            <span>{copiedKey === "secret" ? "Copied" : "Copy"}</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="font-mono text-xs text-[#71717a] bg-[#0c0d0c] p-2.5 rounded-lg border border-[#222623] break-all select-all">
+                      {showSecretKey ? savedWallet.secretKeyBase58 : "••••••••••••••••••••••••••••••••••••••••••••"}
                     </div>
                   </div>
 
                   {/* Actions */}
                   <div className="pt-1 flex gap-2">
                     <button
-                      onClick={handleDownloadKeypair}
-                      className="flex-1 py-1.5 px-3 rounded-lg bg-white hover:bg-[#f2f5ef] border border-[#d8ded4] text-xs font-semibold text-[#111e16] transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                      onClick={() => handleDownloadKeypair(savedWallet)}
+                      className="flex-1 py-1.5 px-3 rounded-lg bg-[#161917] hover:bg-[#1f2420] border border-[#272b28] text-xs font-semibold text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      <Download className="w-3.5 h-3.5 text-[#5c7366]" />
+                      <Download className="w-3.5 h-3.5 text-[#8a918d]" />
                       <span>Download id.json</span>
                     </button>
                     <a
-                      href={createdWallet.explorerUrl}
+                      href={savedWallet.explorerUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="py-1.5 px-3 rounded-lg bg-white hover:bg-[#f2f5ef] border border-[#d8ded4] text-xs font-semibold text-[#5c7366] hover:text-[#111e16] transition-colors flex items-center gap-1 shadow-2xs"
+                      className="py-1.5 px-3 rounded-lg bg-[#161917] hover:bg-[#1f2420] border border-[#272b28] text-xs font-semibold text-[#8a918d] hover:text-white transition-colors flex items-center gap-1"
                     >
                       <span>Explorer</span>
                       <ExternalLink className="w-3 h-3" />
@@ -647,17 +729,17 @@ export default function WalletDialog({
                   <div className="pt-2 flex gap-2">
                     <button
                       onClick={() => {
-                        if (onSuccess) onSuccess(createdWallet.publicKey);
+                        if (onSuccess) onSuccess(savedWallet.publicKey);
                         else onClose();
                       }}
-                      className="flex-1 py-2.5 px-4 rounded-xl bg-[#0a3d2a] hover:bg-[#114d36] text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                      className="flex-1 py-2.5 px-4 rounded-xl bg-[#1e4632] hover:bg-[#285e43] border border-[#317755] text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                     >
                       <span>Done &amp; Continue</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                     <button
                       onClick={handleDisconnectAll}
-                      className="py-2.5 px-3 rounded-xl bg-[#fee2e2] hover:bg-[#fecaca] border border-[#fca5a5] text-xs font-semibold text-rose-700 transition-colors cursor-pointer"
+                      className="py-2.5 px-3 rounded-xl bg-[#2a1717] hover:bg-[#3d1e1e] border border-[#522525] text-xs font-semibold text-rose-300 transition-colors cursor-pointer"
                       title="Disconnect and clear this wallet"
                     >
                       Disconnect
@@ -666,11 +748,52 @@ export default function WalletDialog({
 
                   <div className="text-center pt-1">
                     <button
-                      onClick={handleGenerateWallet}
+                      onClick={handleGenerateDraft}
                       disabled={isGenerating}
-                      className="text-[11px] text-[#5c7366] hover:text-[#0a3d2a] transition-colors cursor-pointer"
+                      className="text-[11px] text-[#71717a] hover:text-[#4ade80] transition-colors cursor-pointer"
                     >
-                      + Generate New Keypair
+                      + Generate Different Keypair
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* STATE 3: No keypair yet - prompt to generate */
+                <div className="space-y-4">
+                  <div className="p-3.5 rounded-xl bg-[#161917] border border-[#272b28] space-y-1.5">
+                    <div className="flex items-center gap-1.5 font-bold text-[#4ade80] text-xs">
+                      <Key className="w-4 h-4 text-[#4ade80]" />
+                      <span>Instant Devnet Testing Keypair</span>
+                    </div>
+                    <p className="text-[11px] text-[#8a918d] leading-relaxed">
+                      Generates a Solana ed25519 keypair and pre-funds it with 1.0 test SOL on Devnet. Perfect for instant trading and verification testing without browser extensions.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleGenerateDraft}
+                    disabled={isGenerating}
+                    className="w-full py-3 px-4 rounded-xl bg-[#1e4632] hover:bg-[#285e43] border border-[#317755] text-white font-bold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-md"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
+                        <span>Generating &amp; Funding Keypair...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Wallet className="w-4 h-4" />
+                        <span>Generate Devnet Keypair</span>
+                      </>
+                    )}
+                  </button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("connect")}
+                      className="text-[11px] text-[#71717a] hover:text-[#4ade80] transition-colors cursor-pointer"
+                    >
+                      Or connect an existing browser extension →
                     </button>
                   </div>
                 </div>
@@ -680,11 +803,11 @@ export default function WalletDialog({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 bg-[#f8faf7] border-t border-[#e1e7de] flex items-center justify-between text-[11px] text-[#5c7366]">
+        <div className="px-5 py-3 bg-[#0d0f0e] border-t border-[#1e211f] flex items-center justify-between text-[11px] text-[#71717a]">
           <span>Non-custodial Solana Devnet</span>
           <button
             onClick={handleClose}
-            className="hover:text-[#111e16] transition-colors cursor-pointer font-semibold"
+            className="hover:text-white transition-colors cursor-pointer font-semibold"
           >
             Close
           </button>

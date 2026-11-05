@@ -81,6 +81,19 @@ export default function LandingNavbar() {
     return () => window.removeEventListener("storage", handleStorage);
   }, [walletDialogOpen]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("wallet") === "connect") {
+        setWalletDialogInitialTab("connect");
+        setWalletDialogOpen(true);
+      } else if (params.get("wallet") === "create") {
+        setWalletDialogInitialTab("create");
+        setWalletDialogOpen(true);
+      }
+    }
+  }, []);
+
   return (
     <>
       <header
@@ -266,7 +279,10 @@ export default function LandingNavbar() {
 
                 {/* 2. Connect wallet (Deep Forest Green Pill Button with White Wallet Icon) */}
                 <button
-                  onClick={() => setAdapterModalVisible(true)}
+                  onClick={() => {
+                    setWalletDialogInitialTab("connect");
+                    setWalletDialogOpen(true);
+                  }}
                   className="px-5 py-2.5 rounded-full bg-[#0a3d2a] hover:bg-[#114d36] text-white font-semibold text-sm transition-all duration-200 flex items-center gap-2 shadow-[0_2px_8px_rgba(10,61,42,0.2)] hover:shadow-[0_4px_14px_rgba(10,61,42,0.3)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <svg
@@ -406,7 +422,8 @@ export default function LandingNavbar() {
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  setAdapterModalVisible(true);
+                  setWalletDialogInitialTab("connect");
+                  setWalletDialogOpen(true);
                 }}
                 className="w-full text-center py-2.5 text-xs font-semibold text-white bg-[#0a3d2a] hover:bg-[#114d36] rounded-full flex items-center justify-center gap-2 shadow-xs"
               >
@@ -431,7 +448,7 @@ export default function LandingNavbar() {
       <WalletDialog
         isOpen={walletDialogOpen}
         onClose={() => setWalletDialogOpen(false)}
-        hideTabs={!isWalletConnected}
+        hideTabs={false}
         initialTab={walletDialogInitialTab}
       />
     </>

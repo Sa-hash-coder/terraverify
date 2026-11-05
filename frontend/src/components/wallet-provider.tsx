@@ -34,7 +34,7 @@ export default function WalletProviderComponent({ children }: { children: React.
         confirmTransactionInitialTimeout: 10000,
       }}
     >
-      <WalletProvider wallets={wallets} autoConnect={true}>
+      <WalletProvider wallets={wallets} autoConnect={false}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
