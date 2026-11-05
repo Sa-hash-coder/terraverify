@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Keypair } from "@solana/web3.js";
 import { Loader2 } from "lucide-react";
 
@@ -31,7 +30,6 @@ export default function WalletDialog({
   initialTab = "create",
 }: WalletDialogProps) {
   const [mounted, setMounted] = useState(false);
-  const { setVisible: setAdapterModalVisible } = useWalletModal();
   const { connected, publicKey, disconnect, select, wallets, connect } = useWallet();
   const { connection } = useConnection();
 
@@ -301,22 +299,42 @@ export default function WalletDialog({
     URL.revokeObjectURL(url);
   };
 
-  // Connect extension directly on 1-click (avoids asking twice)
+  // Connect extension directly on 1-click (avoids asking twice and avoids secondary modals)
   const handleConnectAdapter = async (walletName: string) => {
     setConnectingAdapter(walletName);
+    setAirdropMsg(null);
     try {
-      select(walletName as any);
-      await new Promise((r) => setTimeout(r, 80));
-      await connect();
+      const target = wallets.find(
+        (w) => w.adapter.name.toLowerCase() === walletName.toLowerCase()
+      );
+
+      if (!target) {
+        throw new Error(`${walletName} wallet extension is not installed.`);
+      }
+
+      select(target.adapter.name as any);
+
+      if (!target.adapter.connected) {
+        await target.adapter.connect();
+      }
+
       dispatchWalletEvents();
-      if (onSuccess && publicKey) {
-        onSuccess(publicKey.toBase58());
+
+      const pubkey = target.adapter.publicKey?.toBase58() || publicKey?.toBase58();
+      if (pubkey && onSuccess) {
+        onSuccess(pubkey);
       }
       onClose();
-    } catch (err) {
-      console.warn("Direct connect failed, opening fallback modal:", err);
-      onClose();
-      setAdapterModalVisible(true);
+    } catch (err: any) {
+      console.warn("Direct extension connect failed:", err);
+      // NEVER open a second modal or close the dialog on error!
+      if (err?.name === "WalletNotReadyError" || err?.name === "WalletNotFoundError") {
+        setAirdropMsg(`${walletName} extension not detected. Please install it.`);
+      } else if (err?.message) {
+        setAirdropMsg(err.message);
+      } else {
+        setAirdropMsg("Connection request was cancelled.");
+      }
     } finally {
       setConnectingAdapter(null);
     }
@@ -592,10 +610,16 @@ export default function WalletDialog({
                     </div>
                   </div>
                 ) : (
-                  <div className="py-2 space-y-3 text-left">
+                  <div className="py-2 space-y-3.5 text-left">
                     <p className="text-xs text-[#a1a1aa] leading-relaxed">
                       Connect an installed wallet extension (Phantom, Solflare, Backpack).
                     </p>
+
+                    {airdropMsg && (
+                      <div className="text-[11px] font-mono text-[#fca5a5] bg-[#201818] p-2 rounded border border-[#3a2222]">
+                        {airdropMsg}
+                      </div>
+                    )}
 
                     {/* Direct 1-Click Extensions list without asking twice */}
                     <div className="space-y-2">
@@ -605,7 +629,7 @@ export default function WalletDialog({
                             key={w.adapter.name}
                             onClick={() => handleConnectAdapter(w.adapter.name)}
                             disabled={connectingAdapter === w.adapter.name}
-                            className="w-full py-2.5 px-4 rounded-lg bg-white text-black font-semibold text-xs hover:bg-[#e4e4e7] transition-all flex items-center justify-between cursor-pointer group disabled:opacity-60"
+                            className="w-full py-2.5 px-4 rounded-lg bg-white text-black font-semibold text-xs hover:bg-[#e4e4e7] transition-all flex items-center justify-between cursor-pointer group disabled:opacity-60 shadow-md"
                           >
                             <div className="flex items-center gap-2.5">
                               {w.adapter.icon && (
@@ -623,15 +647,9 @@ export default function WalletDialog({
                           </button>
                         ))
                       ) : (
-                        <button
-                          onClick={() => {
-                            onClose();
-                            setAdapterModalVisible(true);
-                          }}
-                          className="w-full py-2.5 px-4 rounded-lg bg-white text-black font-semibold text-xs hover:bg-[#e4e4e7] transition-all cursor-pointer"
-                        >
-                          Select Wallet Extension
-                        </button>
+                        <p className="text-xs text-[#fca5a5] py-2">
+                          No Solana extension detected. Please install Phantom or Solflare.
+                        </p>
                       )}
                     </div>
                   </div>

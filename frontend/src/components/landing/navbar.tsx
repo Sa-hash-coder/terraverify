@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import WalletDialog from "../wallet/wallet-dialog";
 import { smoothScrollTo } from "../../lib/scroll";
 
 export default function LandingNavbar() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [walletDialogOpen, setWalletDialogOpen] = useState(false);
@@ -452,6 +454,10 @@ export default function LandingNavbar() {
       <WalletDialog
         isOpen={walletDialogOpen}
         onClose={() => setWalletDialogOpen(false)}
+        onSuccess={() => {
+          setWalletDialogOpen(false);
+          router.push("/explorer");
+        }}
         hideTabs={false}
         initialTab={walletDialogInitialTab}
       />
