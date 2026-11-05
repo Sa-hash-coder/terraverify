@@ -28,10 +28,14 @@ export default function LandingNavbar() {
       } catch {}
     }
     if (typeof window !== "undefined") {
-      localStorage.removeItem("terra_local_wallet");
+      try {
+        localStorage.removeItem("terra_local_wallet");
+        localStorage.removeItem("walletName");
+      } catch {}
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new CustomEvent("terra_wallet_change"));
     }
     setLocalWalletPubkey(null);
-    window.dispatchEvent(new Event("storage"));
   };
 
   useEffect(() => {
