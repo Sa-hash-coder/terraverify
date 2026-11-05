@@ -209,6 +209,12 @@ export default function LandingNavbar() {
             >
               Technology
             </a>
+            <Link
+              href="/marketplace"
+              className="text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer text-[#4a6356] hover:text-[#0a3d2a] hover:bg-[#e0ebe2]/60 font-medium"
+            >
+              Marketplace
+            </Link>
             <a
               href="#about"
               onClick={(e) => {
@@ -402,6 +408,13 @@ export default function LandingNavbar() {
               >
                 Technology
               </a>
+              <Link
+                href="/marketplace"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-1 hover:text-[#0a3d2a] cursor-pointer"
+              >
+                Marketplace
+              </Link>
               <a
                 href="#about"
                 onClick={(e) => {

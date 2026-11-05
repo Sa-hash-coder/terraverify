@@ -280,7 +280,7 @@ export default function ExplorerPage() {
   ];
 
   return (
-    <PageShell fullWidth noScroll className="bg-[#f4f6f3]">
+    <PageShell fullWidth noScroll className="bg-[#f4f6f3]" requireAuth={false}>
       <div className="flex-1 flex flex-col md:flex-row h-full min-h-0 w-full overflow-hidden relative bg-[#f4f6f3]">
 
         {/* ================================================================= */}

@@ -32,13 +32,7 @@ export default function HeroSection() {
 
   const handleExploreProjects = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (checkHasWallet()) {
-      // Wallet is already added: log user in and proceed to explorer
-      router.push("/explorer");
-    } else {
-      // No wallet added till now: direct open create/add wallet dialog
-      setWalletDialogOpen(true);
-    }
+    router.push("/explorer");
   };
 
   return (
@@ -106,6 +100,24 @@ export default function HeroSection() {
                   <path d="m12 5 7 7-7 7" />
                 </svg>
               </button>
+              <Link
+                href="/marketplace"
+                className="w-full sm:w-auto px-6 py-3.5 text-sm font-semibold text-[#f4f5ef] bg-[#162922] hover:bg-[#1f382f] rounded border border-[#38b87c]/40 hover:border-[#38b87c] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              >
+                <span>Forest Marketplace</span>
+                <svg
+                  className="w-4 h-4 text-[#38b87c]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </Link>
               <a
                 href="#how-it-works"
                 onClick={(e) => smoothScrollTo("how-it-works", e)}
