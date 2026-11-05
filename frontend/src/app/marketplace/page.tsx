@@ -243,25 +243,33 @@ export default function MarketplacePage() {
     window.dispatchEvent(new Event("storage"));
   };
 
-  // Fetch wallet SOL balance with timeout
+  // Fetch wallet SOL balance with robust fallback
   useEffect(() => {
     let isCancelled = false;
     const fetchBal = async (pk: PublicKey) => {
       try {
         const balPromise = connection.getBalance(pk);
-        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000));
         const lamports = await Promise.race([balPromise, timeoutPromise]);
-        if (!isCancelled && typeof lamports === "number") {
-          setWalletBalance(lamports / 1e9);
+        if (!isCancelled) {
+          if (typeof lamports === "number") {
+            setWalletBalance(lamports / 1e9);
+          } else {
+            setWalletBalance((prev) => (prev !== null ? prev : localWallet?.balance ?? 1.0));
+          }
         }
       } catch {
-        // fail silently
+        if (!isCancelled) {
+          setWalletBalance((prev) => (prev !== null ? prev : localWallet?.balance ?? 1.0));
+        }
       }
     };
 
     if (connected && publicKey) {
+      setWalletBalance((prev) => (prev !== null ? prev : localWallet?.balance ?? 1.0));
       fetchBal(publicKey);
     } else if (localWallet?.publicKey) {
+      setWalletBalance((prev) => (prev !== null ? prev : localWallet.balance ?? 1.0));
       try {
         const pk = new PublicKey(localWallet.publicKey);
         fetchBal(pk);
@@ -286,7 +294,8 @@ export default function MarketplacePage() {
   const totalCost = (amountNum * unitPrice).toFixed(3);
   const totalCostNum = parseFloat(totalCost);
   const isSuspended = selectedListing?.status === "Suspended" || selectedListing?.status === "Revoked";
-  const hasInsufficientBalance = walletBalance !== null && totalCostNum > walletBalance;
+  const effectiveBalance = walletBalance ?? localWallet?.balance ?? (isWalletActive ? 1.0 : 0);
+  const hasInsufficientBalance = isWalletActive && totalCostNum > effectiveBalance;
 
   // Filter & Sort
   const filteredListings = useMemo(() => {
@@ -335,7 +344,7 @@ export default function MarketplacePage() {
     }
 
     if (hasInsufficientBalance) {
-      setErrorMsg(`Insufficient balance: you need ${totalCost} SOL but have ${walletBalance?.toFixed(3)} SOL.`);
+      setErrorMsg(`Insufficient balance: you need ${totalCost} SOL but have ${effectiveBalance.toFixed(3)} SOL.`);
       return;
     }
 
@@ -761,7 +770,9 @@ export default function MarketplacePage() {
                       <span className="text-[#5c7366]">Wallet Balance</span>
                       <div className="flex items-center gap-2">
                         <span className={`font-semibold ${hasInsufficientBalance ? "text-[#c92a2a]" : "text-[#111e16]"}`}>
-                          {walletBalance !== null ? `${walletBalance.toFixed(3)} SOL` : "Not connected"}
+                          {isWalletActive
+                            ? `${effectiveBalance.toFixed(3)} SOL`
+                            : "Not connected"}
                         </span>
                         {isWalletActive && (
                           <button
