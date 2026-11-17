@@ -1,12 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import WalletDialog from "../wallet/wallet-dialog";
 import { smoothScrollTo } from "../../lib/scroll";
+
+const landingNavItems = [
+  { id: "how-it-works", label: "How It Works" },
+  { id: "verification", label: "Verification" },
+  { id: "technology", label: "Technology" },
+  { id: "about", label: "About" },
+];
 
 export default function LandingNavbar() {
   const router = useRouter();
@@ -15,7 +22,14 @@ export default function LandingNavbar() {
   const [walletDialogOpen, setWalletDialogOpen] = useState(false);
   const [walletDialogInitialTab, setWalletDialogInitialTab] = useState<"create" | "connect">("create");
   const [localWalletPubkey, setLocalWalletPubkey] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<string>("verification");
+  const [activeSection, setActiveSection] = useState<string>("how-it-works");
+
+  const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    left: number;
+    width: number;
+    opacity: number;
+  }>({ left: 6, width: 124, opacity: 1 });
 
   const { connected, publicKey, disconnect } = useWallet();
   const { setVisible: setAdapterModalVisible } = useWalletModal();
@@ -43,11 +57,40 @@ export default function LandingNavbar() {
     setLocalWalletPubkey(null);
   };
 
+  const updateIndicator = (targetId?: string) => {
+    const target = targetId || activeSection;
+    const activeIdx = landingNavItems.findIndex((item) => item.id === target);
+    if (activeIdx !== -1 && tabRefs.current[activeIdx]) {
+      const el = tabRefs.current[activeIdx];
+      if (el) {
+        setIndicatorStyle({
+          left: el.offsetLeft,
+          width: el.offsetWidth,
+          opacity: 1,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    updateIndicator();
+  }, [activeSection]);
+
+  useEffect(() => {
+    const handleResize = () => updateIndicator();
+    window.addEventListener("resize", handleResize);
+    const timer = setTimeout(() => updateIndicator(), 50);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(timer);
+    };
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 16);
 
-      const sections = ["about", "technology", "how-it-works", "verification"];
+      const sections = ["about", "technology", "verification", "how-it-works"];
       const scrollPos = window.scrollY + 200;
 
       for (const id of sections) {
@@ -165,73 +208,53 @@ export default function LandingNavbar() {
             </div>
           </Link>
 
-          {/* Center Navigation Tabs Container matching Light Eco Theme */}
+          {/* Center Navigation Tabs Container matching Light Eco Theme with Smooth Sliding Indicator */}
           <nav
-            className="hidden md:flex items-center gap-1.5 bg-[#fafcf8] p-1.5 rounded-2xl border border-[#d8ded4] shadow-[0_1px_4px_rgba(0,0,0,0.03)]"
+            className="hidden md:flex items-center gap-1.5 bg-[#fafcf8] p-1.5 rounded-2xl border border-[#d8ded4] shadow-[0_1px_4px_rgba(0,0,0,0.03)] relative"
             aria-label="Main Navigation"
           >
-            <a
-              href="#how-it-works"
-              onClick={(e) => {
-                setActiveSection("how-it-works");
-                smoothScrollTo("how-it-works", e);
+            {/* Sliding Active Pill */}
+            <div
+              className="absolute top-1.5 bottom-1.5 rounded-xl bg-[#e0ebe2] shadow-2xs pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+              style={{
+                left: `${indicatorStyle.left}px`,
+                width: `${indicatorStyle.width}px`,
+                opacity: indicatorStyle.opacity,
               }}
-              className={`text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer ${
-                activeSection === "how-it-works"
-                  ? "bg-[#e0ebe2] text-[#0a3d2a] font-semibold shadow-2xs"
-                  : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
-              }`}
-            >
-              How It Works
-            </a>
-            <a
-              href="#verification"
-              onClick={(e) => {
-                setActiveSection("verification");
-                smoothScrollTo("verification", e);
-              }}
-              className={`text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer ${
-                activeSection === "verification"
-                  ? "bg-[#e0ebe2] text-[#0a3d2a] font-semibold shadow-2xs"
-                  : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
-              }`}
-            >
-              Verification
-            </a>
-            <a
-              href="#technology"
-              onClick={(e) => {
-                setActiveSection("technology");
-                smoothScrollTo("technology", e);
-              }}
-              className={`text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer ${
-                activeSection === "technology"
-                  ? "bg-[#e0ebe2] text-[#0a3d2a] font-semibold shadow-2xs"
-                  : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
-              }`}
-            >
-              Technology
-            </a>
-            <Link
-              href="/marketplace"
-              className="text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer text-[#4a6356] hover:text-[#0a3d2a] hover:bg-[#e0ebe2]/60 font-medium"
-            >
-              Marketplace
-            </Link>
-            <a
-              href="#about"
-              onClick={(e) => {
-                setActiveSection("about");
-                smoothScrollTo("about", e);
-              }}
-              className={`text-sm px-4 py-1.5 rounded-xl transition-all cursor-pointer ${
-                activeSection === "about"
-                  ? "bg-[#e0ebe2] text-[#0a3d2a] font-semibold shadow-2xs"
-                  : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
-              }`}
-            >
-              About
-            </a>
+              aria-hidden="true"
+            />
+
+            {landingNavItems.map((item, idx) => {
+              const isActive = activeSection === item.id;
+              return (
+                <a
+                  key={item.id}
+                  ref={(el) => {
+                    tabRefs.current[idx] = el;
+                  }}
+                  href={`#${item.id}`}
+                  onClick={(e) => {
+                    setActiveSection(item.id);
+                    const el = tabRefs.current[idx];
+                    if (el) {
+                      setIndicatorStyle({
+                        left: el.offsetLeft,
+                        width: el.offsetWidth,
+                        opacity: 1,
+                      });
+                    }
+                    smoothScrollTo(item.id, e);
+                  }}
+                  className={`relative z-10 text-sm px-4 py-1.5 rounded-xl transition-colors duration-200 cursor-pointer ${
+                    isActive
+                      ? "text-[#0a3d2a] font-semibold"
+                      : "text-[#4a6356] hover:text-[#0a3d2a] font-medium"
+                  }`}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
           </nav>
 
           {/* Right Actions matching Screenshot */}
@@ -411,13 +434,6 @@ export default function LandingNavbar() {
               >
                 Technology
               </a>
-              <Link
-                href="/marketplace"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1 hover:text-[#0a3d2a] cursor-pointer"
-              >
-                Marketplace
-              </Link>
               <a
                 href="#about"
                 onClick={(e) => {
